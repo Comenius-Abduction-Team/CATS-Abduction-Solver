@@ -117,13 +117,13 @@ public class Main {
                     }
 
                     if (monitor.isNewProgressAvailable()){
-                        Percentage progress = monitor.getProgress();
+                        Percentage progress = monitor.getProgressPercentage();
                         String message = monitor.getStatusMessage();
                         System.out.println(progress + "//" + message);
                         monitor.markProgressAsProcessed();
                     }
 
-                    if (monitor.getProgress().getValue() >= 100){
+                    if (monitor.getProgressPercentage().getValue() >= 100){
                         thread.interrupt();
                         monitor.notify();
                         break;
