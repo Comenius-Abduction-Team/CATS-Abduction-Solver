@@ -545,9 +545,6 @@ public class HybridSolver implements ISolver {
             return true;
         }
 
-        if (!abducibleAxioms.contains(child))
-            return true;
-
         return false;
     }
 
