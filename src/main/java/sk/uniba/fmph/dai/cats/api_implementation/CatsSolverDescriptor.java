@@ -25,7 +25,7 @@ public class CatsSolverDescriptor implements ISolverDescriptor {
 
     @Override
     public boolean hasComplexConceptSwitch() {
-        return true;
+        return false;
     }
 
     @Override

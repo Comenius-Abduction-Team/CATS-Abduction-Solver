@@ -1,10 +1,9 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
-import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
-import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
+import sk.uniba.fmph.dai.abduction_api.abducible.*;
 import sk.uniba.fmph.dai.abduction_api.exception.AxiomAbducibleException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidObservationException;
+import sk.uniba.fmph.dai.abduction_api.exception.NotSupportedException;
 import sk.uniba.fmph.dai.abduction_api.exception.SymbolAbducibleException;
 import sk.uniba.fmph.dai.abduction_api.factory.IAbductionFactory;
 import sk.uniba.fmph.dai.abduction_api.abducer.IAbducer;
@@ -84,9 +83,23 @@ public class CatsAbductionFactory implements IAbductionFactory {
     }
 
     @Override
-    public ISymbolAbducibles getSymbolAbducibles(Set<OWLEntity> symbols)
-            throws SymbolAbducibleException {
+    public ISymbolAbducibles getSymbolAbducibles(Set<OWLEntity> symbols) throws SymbolAbducibleException {
         return new CatsSymbolAbducibles(symbols);
+    }
+
+    @Override
+    public IExplanationConfigurator getExplanationConfigurator() {
+        return new CatsExplanationConfigurator();
+    }
+
+    @Override
+    public IComplexConceptConfigurator getComplexConcepConfigurator() {
+        return new CatsExplanationConfigurator();
+    }
+
+    @Override
+    public IRoleConfigurator getRoleConfigurator() throws NotSupportedException {
+        return new CatsExplanationConfigurator();
     }
 
     @Override
