@@ -42,230 +42,152 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     }
 
     @Test
-    void mhsMxp() {
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(7, explanations.size());
-        //String expected = "[{¬B(a),¬F(a),¬D(a)}, {E(a),¬D(a),A(a)}, {E(a),¬D(a),¬B(a)}, {E(a),C(a),¬B(a)}, {¬D(a),A(a),¬F(a)}, {¬F(a),A(a),C(a)}, {¬F(a),¬B(a),C(a)}]";
-//        String expected = "[{E(a),¬D(a)}, {¬F(a),¬D(a)}, {C(a),E(a)}, {¬F(a),C(a)}]";
-//        assertEquals(expected, explanations.toString());
-
-    }
-
-    @Test
+    @Override
     void mhs() {
 
-        manager.setAlgorithm(Algorithm.MHS);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(7, explanations.size());
+        super.mhs();
+        solve();
+        testExplanationsFound(7);
 
     }
 
     @Test
-    void mhsMxpNoNeg() {
-
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
-
-    }
-
-    @Test
-    void mhsNoNeg() {
-
-        manager.setAlgorithm(Algorithm.MHS);
-
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
-
-    }
-
-    @Test
-    void mhsMxpSymbolAbd() {
-
-        manager.setAbducibles(symbolAbd);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(2, explanations.size());
-
-    }
-
-    @Test
-    void mhsSymbolAbd() {
-
-        manager.setAlgorithm(Algorithm.MHS);
-
-        manager.setAbducibles(symbolAbd);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(2, explanations.size());
-
-    }
-
-    @Test
-    void mhsMxpSymbolAbdNoNeg() {
-
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
-
-    }
-
-    @Test
-    void mhsSymbolAbdNoNeg() {
-
-        manager.setAlgorithm(Algorithm.MHS);
-
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
-
-    }
-
-    @Test
-    void hstMxp() {
-
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(7, explanations.size());
-        //String expected = "[{¬B(a),¬F(a),¬D(a)}, {E(a),¬D(a),A(a)}, {E(a),¬D(a),¬B(a)}, {E(a),C(a),¬B(a)}, {¬D(a),A(a),¬F(a)}, {¬F(a),A(a),C(a)}, {¬F(a),¬B(a),C(a)}]";
-//        String expected = "[{E(a),¬D(a)}, {¬F(a),¬D(a)}, {C(a),E(a)}, {¬F(a),C(a)}]";
-//        assertEquals(expected, explanations.toString());
-
-    }
-
-    @Test
+    @Override
     void hst() {
 
-        manager.setAlgorithm(Algorithm.HST);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(7, explanations.size());
+        super.hst();
+        solve();
+        testExplanationsFound(7);
 
     }
 
     @Test
-    void hstMxpNoNeg() {
+    @Override
+    void mhsMxp() {
 
-        manager.setAlgorithm(Algorithm.HST_MXP);
-
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
+        super.mhsMxp();
+        solve();
+        testExplanationsFound(7);
 
     }
 
     @Test
+    @Override
+    void hstMxp() {
+
+        super.hstMxp();
+        solve();
+        testExplanationsFound(7);
+
+    }
+
+    @Test
+    @Override
+    void mhsNoNeg() {
+
+        super.mhsNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
     void hstNoNeg() {
 
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
+        super.hstNoNeg();
+        solve();
+        testExplanationsFound(0);
 
     }
 
     @Test
-    void hstMxpSymbolAbd() {
+    @Override
+    void mhsMxpNoNeg() {
 
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(2, explanations.size());
+        super.mhsMxpNoNeg();
+        solve();
+        testExplanationsFound(0);
 
     }
 
     @Test
+    @Override
+    void hstMxpNoNeg() {
+
+        super.hstMxpNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void mhsSymbolAbd() {
+
+        super.mhsSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
     void hstSymbolAbd() {
 
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(2, explanations.size());
+        super.hstSymbolAbd();
+        solve();
+        testExplanationsFound(2);
 
     }
 
     @Test
+    @Override
+    void mhsMxpSymbolAbd() {
+
+        super.mhsMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hstMxpSymbolAbd() {
+
+        super.hstMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void mhsSymbolAbdNoNeg() {
+
+        super.mhsSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void mhsMxpSymbolAbdNoNeg() {
+
+        super.mhsMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
     void hstMxpSymbolAbdNoNeg() {
 
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
-
-    }
-
-    @Test
-    void hstSymbolAbdNoNeg() {
-
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
-
-        manager.solveAbduction();
-
-        Collection<IExplanation> explanations = manager.getExplanations();
-        System.out.println(explanations);
-        assertEquals(0, explanations.size());
+        super.hstMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
 
     }
 
