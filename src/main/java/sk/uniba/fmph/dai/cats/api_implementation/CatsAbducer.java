@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IExplanationConfigurator;
@@ -243,6 +244,7 @@ public class CatsAbducer implements IThreadAbducer {
     private void setSolverConfiguration(){
 
         Configuration.STRICT_RELEVANCE = strictRelevance;
+        Configuration.PRINT_PROGRESS = true;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();
