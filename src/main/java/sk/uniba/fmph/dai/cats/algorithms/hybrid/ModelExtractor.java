@@ -241,7 +241,7 @@ public class ModelExtractor {
         return toReturn;
     }
 
-    public void addAxiomsToModelsAccordingTypes(OWLDataFactory dfactory, Set<OWLAxiom> negModelSet, Set<OWLAxiom> modelSet, Set<OWLClassExpression> foundTypes, Set<OWLClassExpression> newNotTypes, OWLNamedIndividual ind){
+    public void addAxiomsToModelsAccordingTypes(OWLDataFactory factory, Set<OWLAxiom> negModelSet, Set<OWLAxiom> modelSet, Set<OWLClassExpression> foundTypes, Set<OWLClassExpression> newNotTypes, OWLNamedIndividual ind){
 
         for (OWLClassExpression classExpression : foundTypes) {
             if(!loader.isAxiomBasedAbduciblesOnInput()){
@@ -249,11 +249,16 @@ public class ModelExtractor {
                     continue;
                 }
             }
-            OWLClassExpression negClassExp = classExpression.getComplementNNF();
-            OWLAxiom axiom = dfactory.getOWLClassAssertionAxiom(negClassExp, ind);
-            OWLAxiom axiom1 = dfactory.getOWLClassAssertionAxiom(classExpression, ind);
-            negModelSet.add(axiom);
-            modelSet.add(axiom1);
+
+            OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
+            if (hybridSolver.abducibleAxioms.contains(axiom))
+                modelSet.add(axiom);
+
+            OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
+            if (Configuration.NEGATION_ALLOWED && hybridSolver.abducibleAxioms.contains(negatedAxiom))
+                negModelSet.add(negatedAxiom);
+
+
         }
 
         for (OWLClassExpression classExpression : newNotTypes) {
@@ -262,11 +267,14 @@ public class ModelExtractor {
                     continue;
                 }
             }
-            OWLClassExpression negClassExp = classExpression.getComplementNNF();
-            OWLAxiom axiom = dfactory.getOWLClassAssertionAxiom(classExpression, ind);
-            OWLAxiom axiom1 = dfactory.getOWLClassAssertionAxiom(negClassExp, ind);
-            negModelSet.add(axiom);
-            modelSet.add(axiom1);
+
+            OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
+            if (hybridSolver.abducibleAxioms.contains(axiom))
+                negModelSet.add(axiom);
+
+            OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
+            if (Configuration.NEGATION_ALLOWED && hybridSolver.abducibleAxioms.contains(negatedAxiom))
+                modelSet.add(negatedAxiom);
         }
     }
 

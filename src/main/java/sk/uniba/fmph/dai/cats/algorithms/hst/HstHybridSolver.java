@@ -175,6 +175,8 @@ public class HstHybridSolver extends HybridSolver {
                     abducibles.addWithIndex(child,globalMin);
                     globalMin -= 1;
                 }
+                else
+                    return;
             }
         }
     }

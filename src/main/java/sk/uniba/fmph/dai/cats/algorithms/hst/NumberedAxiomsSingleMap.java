@@ -32,10 +32,6 @@ public class NumberedAxiomsSingleMap implements INumberedAbducibles {
         axiomToIndex.remove(axiom);
     }
 
-    public void removeAll(Collection<OWLAxiom> axioms) {
-        axioms.forEach(this::remove);
-    }
-
     public boolean contains(OWLAxiom axiom) {
         return axiomToIndex.containsKey(axiom);
     }

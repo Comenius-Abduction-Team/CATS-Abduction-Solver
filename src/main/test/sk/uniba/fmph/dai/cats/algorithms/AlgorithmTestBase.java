@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.junit.jupiter.api.Test;
+import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -12,6 +13,7 @@ import sk.uniba.fmph.dai.cats.api_implementation.CatsSymbolAbducibles;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -130,47 +132,93 @@ public abstract class AlgorithmTestBase {
         return observationOntology.getAxioms();
     }
 
-    @Test
-    abstract void mhsMxp();
+    public void testExplanationsFound(int expectedCount){
+        Collection<IExplanation> explanations = manager.getExplanations();
+        System.out.println(explanations);
+        assertEquals(expectedCount, explanations.size());
+    }
 
-    @Test
-    abstract void mhs();
-    @Test
-    abstract void mhsMxpNoNeg();
-    @Test
-    abstract void mhsNoNeg();
+    public void solve(){
+        manager.solveAbduction();
+    }
 
-    @Test
-    abstract void mhsMxpSymbolAbd();
+    void mhs(){
+        manager.setAlgorithm(Algorithm.MHS);
+    }
 
-    @Test
-    abstract void mhsSymbolAbd();
+    void hst(){
+        manager.setAlgorithm(Algorithm.HST);
+    }
 
-    @Test
-    abstract void mhsMxpSymbolAbdNoNeg();
+    void mhsMxp(){
+        manager.setAlgorithm(Algorithm.MHS_MXP);
+    }
 
-    @Test
-    abstract void mhsSymbolAbdNoNeg();
+    void hstMxp(){
+        manager.setAlgorithm(Algorithm.HST_MXP);
+    }
 
-    @Test
-    abstract void hstMxp();
+    void mhsNoNeg(){
+        manager.setAlgorithm(Algorithm.MHS);
+        manager.setExplanationConfigurator(noNeg);
+    }
 
-    @Test
-    abstract void hst();
-    @Test
-    abstract void hstMxpNoNeg();
-    @Test
-    abstract void hstNoNeg();
+    void hstNoNeg(){
+        manager.setAlgorithm(Algorithm.HST);
+        manager.setExplanationConfigurator(noNeg);
+    }
 
-    @Test
-    abstract void hstMxpSymbolAbd();
+    void mhsMxpNoNeg(){
+        manager.setAlgorithm(Algorithm.MHS_MXP);
+        manager.setExplanationConfigurator(noNeg);
+    }
 
-    @Test
-    abstract void hstSymbolAbd();
+    void hstMxpNoNeg(){
+        manager.setAlgorithm(Algorithm.HST_MXP);
+        manager.setExplanationConfigurator(noNeg);
+    }
 
-    @Test
-    abstract void hstMxpSymbolAbdNoNeg();
+    void mhsSymbolAbd(){
+        manager.setAlgorithm(Algorithm.MHS);
+        manager.setAbducibles(symbolAbd);
+    }
 
-    @Test
-    abstract void hstSymbolAbdNoNeg();
+    void hstSymbolAbd(){
+        manager.setAlgorithm(Algorithm.HST);
+        manager.setAbducibles(symbolAbd);
+    }
+
+    void mhsMxpSymbolAbd(){
+        manager.setAlgorithm(Algorithm.MHS_MXP);
+        manager.setAbducibles(symbolAbd);
+    }
+
+    void hstMxpSymbolAbd(){
+        manager.setAlgorithm(Algorithm.HST_MXP);
+        manager.setAbducibles(symbolAbd);
+    }
+
+    void mhsSymbolAbdNoNeg(){
+        manager.setAlgorithm(Algorithm.MHS);
+        manager.setAbducibles(symbolAbd);
+        manager.setExplanationConfigurator(noNeg);
+    }
+
+    void hstSymbolAbdNoNeg(){
+        manager.setAlgorithm(Algorithm.HST);
+        manager.setAbducibles(symbolAbd);
+        manager.setExplanationConfigurator(noNeg);
+    }
+
+    void mhsMxpSymbolAbdNoNeg(){
+        manager.setAlgorithm(Algorithm.MHS_MXP);
+        manager.setAbducibles(symbolAbd);
+        manager.setExplanationConfigurator(noNeg);
+    }
+
+    void hstMxpSymbolAbdNoNeg(){
+        manager.setAlgorithm(Algorithm.HST_MXP);
+        manager.setAbducibles(symbolAbd);
+        manager.setExplanationConfigurator(noNeg);
+    }
 }
