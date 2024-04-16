@@ -91,7 +91,7 @@ public class CatsAbductionFactory implements IAbductionFactory {
 
     @Override
     public ISolverDescriptor getDescriptor() {
-        return null;
+        return new CatsSolverDescriptor();
     }
     
 }
