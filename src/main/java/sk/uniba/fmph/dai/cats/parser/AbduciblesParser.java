@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.parser;
 
+import com.github.jsonldjava.utils.JsonUtils;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
@@ -93,12 +94,13 @@ public class AbduciblesParser {
             return null;
         }
 
-        Set<OWLAxiom> abducibles = new HashSet<>();
-        for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
-            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
-                abducibles.add(axiom);
-            }
-        }
+        Set<OWLAxiom> abducibles = getSetOfAxiomBasedAbducibles(abduciblesOntology);
+//        Set<OWLAxiom> abducibles = new HashSet<>();
+//        for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
+//            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
+//                abducibles.add(axiom);
+//            }
+//        }
         return new Abducibles(loader, abducibles);
     }
 
@@ -138,30 +140,60 @@ public class AbduciblesParser {
                     } else {
                         s = "<" + s;
                     }
-                    System.out.println(s);
+//                    System.out.println(s);
                 }
                 axiom1 += s + " ";
             }
             abduciblesInString.append(" " + axiom1);
         }
 
-        System.out.println(abduciblesInString);
+//        System.out.println(abduciblesInString);
 
         OWLOntology abduciblesOntology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new StringDocumentSource(abduciblesInString.toString().trim()));
         StringDocumentTarget documentTarget = new StringDocumentTarget();
         abduciblesOntology.saveOntology(documentTarget);
 
-        System.out.println(abduciblesOntology);
+//        System.out.println(abduciblesOntology);
+
+
+        Set<OWLAxiom> abducibles = getSetOfAxiomBasedAbducibles(abduciblesOntology);
+//        Set<OWLAxiom> abducibles = new HashSet<>();
+//        for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
+//            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
+//                abducibles.add(axiom);
+//            }
+//        }
+//        System.out.println("ABDUCIBLES");
+//        System.out.println(abducibles);
+        return new Abducibles(loader, abducibles);
+    }
+
+    private Set<OWLAxiom> getSetOfAxiomBasedAbducibles(OWLOntology abduciblesOntology) {
 
         Set<OWLAxiom> abducibles = new HashSet<>();
         for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
-            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
+            if (axiom.isOfType(AxiomType.CLASS_ASSERTION)) {
+                if (Configuration.NEGATION_ALLOWED) {
+                    abducibles.add(axiom);
+                    continue;
+                }
+                OWLClassAssertionAxiom classAssertion = (OWLClassAssertionAxiom) axiom;
+                if (classAssertion.getClassExpression().isOWLClass()) {
+                    abducibles.add(axiom);
+                }
+            }
+
+            else if (axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION) {
+                abducibles.add(axiom);
+            }
+
+            else if (Configuration.NEGATION_ALLOWED
+                    && axiom.isOfType(AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION)){
                 abducibles.add(axiom);
             }
         }
-        System.out.println("ABDUCIBLES");
-        System.out.println(abducibles);
-        return new Abducibles(loader, abducibles);
+
+        return abducibles;
     }
 
     private Abducibles createAxiomBasedAbducibles(){
@@ -199,18 +231,20 @@ public class AbduciblesParser {
     }*/
 
     private Abducibles createAbduciblesFromOntologyFile() {
-        Set<OWLAxiom> abducibles = new HashSet<>();
+//        Set<OWLAxiom> abducibles = new HashSet<>();
         OWLOntology abduciblesOntology = null;
         try {
             abduciblesOntology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(Configuration.ABDUCIBLES_FILE_NAME));
         } catch (OWLOntologyCreationException e) {
             e.printStackTrace();
         }
-        for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
-            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
-                abducibles.add(axiom);
-            }
-        }
+//        for(OWLAxiom axiom : abduciblesOntology.getAxioms()){
+//            if(axiom.getAxiomType() == AxiomType.CLASS_ASSERTION || axiom.getAxiomType() == AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION || axiom.getAxiomType() == AxiomType.OBJECT_PROPERTY_ASSERTION){
+//                abducibles.add(axiom);
+//            }
+//        }
+        Set<OWLAxiom> abducibles = getSetOfAxiomBasedAbducibles(abduciblesOntology);
+
         loader.setAxiomBasedAbduciblesOnInput(true);
         return new Abducibles(loader, abducibles);
     }
