@@ -30,15 +30,13 @@ public class FileLogger {
     }
 
     public static void appendToFile(String fileName, long currentTimeMillis, String log) {
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
-            FILE_DIRECTORY = "logs_mhs";
-        } else {
-            FILE_DIRECTORY = "logs";
-        }
+        if (!Configuration.LOGGING)
+            return;
+        FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
+
         createFileIfNotExists(fileName, currentTimeMillis);
         try {
             String file_path = getFilePath(fileName, currentTimeMillis);
-            //System.out.println(Paths.get(file_path));
             Files.write(Paths.get(file_path), log.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException exception) {
             exception.printStackTrace();
