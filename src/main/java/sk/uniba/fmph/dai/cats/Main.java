@@ -33,11 +33,10 @@ import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static boolean TESTING = true;
+    private static boolean TESTING = false;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    //private static final String INPUT_FILE = "in/eval/lubm-0_2_0_noNeg.in";
     private static final String INPUT_FILE = "in/testExtractingModels/pokus9_2.in";
 
     public static void main(String[] args) throws Exception {
