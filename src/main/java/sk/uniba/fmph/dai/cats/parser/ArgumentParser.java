@@ -63,12 +63,12 @@ public class ArgumentParser {
                     String observation = String.join(" ", line).replace("-o: ", "");
                     Configuration.OBSERVATION = observation;
                     break;
-                case "-output:":
-                    String path = String.join(" ", line).replace("-output: ", "");
+                case "-out:":
+                    String path = String.join(" ", line).replace("-out: ", "");
                     if (path.matches("^[\\w\\\\/]*[\\w]+$")) {
                         Configuration.OUTPUT_PATH = path;
                     } else {
-                        String message = "Wrong output path -output " + path + "\nOutput path should contain only alphanumeric symbols, _ and separators (\\,/) and cannot end with a separator";
+                        String message = "Wrong output path -out " + path + "\nOutput path should contain only alphanumeric symbols, _ and separators (\\,/) and cannot end with a separator";
                         throw new RuntimeException(message);
                     }
                     break;
@@ -131,13 +131,6 @@ public class ArgumentParser {
                         add_abd(next, true,false, false);
                     }
                     break;
-//                case "-mhs:":
-//                    if (next.equals("true")) {
-//                        !Configuration.ALGORITHM.isMxpHybrid() = true;
-//                    } else if (!next.equals("false")) {
-//                        System.err.println("Wrong MHS mode value -mhs" + next + ", allowed values are 'true' and 'false'");
-//                    }
-//                    break;
                 case "-l:":
                     if (next.equals("false")) {
                         Configuration.LOOPING_ALLOWED = false;
@@ -163,6 +156,13 @@ public class ArgumentParser {
                         Configuration.NEGATION_ALLOWED = false;
                     } else if (!next.equals("true")) {
                         System.err.println("Wrong negation allowed value -n" + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
+                case "-log:":
+                    if (next.equals("false")) {
+                        Configuration.LOGGING = false;
+                    } else if (!next.equals("true")) {
+                        System.err.println("Wrong logging value -log" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-abdF:":
@@ -196,7 +196,7 @@ public class ArgumentParser {
         }
     }
 
-    private void chooseAlgorithm(String arg){
+    public void chooseAlgorithm(String arg){
         Algorithm chosenAlg = null;
         String name = arg.toUpperCase();
         try{
@@ -225,7 +225,6 @@ public class ArgumentParser {
     }
 
     private void add_abd(String abd, boolean axiomBasedAbducibles, boolean isConcept, boolean isRole){
-//        System.out.println(abd);
         if (axiomBasedAbducibles)
             Configuration.AXIOM_BASED_ABDUCIBLES.add(abd);
         else if (isConcept)

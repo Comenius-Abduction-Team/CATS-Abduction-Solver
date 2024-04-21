@@ -93,7 +93,8 @@ public abstract class ExplanationManager implements IExplanationManager {
 
         StringBuilder result = showExplanationsAccordingToLength(filteredExplanations);
         printer.print(result.toString());
-        FileLogger.appendToFile(FileLogger.HYBRID_LOG_FILE__PREFIX, solver.currentTimeMillis, result.toString());
+        if (Configuration.LOGGING)
+            FileLogger.appendToFile(FileLogger.HYBRID_LOG_FILE__PREFIX, solver.currentTimeMillis, result.toString());
 
         logExplanationsTimes(finalExplanations);
 
@@ -236,6 +237,8 @@ public abstract class ExplanationManager implements IExplanationManager {
     }
 
     private void logExplanationsTimes(List<Explanation> explanations){
+        if (!Configuration.LOGGING)
+            return;
         StringBuilder result = new StringBuilder();
         for (Explanation exp: explanations){
             String line = String.format("%.2f;%s\n", exp.getAcquireTime(), exp);
@@ -286,6 +289,8 @@ public abstract class ExplanationManager implements IExplanationManager {
 
     @Override
     public void logExplanationsWithDepth(Integer depth, boolean timeout, boolean error, Double time) {
+        if (!Configuration.LOGGING)
+            return;
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
         String line = String.format("%d;%d;%.2f%s%s;{%s}\n", depth, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
@@ -294,6 +299,8 @@ public abstract class ExplanationManager implements IExplanationManager {
 
     @Override
     public void logExplanationsWithLevel(Integer level, boolean timeout, boolean error, Double time){
+        if (!Configuration.LOGGING)
+            return;
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getLevel().equals(level)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
         String line = String.format("%d;%d;%.2f%s%s;{%s}\n", level, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);

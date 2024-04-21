@@ -1,6 +1,5 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IExplanationConfigurator;
@@ -19,6 +18,7 @@ import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 
+import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
@@ -40,10 +40,10 @@ public class CatsAbducer implements IThreadAbducer {
 
     double timeout = 0;
     int depth = 0;
-    boolean pureMhs = false;
     boolean hst = false;
     Algorithm algorithm = Algorithm.MHS_MXP;
     boolean strictRelevance = true;
+    boolean logging = false;
 
     boolean multithread = false;
 
@@ -147,14 +147,22 @@ public class CatsAbducer implements IThreadAbducer {
                             setDepth(depth);
                             i++;
                             continue;
-                        case "-mhs":
-                            boolean pureMhs = Boolean.parseBoolean(arguments[i + 1]);
-                            setPureMhs(pureMhs);
+                        case "-alg":
+                            try{
+                                new ArgumentParser().chooseAlgorithm(arguments[i + 1]);
+                            } catch(RuntimeException e){
+                                throw new InvalidSolverParameterException(arguments[i], e.getMessage());
+                            }
                             i++;
                             continue;
                         case "-sR":
                             boolean strictRelevance = Boolean.parseBoolean(arguments[i + 1]);
                             setStrictRelevance(strictRelevance);
+                            i++;
+                            continue;
+                        case "-log":
+                            boolean logging = Boolean.parseBoolean(arguments[i + 1]);
+                            setLogging(logging);
                             i++;
                             continue;
                         default:
@@ -171,7 +179,7 @@ public class CatsAbducer implements IThreadAbducer {
     @Override
     public void resetSolverSpecificParameters() {
         setDepth(0);
-        setPureMhs(false);
+        setAlgorithm(Algorithm.MHS_MXP);
         setStrictRelevance(true);
     }
 
@@ -245,6 +253,7 @@ public class CatsAbducer implements IThreadAbducer {
 
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
+        Configuration.LOGGING = logging;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();
@@ -333,16 +342,8 @@ public class CatsAbducer implements IThreadAbducer {
         this.depth = depth;
     }
 
-    public boolean isPureMhs() {
-        return pureMhs;
-    }
-
     public void setAlgorithm(Algorithm algorithm){
         this.algorithm = algorithm;
-    }
-
-    public void setPureMhs(boolean pureMhs) {
-        this.pureMhs = pureMhs;
     }
 
     public void setHst(boolean hst){this.hst = hst;}
@@ -353,6 +354,14 @@ public class CatsAbducer implements IThreadAbducer {
 
     public void setStrictRelevance(boolean strictRelevance) {
         this.strictRelevance = strictRelevance;
+    }
+
+    public boolean isLogging() {
+        return logging;
+    }
+
+    public void setLogging(boolean logging) {
+        this.logging = logging;
     }
 
     void appendToLog(String message){
