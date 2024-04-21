@@ -41,4 +41,6 @@ public class Configuration {
 
     /** Use to wrap testing prints in an if block. These block should not get to production code. **/
     public static boolean DEBUG_PRINT = false;
+
+    public static boolean LOGGING = true;
 }
