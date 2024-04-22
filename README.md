@@ -13,16 +13,13 @@ For example (allocation of more memory for Java is recommended):
 
 Another way to run the solver is directly through the **src/main/java/sk/uniba/fmph/dai/cats/Main.java** class in a Java IDE. The input can be entered either through a JVM argument or by setting the constants in this class as follows:
 
-*TESTING = true;*
-
-*API = false;*
-
+*TESTING = true;*  
+*API = false;*  
 *INPUT_FILE = \<relative path to the input file\>;*
 
 The input can also be constructed programmatically using the classes and methods of the [DL Abduction API](https://github.com/Comenius-Abduction-Team/DL-Abduction-API) In this case, the constants need to be set to:
 
-*TESTING = true;*
-
+*TESTING = true;*  
 *API = true;*
 
 The abduction problem is then defined in the *runApiTestingMain()* method, which already contains an example.
@@ -65,12 +62,9 @@ In the case where observation consists of multiple assertions (also called multi
 
 There is also another way by which it is possible to define a list of individuals in one *-aI* switch. The list is wrapped in curly braces and each individual is in one line.
 
-*-aI: {*
-
-*\<IRI of an individual 1\>*
-
-*\<IRI of an individual 2\>*
-
+*-aI: {*  
+*\<IRI of an individual 1\>*  
+*\<IRI of an individual 2\>*  
 *}*
 
 The same can be done with *-aC* (defining a list of classes) and *-aR* (defining a list of object properties).
@@ -80,12 +74,9 @@ The same can be done with *-aC* (defining a list of classes) and *-aR* (defining
 
 Another way is to list only assertions. In this case, *Manchester Syntax* needs to be used. 
 
-*-abd: {*
-
-*\<assertion 1\>*
-
-*\<assertion 2\>*
-
+*-abd: {*  
+*\<assertion 1\>*  
+*\<assertion 2\>*  
 *}* 
     
 * *-abdF: \<string\>* a relative path to the ontology file, assertions from the ontology will be used as abducibles.
