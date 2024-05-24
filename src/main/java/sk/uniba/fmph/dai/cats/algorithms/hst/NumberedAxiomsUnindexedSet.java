@@ -30,7 +30,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
                 result.add(axiom);
             }
         }
-        return result;
+        return Collections.unmodifiableSet(result);
     }
 
     public void add(OWLAxiom axiom) {

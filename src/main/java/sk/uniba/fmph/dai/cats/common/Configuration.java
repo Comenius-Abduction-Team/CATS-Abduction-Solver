@@ -33,9 +33,9 @@ public class Configuration {
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
     public static boolean CHECK_RELEVANCE_DURING_BUILDING_TREE_IN_MHS_MXP = false;
 
-    //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
+    public static boolean CACHE_ABDUCIBLES = true;
 
-    public static boolean HST = false;
+    //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;
 
