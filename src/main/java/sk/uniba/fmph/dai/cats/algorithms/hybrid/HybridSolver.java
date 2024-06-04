@@ -77,21 +77,22 @@ public class HybridSolver implements ISolver {
     }
 
     public List<String> getInfo() {
-        String optimizationQXP = "Optimization QXP: " + Configuration.CHECKING_MINIMALITY_BY_QXP;
-        String optimizationLongestConf = "Optimization Cached Conflicts - The Longest Conflict: " + Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT;
-        String optimizationMedian = "Optimization Cached Conflicts - Median: " + Configuration.CACHED_CONFLICTS_MEDIAN;
+//        String optimizationQXP = "Optimization QXP: " + Configuration.CHECKING_MINIMALITY_BY_QXP;
+//        String optimizationLongestConf = "Optimization Cached Conflicts - The Longest Conflict: " + Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT;
+//        String optimizationMedian = "Optimization Cached Conflicts - Median: " + Configuration.CACHED_CONFLICTS_MEDIAN;
         String roles = "Roles: " + Configuration.ROLES_IN_EXPLANATIONS_ALLOWED;
         String looping = "Looping allowed: " + Configuration.LOOPING_ALLOWED;
         String negation = "Negation: " +  Configuration.NEGATION_ALLOWED;
         String mhs_mode = "Algorithm: " + Configuration.ALGORITHM;
+        String caching = "Abducible caching: " + Configuration.CACHE_ABDUCIBLES;
         String relevance = "Strict relevance: " + Configuration.STRICT_RELEVANCE;
         String depth = "Depth limit: ";
         if (Configuration.DEPTH > 0) depth += Configuration.DEPTH; else depth += "none";
         String timeout = "Timeout: ";
         if (Configuration.TIMEOUT > 0) timeout += Configuration.TIMEOUT; else timeout += "none";
 
-        return Arrays.asList(optimizationQXP, optimizationLongestConf, optimizationMedian,
-                roles, looping, negation, mhs_mode, relevance, depth, timeout);
+        return Arrays.asList(
+                roles, looping, negation, mhs_mode, caching, relevance, depth, timeout);
     }
 
     @Override
@@ -127,6 +128,11 @@ public class HybridSolver implements ISolver {
         //trySolve();
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(100, "Abduction finished.");
+
+
+        //Runtime runtime = Runtime.getRuntime();
+        //runtime.gc();
+        //System.out.println(runtime.totalMemory() - runtime.freeMemory());
     }
 
     protected void trySolve() throws OWLOntologyStorageException, OWLOntologyCreationException {
@@ -162,6 +168,7 @@ public class HybridSolver implements ISolver {
         addNegatedObservation();
 
         abducibleAxioms = new AxiomSet(createAbducibleAxioms());
+        modelExtractor.initialiseAbducibles();
     }
 
     protected void setupCollections(){
@@ -402,7 +409,7 @@ public class HybridSolver implements ISolver {
         if(root == null){
             return;
         }
-        if (Configuration.HST){
+        if (Configuration.ALGORITHM.isHst()){
             //Set i(v) = |COMP| + 1
             root.index = globalMin + 1;
         }

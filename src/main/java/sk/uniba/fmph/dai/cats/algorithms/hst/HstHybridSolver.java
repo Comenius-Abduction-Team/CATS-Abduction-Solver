@@ -40,6 +40,7 @@ public class HstHybridSolver extends HybridSolver {
         addNegatedObservation();
 
         abducibleAxioms = new NumberedAxiomsUnindexedSet(createAbducibleAxioms());
+        modelExtractor.initialiseAbducibles();
 
         //Initially, MIN is set to |COMP|
         globalMin = abducibleAxioms.size();
