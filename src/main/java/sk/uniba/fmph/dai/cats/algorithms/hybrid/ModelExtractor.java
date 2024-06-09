@@ -81,7 +81,7 @@ public class ModelExtractor {
 
         solver.lastUsableModelIndex = solver.models.indexOf(modelNode);
 
-        if (!modelNode.data.isEmpty() && solver.lastUsableModelIndex == -1) {
+        if (!negModelNode.data.isEmpty() && solver.lastUsableModelIndex == -1) {
             solver.lastUsableModelIndex = solver.models.size();
             addModel(modelNode, negModelNode);
         }
@@ -265,15 +265,17 @@ public class ModelExtractor {
 
                 OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
                 axiom = getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom))
+                if (Objects.nonNull(axiom)){
                     modelSet.add(axiom);
+                }
 
                 OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
                 if (!Configuration.NEGATION_ALLOWED)
                     continue;
                 negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom))
+                if (Objects.nonNull(negatedAxiom)){
                     negModelSet.add(negatedAxiom);
+                }
 
             }
             else {
@@ -301,15 +303,17 @@ public class ModelExtractor {
 
                 OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
                 axiom = getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom))
+                if (Objects.nonNull(axiom)){
                     negModelSet.add(axiom);
+                }
 
                 OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
                 if (!Configuration.NEGATION_ALLOWED)
                     continue;
                 negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom))
+                if (Objects.nonNull(negatedAxiom)){
                     modelSet.add(negatedAxiom);
+                }
 
             }
 
@@ -336,7 +340,6 @@ public class ModelExtractor {
             }
         }
         return fromAbducibles;
-//        return abducibles.get(axiom.hashCode());
     }
 
     public void addAxiomsToModelsAccordingTypes(Set<OWLAxiom> negModelSet, Set<OWLAxiom> modelSet, Set<OWLObjectPropertyAssertionAxiom> foundTypes, Set<OWLAxiom> newNotTypes){
@@ -365,14 +368,13 @@ public class ModelExtractor {
 
     }
 
-
     public void deletePathFromOntology() {
         solver.resetOntologyToOriginal();
     }
 
     public void addModel(ModelNode model, ModelNode negModel){
         solver.lastUsableModelIndex = solver.models.indexOf(model);
-        if (solver.lastUsableModelIndex != -1 || model.data.isEmpty()){
+        if (solver.lastUsableModelIndex != -1 || (negModel.data.isEmpty() && model.data.isEmpty())){
             return;
         }
         solver.lastUsableModelIndex = solver.models.size();

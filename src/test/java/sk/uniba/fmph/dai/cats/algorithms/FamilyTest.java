@@ -51,7 +51,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.hst();
         manager.setDepth(2);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
@@ -73,7 +73,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.hstMxp();
         manager.setDepth(2);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
