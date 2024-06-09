@@ -1,8 +1,5 @@
 package sk.uniba.fmph.dai.cats.parser;
 
-import com.github.jsonldjava.utils.JsonUtils;
-import sk.uniba.fmph.dai.cats.application.Application;
-import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.Prefixes;
 import sk.uniba.fmph.dai.cats.models.Abducibles;
@@ -15,12 +12,10 @@ import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class AbduciblesParser {
 
-    private Logger logger = Logger.getLogger(ObservationParser.class.getSimpleName());
-    private ConsoleLoader loader;
+    private final ConsoleLoader loader;
 
     public AbduciblesParser(ConsoleLoader loader) {
         this.loader = loader;

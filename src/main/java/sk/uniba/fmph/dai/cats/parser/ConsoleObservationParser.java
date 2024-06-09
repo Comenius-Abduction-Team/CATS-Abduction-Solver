@@ -8,13 +8,11 @@ import org.semanticweb.owlapi.io.StringDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
-import org.apache.log4j.Logger;
-
 public class ConsoleObservationParser extends ObservationParser {
 
     public ConsoleObservationParser(Loader loader) {
         super(loader);
-        printer = new ConsolePrinter(Logger.getRootLogger());
+        printer = new ConsolePrinter();
     }
 
     @Override

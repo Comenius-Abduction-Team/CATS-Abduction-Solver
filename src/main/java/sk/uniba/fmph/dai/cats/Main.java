@@ -6,19 +6,17 @@ import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.abduction_api.monitor.Percentage;
+import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.ISolver;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ConsoleExplanationManager;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpSolver;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbductionFactory;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import sk.uniba.fmph.dai.cats.logger.FileLogger;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
@@ -33,15 +31,13 @@ import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static boolean TESTING = false;
+    private static final boolean TESTING = false;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    private static final String INPUT_FILE = "in/testExtractingModels/pokus9_2.in";
+    private static final String INPUT_FILE = "in/toothache.in";
 
     public static void main(String[] args) throws Exception {
-
-        FileLogger.initializeLogger();
 
         if (TESTING){
             if (API){
@@ -52,14 +48,10 @@ public class Main {
             args = new String[]{INPUT_FILE};
         }
 
-        Logger logger = Logger.getRootLogger();
-        logger.setLevel(Level.OFF);
-        BasicConfigurator.configure();
-
         ThreadTimes threadTimes = new ThreadTimes(100);
 
         try{
-            runSolving(args, threadTimes, logger);
+            runSolving(args, threadTimes);
         } catch(Throwable e) {
             e.printStackTrace();
             Application.finish(ExitCode.ERROR);
@@ -144,7 +136,7 @@ public class Main {
         System.out.println(threadAbducer.getFullLog());
     }
 
-    public static ISolver runSolving(String[] args, ThreadTimes threadTimes, Logger logger) throws Exception {
+    public static ISolver runSolving(String[] args, ThreadTimes threadTimes) throws Exception {
 
         ISolver solver = null;
 
@@ -160,25 +152,27 @@ public class Main {
 
             IReasonerManager reasonerManager = new ReasonerManager(loader);
 
-            solver = createSolver(threadTimes, loader, reasonerManager, logger);
+            solver = createSolver(threadTimes, loader, reasonerManager);
             solver.solve(loader, reasonerManager);
 
         } catch(Throwable e){
-            new ConsolePrinter(logger).logError("An error occurred: ", e);
+            new ConsolePrinter().logError("An error occurred: ", e);
             throw e;
         }
 
         return solver;
     }
 
-    private static ISolver createSolver(ThreadTimes threadTimes, ILoader loader, IReasonerManager reasonerManager, Logger logger) {
+    private static ISolver createSolver(ThreadTimes threadTimes, ILoader loader, IReasonerManager reasonerManager) {
 
         ConsoleExplanationManager explanationManager = new ConsoleExplanationManager(loader, reasonerManager);
         ConsoleProgressManager progressManager = new ConsoleProgressManager();
 
         if (Configuration.ALGORITHM.isHst())
-            return new HstHybridSolver(threadTimes, explanationManager, progressManager, new ConsolePrinter(logger));
+            return new HstHybridSolver(threadTimes, explanationManager, progressManager, new ConsolePrinter());
+        else if (Configuration.ALGORITHM == Algorithm.MXP)
+            return new MxpSolver(threadTimes, explanationManager, progressManager, new ConsolePrinter());
         else
-            return new HybridSolver(threadTimes, explanationManager, progressManager, new ConsolePrinter(logger));
+            return new HybridSolver(threadTimes, explanationManager, progressManager, new ConsolePrinter());
     }
 }
