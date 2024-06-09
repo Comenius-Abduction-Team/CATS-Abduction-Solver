@@ -27,7 +27,7 @@ The abduction problem is then defined in the *runApiTestingMain()* method, which
 ## Input
 CATS receives a structured input file as a parameter. The input file contains one switch per line. Mandatory switches are **-f** and **-o**, other switches are optional.
 
-A line in the input file can be commented out with a *// * at the start of the line (there must be a space after the slashes). 
+A line in the input file can be commented out with a // at the start of the line (there must be a space after the slashes). 
 
 #### Problem definition:
 * **-f: \<string\>**  a relative path to the ontology file, which represents the knowledge base $K$.
