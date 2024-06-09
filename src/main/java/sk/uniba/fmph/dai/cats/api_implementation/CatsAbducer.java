@@ -11,7 +11,6 @@ import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.logger.FileLogger;
 import sk.uniba.fmph.dai.cats.models.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
@@ -52,12 +51,12 @@ public class CatsAbducer implements IThreadAbducer {
     ReasonerManager reasonerManager;
     ThreadTimes timer;
 
-    public boolean isMultithread() {
-        return multithread;
+    public CatsAbducer() {
+
     }
 
-    public CatsAbducer(){
-        FileLogger.initializeLogger();
+    public boolean isMultithread() {
+        return multithread;
     }
 
     public CatsAbducer(OWLOntology backgroundKnowledge, OWLAxiom observation)

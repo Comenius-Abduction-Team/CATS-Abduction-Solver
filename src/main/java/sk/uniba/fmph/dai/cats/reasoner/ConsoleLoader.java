@@ -8,14 +8,12 @@ import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.parser.*;
 
 import java.io.File;
-import org.apache.log4j.Logger;
 
 public class ConsoleLoader extends Loader {
 
     public ConsoleLoader(){
         super();
-        Logger logger = Logger.getRootLogger();
-        printer = new ConsolePrinter(logger);
+        printer = new ConsolePrinter();
     }
 
     @Override
