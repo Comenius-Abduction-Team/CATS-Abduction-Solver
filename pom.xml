@@ -6,7 +6,7 @@
 
     <groupId>sk.uniba.fmph.dai</groupId>
     <artifactId>cats</artifactId>
-    <version>1.0.9</version>
+    <version>1.1.0</version>
 
 <!--    <packaging>jar</packaging>-->
 
@@ -38,11 +38,11 @@
 <!--            <artifactId>slf4j-reload4j</artifactId>-->
 <!--            <version>2.0.13</version>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>org.semanticweb.elk</groupId>
-            <artifactId>elk-owlapi</artifactId>
-            <version>0.4.3</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.semanticweb.elk</groupId>-->
+<!--            <artifactId>elk-owlapi</artifactId>-->
+<!--            <version>0.4.3</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
@@ -58,11 +58,11 @@
             <artifactId>openllet-owlapi</artifactId>
             <version>2.6.4</version>
         </dependency>
-        <dependency>
-            <groupId>net.sourceforge.owlapi</groupId>
-            <artifactId>org.semanticweb.hermit</artifactId>
-            <version>[1.4.3.517,)</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>net.sourceforge.owlapi</groupId>-->
+<!--            <artifactId>org.semanticweb.hermit</artifactId>-->
+<!--            <version>[1.4.3.517,)</version>-->
+<!--        </dependency>-->
        <dependency>
             <groupId>com.github.Comenius-Abduction-Team</groupId>
             <artifactId>DL-Abduction-API</artifactId>
@@ -80,11 +80,11 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.jsonld-java</groupId>
-            <artifactId>jsonld-java</artifactId>
-            <version>0.13.6</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.jsonld-java</groupId>-->
+<!--            <artifactId>jsonld-java</artifactId>-->
+<!--            <version>0.13.6</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
