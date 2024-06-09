@@ -147,7 +147,7 @@ public class HybridSolver implements ISolver {
         Double time = threadTimes.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, false, true, time);
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithDepth(currentDepth + 1, false, true, time);
             explanationManager.logExplanationsWithLevel(currentDepth, false, true, time);
         }
@@ -320,7 +320,7 @@ public class HybridSolver implements ISolver {
                         makeTimeoutPartialLog();
                         return;
                     }
-                    if(!Configuration.ALGORITHM.isMxpHybrid()){
+                    if(!Configuration.ALGORITHM.usesMxp()){
                         if(!isOntologyConsistent()){
 
                             if (Configuration.DEBUG_PRINT){
@@ -381,14 +381,14 @@ public class HybridSolver implements ISolver {
         Double time = threadTimes.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, false, false, time);
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithLevel(currentDepth, false, false, time);
         }
         pathsInCertainDepth = new HashSet<>();
     }
 
     protected ModelNode createRoot() {
-        if( Configuration.ALGORITHM.isMxpHybrid() ){
+        if( Configuration.ALGORITHM.usesMxp() ){
 
             runMxpInRoot();
 
@@ -433,7 +433,7 @@ public class HybridSolver implements ISolver {
             path.clear();
             return;
         }
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             newNode.addLengthOneExplanationsFromNode(parent);
             newNode.addLengthOneExplanations(explanationManager.getLengthOneExplanations());
         }
@@ -496,7 +496,7 @@ public class HybridSolver implements ISolver {
         Double time = threadTimes.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, true, false, time);
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithDepth(currentDepth + 1, true, false, time);
             explanationManager.logExplanationsWithLevel(currentDepth, true,false, time);
         }
@@ -518,7 +518,7 @@ public class HybridSolver implements ISolver {
             }
         }
 
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
+        if(!Configuration.ALGORITHM.usesMxp()){
             if(!ruleChecker.isRelevant(explanation)){
                 return true;
             }
@@ -527,7 +527,7 @@ public class HybridSolver implements ISolver {
             }
         }
 
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             if (ruleChecker.isExplanation(explanation)){
                 addToExplanations(explanation);
                 if (Configuration.DEBUG_PRINT)

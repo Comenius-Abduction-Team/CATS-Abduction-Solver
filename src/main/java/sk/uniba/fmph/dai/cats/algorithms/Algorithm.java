@@ -5,13 +5,13 @@ public enum Algorithm {
     MHS, MXP {
 
         @Override
-        public boolean isMxpHybrid() {
+        public boolean usesMxp() {
             return true;
         }
 
     }, MHS_MXP {
         @Override
-        public boolean isMxpHybrid() {
+        public boolean usesMxp() {
             return true;
         }
 
@@ -34,7 +34,7 @@ public enum Algorithm {
         }
 
         @Override
-        public boolean isMxpHybrid() {
+        public boolean usesMxp() {
             return true;
         }
 
@@ -48,7 +48,7 @@ public enum Algorithm {
         return false;
     }
 
-    public boolean isMxpHybrid(){
+    public boolean usesMxp(){
         return false;
     }
 

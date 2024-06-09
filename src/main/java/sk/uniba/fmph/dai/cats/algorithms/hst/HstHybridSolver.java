@@ -130,7 +130,7 @@ public class HstHybridSolver extends HybridSolver {
                         makeTimeoutPartialLog();
                         return;
                     }
-                    if(!Configuration.ALGORITHM.isMxpHybrid()){
+                    if(!Configuration.ALGORITHM.usesMxp()){
                         if(!isOntologyConsistent()){
                             explanation.setDepth(explanation.getAxioms().size());
                             explanationManager.addPossibleExplanation(explanation);
@@ -187,7 +187,7 @@ public class HstHybridSolver extends HybridSolver {
             path.clear();
             return;
         }
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             newNode.addLengthOneExplanationsFromNode(parent);
             newNode.addLengthOneExplanations(explanationManager.getLengthOneExplanations());
         }
@@ -211,7 +211,7 @@ public class HstHybridSolver extends HybridSolver {
             }
         }
 
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
+        if(!Configuration.ALGORITHM.usesMxp()){
             if(!ruleChecker.isRelevant(explanation)){
                 return true;
             }
@@ -220,7 +220,7 @@ public class HstHybridSolver extends HybridSolver {
             }
         }
 
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             if (ruleChecker.isExplanation(explanation)){
                 addToExplanations(explanation);
                 return true;

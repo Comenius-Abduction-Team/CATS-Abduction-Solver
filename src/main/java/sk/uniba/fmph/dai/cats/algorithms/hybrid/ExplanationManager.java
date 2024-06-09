@@ -82,7 +82,7 @@ public abstract class ExplanationManager implements IExplanationManager {
     @Override
     public void showExplanations() throws OWLOntologyStorageException, OWLOntologyCreationException {
         List<Explanation> filteredExplanations;
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
+        if(!Configuration.ALGORITHM.usesMxp()){
             filteredExplanations = possibleExplanations;
         } else {
             filteredExplanations = getConsistentExplanations();
@@ -98,7 +98,7 @@ public abstract class ExplanationManager implements IExplanationManager {
 
         logExplanationsTimes(finalExplanations);
 
-        if(Configuration.ALGORITHM.isMxpHybrid()){
+        if(Configuration.ALGORITHM.usesMxp()){
             StringBuilder resultLevel = showExplanationsAccordingToLevel(new ArrayList<>(finalExplanations));
             FileLogger.appendToFile(FileLogger.HYBRID_LEVEL_LOG_FILE__PREFIX, solver.currentTimeMillis, resultLevel.toString());
         }
@@ -147,7 +147,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         int depth = 1;
         while (!filteredExplanations.isEmpty()) {
             List<Explanation> currentExplanations = removeExplanationsWithDepth(filteredExplanations, depth);
-            if(Configuration.ALGORITHM.isMxpHybrid()){
+            if(Configuration.ALGORITHM.usesMxp()){
                 if(!Configuration.CHECKING_MINIMALITY_BY_QXP){
                     filterIfNotMinimal(currentExplanations);
                 }
