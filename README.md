@@ -17,7 +17,7 @@ Another way to run the solver is directly through the **src/main/java/sk/uniba/f
 *API = false;*  
 *INPUT_FILE = \<relative path to the input file\>;*
 
-The input can also be constructed programmatically using the classes and methods of the [DL Abduction API](https://github.com/Comenius-Abduction-Team/DL-Abduction-API) In this case, the constants need to be set to:
+The input can also be constructed programmatically using the classes and methods of the [DL Abduction API](https://github.com/Comenius-Abduction-Team/DL-Abduction-API). In this case, the constants need to be set to:
 
 *TESTING = true;*  
 *API = true;*
@@ -27,12 +27,14 @@ The abduction problem is then defined in the *runApiTestingMain()* method, which
 ## Input
 CATS receives a structured input file as a parameter. The input file contains one switch per line. Mandatory switches are **-f** and **-o**, other switches are optional.
 
+A line in the input file can be commented out with a *// * at the start of the line (there must be a space after the slashes). 
+
 #### Problem definition:
 * **-f: \<string\>**  a relative path to the ontology file, which represents the knowledge base $K$.
 * **-o: \<ontology\>** observation $O$ in the form of an ontology (in any ontology syntax), which has to be written in one line.
 
 #### Algorithm settings:
-* *-alg: \[ mhs | mhs-mxp | hst | hst-mxp ]>*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
+* *-alg: \[ mhs | hst | mxp | mhs-mxp | hst-mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
 * *-t: \<positive integer\>* the time after which the search for explanations terminates. By default, it is not set.
 * *-d: \<positive integer\>* the depth of the HS-tree, when the search terminates. For example, for *-d: 2* search terminates after completing level 1 of HS-tree. By default, it is not set.
 
@@ -91,21 +93,21 @@ Each log is created in a folder with path *logs/\<algorithm\>/\<background knowl
 ### Final logs 
 Final logs are created only after the search for explanations is complete (it either ended normally and all explanations have been found or it was interrupted by the depth or time limit). The found explanations are filtered and only the desired ones are written in the logs.
 
-**Hybrid log**
-*\<time\>__\<input file name\>__hybrid.log*
+**Final log**
+*\<time\>__\<input file name\>__final.log*
 
-* final log which contains desired explanations of a certain length in each line (except the last)
+* the main final log which contains desired explanations of a certain length in each line (except the last)
   * line form: *\<length n\>;\<number of explanations\>;\<level completion time\>; {\<found explanations of the length n\>}*
 * last line contains the total running time
 
 **Explanation times log**
-*\<time\>__\<input file name\>__hybrid_explanation_times.log*
+*\<time\>__\<input file name\>__explanation_times.log*
 
 * final log which contains desired explanations and time when they were found
   * line form: *\<time t\>;\<explanation found in the time t\>*
 
 **Level log**
-*\<time\>__\<input file name\>__hybrid_level.log*
+*\<time\>__\<input file name\>__level.log*
 
 * final log which contains desired explanations found in a certain level in each line (except the last)
   * line form: *\<level l\>;\<number of explanations\>;\<level l completion time\>; {\<explanations found in the level l\>}*
@@ -117,23 +119,23 @@ Final logs are created only after the search for explanations is complete (it ei
 
 **Error log**
 *\<time\>__\<input file name\>__error.log*
-* created only if an error occurred during the construction of the HS-tree
+* created only if an error occurred during the algorithm's run
 * records an error that occurred
 
 ### Partial logs
 Partial logs are created while the solving of the abduction problem is running. They help us to have an overview of the progress along the run. They record, for example, possible explanations which were found after passing one level. However, these explanations are only possible explanations and therefore may not be desired.
 
 **Partial explanations log**
-*\<time\>__\<input file name\>__hybrid_partial_explanations.log*
+*\<time\>__\<input file name\>__partial_explanations.log*
 
-* partial log with the same structure as **hybrid log**
-* may contain also undesired explonations 
+* partial log with the same structure as **final log**
+* may contain undesired explanations 
 
 **Partial level explanations log**
-*\<time\>__\<input file name\>__hybrid_partial_level_explanations.log*
+*\<time\>__\<input file name\>__partial_level_explanations.log*
 
 * partial log with the same structure as **level log**
 * may contain also undesired explonations 
 
 When solving the abduction problem using MHS-MXP/HST-MXP, all the mentioned logs are produced.
-When using the MHS/HST algorithms, however, only some are produced: **hybrid log**, **explanation times log**, **info log**, **error log** and **partial explanations log**. The reason for this is that other logs would be redundant. For the MHS/HST algorithm, the grouping of explanations according to the length is identical to grouping them according to the levels.
+When using the MHS/HST algorithms, however, only some are produced: **final log**, **explanation times log**, **info log**, **error log** and **partial explanations log**. The reason for this is that other logs would be redundant. For the MHS/HST algorithm, the grouping of explanations according to the length is identical to grouping them according to the levels.
