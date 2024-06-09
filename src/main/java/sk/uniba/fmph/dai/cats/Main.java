@@ -11,7 +11,7 @@ import sk.uniba.fmph.dai.cats.algorithms.ISolver;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ConsoleExplanationManager;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
-import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpSolver;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.MxpSolver;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbductionFactory;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
