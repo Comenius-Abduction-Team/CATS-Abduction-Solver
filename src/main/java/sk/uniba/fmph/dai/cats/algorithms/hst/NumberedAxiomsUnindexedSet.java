@@ -22,7 +22,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
     @Override
     public Set<OWLAxiom> getAxioms() {
         if (unindexed.size() == max)
-            return Collections.unmodifiableSet(unindexed);
+            return new HashSet<>(unindexed);
         Set<OWLAxiom> result = new HashSet<>(unindexed);
         for (int i = 0; i < max; i++) {
             OWLAxiom axiom = indexToAxiom[i];
@@ -30,7 +30,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
                 result.add(axiom);
             }
         }
-        return Collections.unmodifiableSet(result);
+        return result;
     }
 
     public void add(OWLAxiom axiom) {
