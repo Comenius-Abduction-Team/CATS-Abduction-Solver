@@ -20,6 +20,10 @@ public class AxiomSet implements IAbducibleAxioms {
         this.axioms = axioms;
     }
 
+    public AxiomSet(Collection<OWLAxiom> axioms) {
+        this.axioms = new HashSet(axioms);
+    }
+
     @Override
     public Set<OWLAxiom> getAxioms() {
         return axioms;
@@ -27,11 +31,7 @@ public class AxiomSet implements IAbducibleAxioms {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for (OWLAxiom owlAxiom : axioms) {
-            result.append(StringFactory.getRepresentation(owlAxiom)).append(";");
-        }
-        return result.toString();
+        return StringFactory.getRepresentation(axioms);
     }
 
     public void remove(OWLAxiom literal) {
@@ -54,6 +54,8 @@ public class AxiomSet implements IAbducibleAxioms {
     public int size(){
         return axioms.size();
     }
+
+    public boolean isEmpty() {  return axioms.isEmpty(); }
 
     @Override
     public boolean contains(OWLAxiom axiom) {

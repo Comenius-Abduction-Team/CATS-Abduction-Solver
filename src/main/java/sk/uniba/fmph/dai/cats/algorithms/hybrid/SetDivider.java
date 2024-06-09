@@ -50,7 +50,7 @@ public class SetDivider {
         }
     }
 
-    public List<AxiomSet> divideIntoSets(AxiomSet literals) {
+    public List<AxiomSet> divideIntoSets(Set<OWLAxiom> literals) {
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT && explanationManager.getPossibleExplanationsSize() > 0 && lastUsedIndex != -1){
             return divideIntoSetsAccordingTheLongestConflict(literals);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN && explanationManager.getPossibleExplanationsSize() > 0){
@@ -59,7 +59,7 @@ public class SetDivider {
         return divideIntoSetsWithoutCondition(literals);
     }
 
-    public List<AxiomSet> divideIntoSetsWithoutCondition(AxiomSet literals){
+    public List<AxiomSet> divideIntoSetsWithoutCondition(Set<OWLAxiom> literals){
         List<AxiomSet> dividedLiterals = new ArrayList<>();
 
         dividedLiterals.add(new AxiomSet());
@@ -67,14 +67,14 @@ public class SetDivider {
 
         int count = 0;
 
-        for (OWLAxiom owlAxiom : literals.getAxioms()) {
+        for (OWLAxiom owlAxiom : literals) {
             dividedLiterals.get(count % 2).add(owlAxiom);
             count++;
         }
         return dividedLiterals;
     }
 
-    private List<AxiomSet> divideIntoSetsAccordingTheLongestConflict(AxiomSet literals){
+    private List<AxiomSet> divideIntoSetsAccordingTheLongestConflict(Set<OWLAxiom> literals){
         Explanation theLongestExplanation = explanationManager.getPossibleExplanations().get(lastUsedIndex);
         Set<OWLAxiom> axiomsFromExplanation = new HashSet<>(theLongestExplanation.getAxioms());
 
@@ -84,13 +84,13 @@ public class SetDivider {
 
         int count = 0;
         for(OWLAxiom owlAxiom : axiomsFromExplanation){
-            if(literals.getAxioms().contains(owlAxiom)){
+            if(literals.contains(owlAxiom)){
                 dividedLiterals.get(count % 2).add(owlAxiom);
                 count++;
             }
         }
 
-        for(OWLAxiom owlAxiom : literals.getAxioms()) {
+        for(OWLAxiom owlAxiom : literals) {
             if(!axiomsFromExplanation.contains(owlAxiom)){
                 dividedLiterals.get(count % 2).add(owlAxiom);
                 count++;
@@ -117,8 +117,8 @@ public class SetDivider {
         return indexOfLongestExp;
     }
 
-    private List<AxiomSet> divideIntoSetsAccordingTableOfLiteralsPairOccurrence(AxiomSet literals){
-        Set<OWLAxiom> axiomsFromLiterals = new HashSet<>(literals.getAxioms());
+    private List<AxiomSet> divideIntoSetsAccordingTableOfLiteralsPairOccurrence(Set<OWLAxiom> literals){
+        Set<OWLAxiom> axiomsFromLiterals = new HashSet<>(literals);
         List<AxiomSet> dividedLiterals = new ArrayList<>();
         dividedLiterals.add(new AxiomSet());
         dividedLiterals.add(new AxiomSet());
@@ -146,7 +146,7 @@ public class SetDivider {
 
     public void addPairsOfLiteralsToTable(Explanation explanation){
         LinkedList<OWLAxiom> expAxioms;
-        if (explanation.getAxioms() instanceof List)
+        if (explanation.getAxioms() != null)
             expAxioms = (LinkedList<OWLAxiom>) explanation.getAxioms();
         else
             expAxioms = new LinkedList<>(explanation.getAxioms());
@@ -164,8 +164,8 @@ public class SetDivider {
 
     public void addToListOfAxiomPairOccurance(Integer value){
         int index = 0;
-        for(int i = 0; i < numberOfAxiomPairOccurance.size(); i++){
-            if(numberOfAxiomPairOccurance.get(i) > value){
+        for (Integer integer : numberOfAxiomPairOccurance) {
+            if (integer > value) {
                 break;
             }
             index++;
@@ -174,7 +174,7 @@ public class SetDivider {
     }
 
     private void setMedianFromListOfAxiomPairOccurance(){
-        if(numberOfAxiomPairOccurance.size() == 0){
+        if(numberOfAxiomPairOccurance.isEmpty()){
             return;
         }
         if(numberOfAxiomPairOccurance.size() % 2 == 0){
