@@ -6,35 +6,33 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.IOException;
 
-public class ExtractingModel91Test extends AlgorithmTestBase {
+public class ToothacheTest extends AlgorithmTestBase {
 
-    public ExtractingModel91Test() throws OWLOntologyCreationException, IOException {
+    public ToothacheTest() throws OWLOntologyCreationException, IOException {
         super();
     }
 
     @Override
     void setUpInput() {
-        ONTOLOGY_FILE = "files/testExtractingModel9_1.owl";
+        ONTOLOGY_FILE = "files/toothache_ontology.rdf";
 
         OBSERVATION =
-                "Prefix: o: <http://www.co-ode.org/ontologies/ont.owl#>"
-                        + " Class: o:A Class: o:C Class: o:E"
-                        + " Individual: o:a Types: o:A and o:C and o:E";
+                "Prefix: o: <http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#>"
+                        + " Class: o:Toothache"
+                        + " Individual: o:John Types: o:Toothache";
 
-        ABDUCIBLE_PREFIX = "http://www.co-ode.org/ontologies/ont.owl#";
+        ABDUCIBLE_PREFIX = "http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#";
     }
 
     @Override
     void setUpAbducibles() {
-        OWLClass A = dataFactory.getOWLClass(":A", prefixManager);
-        OWLClass B = dataFactory.getOWLClass(":B", prefixManager);
-        OWLClass D = dataFactory.getOWLClass(":D", prefixManager);
-        OWLClass E = dataFactory.getOWLClass(":E", prefixManager);
+        OWLClass cold = dataFactory.getOWLClass(":DrankColdDrink", prefixManager);
+        OWLClass sensitive = dataFactory.getOWLClass(":SensitiveTeeth", prefixManager);
+        OWLClass cavity = dataFactory.getOWLClass(":Cavity", prefixManager);
 
-        symbolAbd.add(A);
-        symbolAbd.add(B);
-        symbolAbd.add(D);
-        symbolAbd.add(E);
+        symbolAbd.add(cold);
+        symbolAbd.add(sensitive);
+        symbolAbd.add(cavity);
     }
 
     @Test
@@ -43,7 +41,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhs();
         solve();
-        testExplanationsFound(7);
+        testExplanationsFound(3);
 
     }
 
@@ -53,7 +51,17 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.hst();
         solve();
-        testExplanationsFound(7);
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void mxp() {
+
+        super.hst();
+        solve();
+        testExplanationsFound(3);
 
     }
 
@@ -63,7 +71,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhsMxp();
         solve();
-        testExplanationsFound(7);
+        testExplanationsFound(3);
 
     }
 
@@ -73,7 +81,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.hstMxp();
         solve();
-        testExplanationsFound(7);
+        testExplanationsFound(3);
 
     }
 
@@ -83,7 +91,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhsNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(3);
 
     }
 
@@ -93,7 +101,17 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.hstNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void mxpNoNeg() {
+
+        super.hstNoNeg();
+        solve();
+        testExplanationsFound(3);
 
     }
 
@@ -103,7 +121,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhsMxpNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(3);
 
     }
 
@@ -113,7 +131,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.hstMxpNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(3);
 
     }
 
@@ -130,6 +148,16 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     @Test
     @Override
     void hstSymbolAbd() {
+
+        super.hstSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void mxpSymbolAbd() {
 
         super.hstSymbolAbd();
         solve();
@@ -163,7 +191,27 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhsSymbolAbdNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hstSymbolAbdNoNeg() {
+
+        super.mhsSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void mxpSymbolAbdNoNeg() {
+
+        super.mhsSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
 
     }
 
@@ -173,7 +221,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.mhsMxpSymbolAbdNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(2);
 
     }
 
@@ -183,7 +231,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
         super.hstMxpSymbolAbdNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(2);
 
     }
 

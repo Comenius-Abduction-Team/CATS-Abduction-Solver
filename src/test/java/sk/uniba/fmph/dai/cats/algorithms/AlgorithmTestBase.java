@@ -1,6 +1,5 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
-import org.junit.jupiter.api.Test;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbducer;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,6 +149,8 @@ public abstract class AlgorithmTestBase {
         manager.setAlgorithm(Algorithm.HST);
     }
 
+    void mxp(){ manager.setAlgorithm(Algorithm.MXP); }
+
     void mhsMxp(){
         manager.setAlgorithm(Algorithm.MHS_MXP);
     }
@@ -165,6 +166,11 @@ public abstract class AlgorithmTestBase {
 
     void hstNoNeg(){
         manager.setAlgorithm(Algorithm.HST);
+        manager.setExplanationConfigurator(noNeg);
+    }
+
+    void mxpNoNeg(){
+        manager.setAlgorithm(Algorithm.MXP);
         manager.setExplanationConfigurator(noNeg);
     }
 
@@ -188,6 +194,11 @@ public abstract class AlgorithmTestBase {
         manager.setAbducibles(symbolAbd);
     }
 
+    void mxpSymbolAbd(){
+        manager.setAlgorithm(Algorithm.MXP);
+        manager.setAbducibles(symbolAbd);
+    }
+
     void mhsMxpSymbolAbd(){
         manager.setAlgorithm(Algorithm.MHS_MXP);
         manager.setAbducibles(symbolAbd);
@@ -206,6 +217,12 @@ public abstract class AlgorithmTestBase {
 
     void hstSymbolAbdNoNeg(){
         manager.setAlgorithm(Algorithm.HST);
+        manager.setAbducibles(symbolAbd);
+        manager.setExplanationConfigurator(noNeg);
+    }
+
+    void mxpSymbolAbdNoNeg(){
+        manager.setAlgorithm(Algorithm.MXP);
         manager.setAbducibles(symbolAbd);
         manager.setExplanationConfigurator(noNeg);
     }
