@@ -1,19 +1,12 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
-import sk.uniba.fmph.dai.cats.algorithms.ISolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.*;
-import com.google.common.collect.Iterables;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
-import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
-import sk.uniba.fmph.dai.cats.models.AxiomSet;
 import sk.uniba.fmph.dai.cats.models.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
 
 import java.util.*;
@@ -50,8 +43,15 @@ public class HstHybridSolver extends HybridSolver {
     protected void startSolving() throws OWLOntologyCreationException {
         currentDepth = 0;
 
-        Queue<TreeNode> queue = new LinkedList<>();
-        initializeTree(queue);
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        ModelNode root = createRoot();
+        if (root == null)
+            return;
+
+        queue.add(root);
+
+        //Set i(v) = |COMP| + 1
+        root.index = abducibleAxioms.size() + 1;
 
         if (isTimeout()) {
             makeTimeoutPartialLog();
@@ -160,7 +160,6 @@ public class HstHybridSolver extends HybridSolver {
             }
         }
         path.clear();
-
         if(!levelTimes.containsKey(currentDepth)){
             makePartialLog();
         }
@@ -180,29 +179,6 @@ public class HstHybridSolver extends HybridSolver {
                     return;
             }
         }
-    }
-
-    @Override
-    protected void initializeTree(Queue<TreeNode> queue) {
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
-            if(!isOntologyConsistent()){
-                return;
-            }
-        } else {
-            Conflict conflict = getMergeConflict();
-            for (Explanation e : conflict.getExplanations()){
-                e.setDepth(e.size());
-            }
-            explanationManager.setPossibleExplanations(conflict.getExplanations());
-        }
-
-        ModelNode root = createModelNodeFromExistingModel(true, null, null, findReuseIndex());
-        if(root == null){
-            return;
-        }
-        //Set i(v) = |COMP| + 1
-        root.index = abducibleAxioms.size() + 1;
-        queue.add(root);
     }
 
     private void addNodeToTree(Queue<TreeNode> queue, Explanation explanation, ModelNode parent, int index, int reuseIndex){

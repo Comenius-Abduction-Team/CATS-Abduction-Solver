@@ -2,7 +2,14 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 public enum Algorithm {
 
-    MHS, MHS_MXP {
+    MHS, MXP {
+
+        @Override
+        public boolean isMxpHybrid() {
+            return true;
+        }
+
+    }, MHS_MXP {
         @Override
         public boolean isMxpHybrid() {
             return true;

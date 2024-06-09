@@ -1,16 +1,12 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.algorithms.ISolver;
-import sk.uniba.fmph.dai.cats.algorithms.hst.INumberedAbducibles;
-import sk.uniba.fmph.dai.cats.algorithms.hst.NumberedAxiomsUnindexedSet;
 import com.google.common.collect.Iterables;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.models.*;
 import org.semanticweb.owlapi.model.*;
-
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
@@ -50,7 +46,7 @@ public class HybridSolver implements ISolver {
     public Map<Integer, Double> levelTimes = new HashMap<>();
     public boolean checkingMinimalityWithQXP = false;
     protected IRuleChecker ruleChecker;
-    protected Integer currentDepth;
+    protected int currentDepth = 0;
     protected int globalMin;
 
     protected int numberOfNodes = 0;
@@ -125,14 +121,9 @@ public class HybridSolver implements ISolver {
             reasonerManager.isOntologyWithLiteralsConsistent(abducibleAxioms.getAxioms(), ontology);
             trySolve();
         }
-        //trySolve();
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(100, "Abduction finished.");
 
-
-        //Runtime runtime = Runtime.getRuntime();
-        //runtime.gc();
-        //System.out.println(runtime.totalMemory() - runtime.freeMemory());
     }
 
     protected void trySolve() throws OWLOntologyStorageException, OWLOntologyCreationException {
@@ -189,7 +180,7 @@ public class HybridSolver implements ISolver {
             Set<OWLAxiom> abduciblesWithoutObservation = abducibles.getAxiomBasedAbducibles();
             if (loader.isMultipleObservationOnInput()){
                 if (Configuration.STRICT_RELEVANCE) {
-                    abduciblesWithoutObservation.removeAll(loader.getObservation().getAxiomsInMultipleObservations());
+                    loader.getObservation().getAxiomsInMultipleObservations().forEach(abduciblesWithoutObservation::remove);
                 }
             } else {
                 abduciblesWithoutObservation.remove(loader.getObservation().getOwlAxiom());
@@ -247,8 +238,12 @@ public class HybridSolver implements ISolver {
 
         currentDepth = 0;
 
-        Queue<TreeNode> queue = new LinkedList<>();
-        initializeTree(queue);
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        ModelNode root = createRoot();
+        if (root == null)
+            return;
+
+        queue.add(root);
 
         if(isTimeout()) {
             makeTimeoutPartialLog();
@@ -392,28 +387,28 @@ public class HybridSolver implements ISolver {
         pathsInCertainDepth = new HashSet<>();
     }
 
-    protected void initializeTree(Queue<TreeNode> queue) {
-        if(!Configuration.ALGORITHM.isMxpHybrid()){
-            if(!isOntologyConsistent()){
-                return;
-            }
+    protected ModelNode createRoot() {
+        if( Configuration.ALGORITHM.isMxpHybrid() ){
+
+            runMxpInRoot();
+
         } else {
-            Conflict conflict = getMergeConflict();
-            for (Explanation e: conflict.getExplanations()){
-                e.setDepth(e.getAxioms().size());
+
+            if(!isOntologyConsistent()){
+                return null;
             }
-            explanationManager.setPossibleExplanations(conflict.getExplanations());
+
         }
 
-        ModelNode root = createModelNodeFromExistingModel(true, null, null, findReuseIndex());
-        if(root == null){
-            return;
+        return createModelNodeFromExistingModel(true, null, null, findReuseIndex());
+    }
+
+    protected void runMxpInRoot(){
+        Conflict conflict = getMergeConflict();
+        for (Explanation e: conflict.getExplanations()){
+            e.setDepth(e.getAxioms().size());
         }
-        if (Configuration.ALGORITHM.isHst()){
-            //Set i(v) = |COMP| + 1
-            root.index = globalMin + 1;
-        }
-        queue.add(root);
+        explanationManager.setPossibleExplanations(conflict.getExplanations());
     }
 
     protected void addToExplanations(Explanation explanation){
@@ -556,12 +551,12 @@ public class HybridSolver implements ISolver {
     }
 
     protected Conflict getMergeConflict() {
-        return findConflicts(abducibleAxioms.getAsAxiomSet());
+        return findConflicts(abducibleAxioms.getAxioms());
     }
 
     protected List<Explanation> findExplanations(){
 
-       AxiomSet copy = new AxiomSet();
+        Set<OWLAxiom> copy = new HashSet<>();
 
 
         List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
@@ -582,23 +577,31 @@ public class HybridSolver implements ISolver {
        return conflict.getExplanations();
     }
 
-    protected Conflict findConflicts(AxiomSet axioms) {
+    protected Conflict findConflicts(Set<OWLAxiom> axioms) {
+
         path.remove(negObservation);
-        reasonerManager.addAxiomsToOntology(path);
+
+        // ???
 
 
         if (isTimeout()) {
-            return new Conflict(new AxiomSet(), new LinkedList<>());
+            return new Conflict(new HashSet<>(), new ArrayList<>());
         }
 
-        if (isOntologyWithLiteralsConsistent(axioms.getAxioms())) {
-            return new Conflict(axioms, new LinkedList<>());
+        reasonerManager.addAxiomsToOntology(path);
+
+        // if isConsistent(B ∪ C) then return [C, ∅];
+        if (isOntologyWithLiteralsConsistent(axioms)) {
+            return new Conflict(axioms, new ArrayList<>());
         }
+
         resetOntologyToOriginal();
+
+        // if |C| = 1 then return [∅, {C}];
         if (axioms.size() == 1) {
-            List<Explanation> explanations = new LinkedList<>();
-            explanations.add(new Explanation(axioms.getAxioms(), axioms.size(), currentDepth, threadTimes.getTotalUserTimeInSec()));
-            return new Conflict(new AxiomSet(), explanations);
+            List<Explanation> explanations = new ArrayList<>();
+            explanations.add(new Explanation(axioms, axioms.size(), currentDepth, threadTimes.getTotalUserTimeInSec()));
+            return new Conflict(new HashSet<>(), explanations);
         }
 
         int indexOfExplanation = -1;
@@ -606,32 +609,39 @@ public class HybridSolver implements ISolver {
             indexOfExplanation = setDivider.getIndexOfTheLongestAndNotUsedConflict();
         }
 
+        // Split C into disjoint, non-empty sets C1 and C2
         List<AxiomSet> sets = setDivider.divideIntoSets(axioms);
+
         double median = setDivider.getMedian();
 
-        Conflict conflictC1 = findConflicts(sets.get(0));
-        if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
+        //[C'1, Γ1] ← FINDCONFLICTS(B, C1)
+        Conflict conflictC1 = findConflicts(sets.get(0).getAxioms());
+        if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
-        } else if(Configuration.CACHED_CONFLICTS_MEDIAN){
+        } else if (Configuration.CACHED_CONFLICTS_MEDIAN){
             setDivider.setMedian(median);
         }
 
-        Conflict conflictC2 = findConflicts(sets.get(1));
-        if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
+        //[C'2, Γ2] ← FINDCONFLICTS(B, C2)
+        Conflict conflictC2 = findConflicts(sets.get(1).getAxioms());
+        if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
-        } else if(Configuration.CACHED_CONFLICTS_MEDIAN){
+        } else if (Configuration.CACHED_CONFLICTS_MEDIAN){
             setDivider.setMedian(median);
         }
 
+        // Γ ← Γ1 ∪ Γ2;
         List<Explanation> explanations = new LinkedList<>();
         explanations.addAll(conflictC1.getExplanations());
         explanations.addAll(conflictC2.getExplanations());
 
-        AxiomSet conflictLiterals = new AxiomSet();
-        conflictLiterals.addAll(conflictC1.getAxioms().getAxioms());
-        conflictLiterals.addAll(conflictC2.getAxioms().getAxioms());
+        // C'1 ∪ C'2
+        Set<OWLAxiom> conflictLiterals = new HashSet<>();
+        conflictLiterals.addAll(conflictC1.getAxioms());
+        conflictLiterals.addAll(conflictC2.getAxioms());
 
-        while (!isOntologyWithLiteralsConsistent(conflictLiterals.getAxioms())) {
+        // while ¬isConsistent(C'1 ∪ C'2 ∪ B) do
+        while (!isOntologyWithLiteralsConsistent(conflictLiterals)) {
 
             if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
@@ -639,19 +649,35 @@ public class HybridSolver implements ISolver {
 
             if (isTimeout()) break;
 
-            path.addAll(conflictC2.getAxioms().getAxioms());
-            Explanation X = getConflict(conflictC2.getAxioms().getAxioms(), conflictC1.getAxioms(), path);
-            path.removeAll(conflictC2.getAxioms().getAxioms());
+            // X ← GETCONFLICT(B ∪ C'2, C'2, C'1)
+            path.addAll(conflictC2.getAxioms());
+            Explanation X = getConflict(conflictC2.getAxioms(), conflictC1.getAxioms(), path);
+            path.removeAll(conflictC2.getAxioms());
 
+            // temp ← GETCONFLICT(B ∪ X, X, C'2)
             path.addAll(X.getAxioms());
             Explanation CS = getConflict(X.getAxioms(), conflictC2.getAxioms(), path);
-            path.removeAll(X.getAxioms());
+            // removeAll(X) is inefficient if X is a list and its size is larger than the set itself
+            X.getAxioms().forEach(path::remove);
 
+            // CS ← X ∪ temp
             CS.getAxioms().addAll(X.getAxioms());
 
-            conflictLiterals.removeAll(conflictC1.getAxioms().getAxioms());
-            X.getAxioms().stream().findFirst().ifPresent(axiom -> conflictC1.getAxioms().remove(axiom));
-            conflictLiterals.addAll(conflictC1.getAxioms().getAxioms());
+            // C'1 ← C'1 \ {α} where α ∈ X
+            Set<OWLAxiom> c1Axioms = conflictC1.getAxioms();
+            conflictLiterals.removeAll(c1Axioms);
+
+            // toto funguje na 100% iba ak je C'1 nadmnozinou X
+            //X.getAxioms().stream().findAny().ifPresent(axiom -> conflictC1.getAxioms().remove(axiom));
+
+            for (OWLAxiom a : X.getAxioms()){
+                if (c1Axioms.contains(a)){
+                    c1Axioms.remove(a);
+                    break;
+                }
+            }
+
+            conflictLiterals.addAll(c1Axioms);
 
             if (explanations.contains(CS) || isTimeout()) {
                 break;
@@ -670,28 +696,31 @@ public class HybridSolver implements ISolver {
         return new Conflict(conflictLiterals, explanations);
     }
 
-    protected Explanation getConflict(Collection<OWLAxiom> axioms, AxiomSet literals, Set<OWLAxiom> actualPath) {
+    protected Explanation getConflict(Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, Set<OWLAxiom> actualPath) {
 
         if (isTimeout()) {
             return new Explanation();
         }
 
+        // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
         if (!axioms.isEmpty() && !isOntologyConsistent()) {
             return new Explanation();
         }
 
+        // if |C| = 1 then return C;
         if (literals.size() == 1) {
-            return new Explanation(literals.getAxioms(), 1, currentDepth, threadTimes.getTotalUserTimeInSec());
+            return new Explanation(literals, 1, currentDepth, threadTimes.getTotalUserTimeInSec());
         }
 
+        // Split C into disjoint, non-empty sets
         List<AxiomSet> sets = setDivider.divideIntoSetsWithoutCondition(literals);
 
         actualPath.addAll(sets.get(0).getAxioms());
-        Explanation D2 = getConflict(sets.get(0).getAxioms(), sets.get(1), actualPath);
+        Explanation D2 = getConflict(sets.get(0).getAxioms(), sets.get(1).getAxioms(), actualPath);
         actualPath.removeAll(sets.get(0).getAxioms());
 
         actualPath.addAll(D2.getAxioms());
-        Explanation D1 = getConflict(D2.getAxioms(), sets.get(0), actualPath);
+        Explanation D1 = getConflict(D2.getAxioms(), sets.get(0).getAxioms(), actualPath);
         actualPath.removeAll(D2.getAxioms());
 
         Set<OWLAxiom> conflicts = new HashSet<>();
@@ -715,16 +744,16 @@ public class HybridSolver implements ISolver {
     protected boolean addNewExplanations(){
         List<Explanation> newExplanations = findExplanations();
         explanationManager.setLengthOneExplanations(new ArrayList<>());
-        for (Explanation conflict : newExplanations){
-            if (conflict.getAxioms().size() == 1){
-                //explanationManager.addLengthOneExplanation(conflict.getOwlAxioms().stream().findFirst().orElse(null));
-                explanationManager.addLengthOneExplanation(Iterables.get(conflict.getAxioms(), 0));
+        for (Explanation explanation : newExplanations){
+            if (explanation.getAxioms().size() == 1){
+                //explanationManager.addLengthOneExplanation(explanation.getOwlAxioms().stream().findFirst().orElse(null));
+                explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
             }
-            conflict.addAxioms(path);
-            if (ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), conflict)){
-                Explanation newExplanation = conflict;
+            explanation.addAxioms(path);
+            if (ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
+                Explanation newExplanation = explanation;
                 if(Configuration.CHECKING_MINIMALITY_BY_QXP){
-                    newExplanation = getMinimalExplanationByCallingQXP(conflict);
+                    newExplanation = getMinimalExplanationByCallingQXP(explanation);
                 }
                 newExplanation.setDepth(newExplanation.getAxioms().size());
                 explanationManager.addPossibleExplanation(newExplanation);
@@ -752,15 +781,14 @@ public class HybridSolver implements ISolver {
     }
 
     public Explanation getMinimalExplanationByCallingQXP(Explanation explanation){
-        Set<OWLAxiom> temp = new HashSet<>(explanation.getAxioms());
+        Set<OWLAxiom> potentialExplanations = new HashSet<>(explanation.getAxioms());
         if(path != null){
-            temp.addAll(path);
+            potentialExplanations.addAll(path);
         }
-       AxiomSet potentialExplanations = new AxiomSet(temp);
 
         checkingMinimalityWithQXP = true;
         pathDuringCheckingMinimality = new HashSet<>();
-        Explanation newExplanation = getConflict(new ArrayList<>(), potentialExplanations, pathDuringCheckingMinimality);
+        Explanation newExplanation = getConflict(new HashSet<>(), potentialExplanations, pathDuringCheckingMinimality);
         checkingMinimalityWithQXP = false;
         pathDuringCheckingMinimality = new HashSet<>();
 
