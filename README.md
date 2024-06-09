@@ -9,7 +9,7 @@ You can run CATS through the command line using
 
 For example (allocation of more memory for Java is recommended):
 
-**java -Xmx4096m -jar cats.jar in/abducibles/input_fam.in**
+**java -Xmx4096m -jar cats.jar in/toothache.in**
 
 Another way to run the solver is directly through the **src/main/java/sk/uniba/fmph/dai/cats/Main.java** class in a Java IDE. The input can be entered either through a JVM argument or by setting the constants in this class as follows:
 
