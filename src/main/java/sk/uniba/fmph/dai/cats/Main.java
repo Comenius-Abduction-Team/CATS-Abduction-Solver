@@ -17,7 +17,6 @@ import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import sk.uniba.fmph.dai.cats.logger.FileLogger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
@@ -32,11 +31,11 @@ import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static boolean TESTING = false;
+    private static final boolean TESTING = false;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    private static final String INPUT_FILE = "in/testExtractingModels/pokus9_2.in";
+    private static final String INPUT_FILE = "in/toothache.in";
 
     public static void main(String[] args) throws Exception {
 
