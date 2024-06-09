@@ -10,7 +10,7 @@ public class ConsoleExplanationManager extends ExplanationManager {
 
     public ConsoleExplanationManager(ILoader loader, IReasonerManager reasonerManager){
         super(loader, reasonerManager);
-        printer = new ConsolePrinter();
+        printer = new ConsolePrinter(null);
     }
 
     @Override

@@ -45,6 +45,7 @@ public abstract class Loader implements ILoader {
             if (reasoner.isConsistent()) {
                 printer.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
+                //printer.logError(LogMessage.ERROR_ONTOLOGY_CONSISTENCY, null);
                 reasoner.dispose();
                 throw new RuntimeException(LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
             }

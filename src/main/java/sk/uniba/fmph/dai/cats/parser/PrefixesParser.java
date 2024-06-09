@@ -2,11 +2,13 @@ package sk.uniba.fmph.dai.cats.parser;
 
 import sk.uniba.fmph.dai.cats.common.Prefixes;
 import org.semanticweb.owlapi.model.*;
+import java.util.logging.Logger;
 
 public class
 
 PrefixesParser {
 
+    private Logger logger = Logger.getLogger(ObservationParser.class.getSimpleName());
     private OWLDocumentFormat observationOntologyFormat;
 
     public PrefixesParser(OWLDocumentFormat observationOntologyFormat) {

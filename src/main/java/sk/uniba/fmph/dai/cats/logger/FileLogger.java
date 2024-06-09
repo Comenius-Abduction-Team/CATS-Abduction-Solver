@@ -2,6 +2,9 @@ package sk.uniba.fmph.dai.cats.logger;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +23,11 @@ public class FileLogger {
     public static final String HYBRID_PARTIAL_EXPLANATIONS_ACCORDING_TO_LEVELS_LOG_FILE__PREFIX = "hybrid_partial_level_explanations";
     public static final String LOG_FILE__POSTFIX = ".log";
     private static String FILE_DIRECTORY = "";
+
+    public static void initializeLogger(){
+        Logger.getRootLogger().setLevel(Level.OFF);
+        BasicConfigurator.configure();
+    }
 
     public static void appendToFile(String fileName, long currentTimeMillis, String log) {
         if (!Configuration.LOGGING)

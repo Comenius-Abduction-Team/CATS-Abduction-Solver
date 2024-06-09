@@ -57,6 +57,7 @@ public class CatsAbducer implements IThreadAbducer {
     }
 
     public CatsAbducer(){
+        FileLogger.initializeLogger();
     }
 
     public CatsAbducer(OWLOntology backgroundKnowledge, OWLAxiom observation)

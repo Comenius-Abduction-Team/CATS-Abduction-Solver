@@ -1,18 +1,27 @@
 package sk.uniba.fmph.dai.cats.common;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 public class ConsolePrinter implements IPrinter {
+
+    private final Logger logger;
+
+    public ConsolePrinter(Logger logger){
+        this.logger = logger;
+    }
 
     @Override
     public void logInfo(String message) {
-        System.out.println(message);
+        logger.log(Level.INFO, message);
     }
 
     @Override
     public void logError(String message, Throwable exception) {
         if (exception == null)
-            System.err.println(message);
+            logger.log(Level.WARN, message);
         else
-            System.err.println(message + " " + exception.getMessage());
+            logger.log(Level.WARN, message, exception);
     }
 
     @Override
