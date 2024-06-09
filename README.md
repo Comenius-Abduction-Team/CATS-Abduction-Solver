@@ -97,20 +97,20 @@ Final logs are created only after the search for explanations is complete (it ei
 *\<time\>__\<input file name\>__final.log*
 
 * the main final log which contains desired explanations of a certain length in each line (except the last)
-  * line form: *\<length n\>;\<number of explanations\>;\<level completion time\>; {\<found explanations of the length n\>}*
+  * line form: *\<length n\>; \<number of explanations\>; \<level completion time\>; {\<found explanations of the length n\>}*
 * last line contains the total running time
 
 **Explanation times log**
 *\<time\>__\<input file name\>__explanation_times.log*
 
 * final log which contains desired explanations and time when they were found
-  * line form: *\<time t\>;\<explanation found in the time t\>*
+  * line form: *\<time t\>; \<explanation found in the time t\>*
 
 **Level log**
 *\<time\>__\<input file name\>__level.log*
 
 * final log which contains desired explanations found in a certain level in each line (except the last)
-  * line form: *\<level l\>;\<number of explanations\>;\<level l completion time\>; {\<explanations found in the level l\>}*
+  * line form: *\<level l\>; \<number of explanations\>; \<level l completion time\>; {\<explanations found in the level l\>}*
 * last line contains the total running time
 
 **Info log**
