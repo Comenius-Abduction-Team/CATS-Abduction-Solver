@@ -11,13 +11,13 @@ import java.nio.file.StandardOpenOption;
 
 public class FileLogger {
 
-    public static final String HYBRID_INFO_LOG__PREFIX = "info";
-    public static final String HYBRID_ERROR_LOG__PREFIX = "error";
-    public static final String HYBRID_LOG_FILE__PREFIX = "hybrid";
-    public static final String HYBRID_LEVEL_LOG_FILE__PREFIX = "hybrid_level";
-    public static final String HYBRID_EXP_TIMES_LOG_FILE__PREFIX = "hybrid_explanation_times";
-    public static final String HYBRID_PARTIAL_EXPLANATIONS_LOG_FILE__PREFIX = "hybrid_partial_explanations";
-    public static final String HYBRID_PARTIAL_EXPLANATIONS_ACCORDING_TO_LEVELS_LOG_FILE__PREFIX = "hybrid_partial_level_explanations";
+    public static final String INFO_LOG__PREFIX = "info";
+    public static final String ERROR_LOG__PREFIX = "error";
+    public static final String FINAL_LOG__PREFIX = "final";
+    public static final String LEVEL_LOG___PREFIX = "level";
+    public static final String EXP_TIMES_LOG__PREFIX = "explanation_times";
+    public static final String PARTIAL_LOG__PREFIX = "partial_explanations";
+    public static final String PARTIAL_LEVEL_LOG__PREFIX = "partial_level_explanations";
     public static final String LOG_FILE__POSTFIX = ".log";
     private static String FILE_DIRECTORY = "";
 
@@ -60,7 +60,7 @@ public class FileLogger {
             directory.mkdirs();
         }
 
-        return directoryPath.concat(File.separator).concat("" + currentTimeMillis + "__").concat(Configuration.INPUT_FILE_NAME + "__").concat(fileName).concat(LOG_FILE__POSTFIX);
+        return directoryPath.concat(File.separator).concat(currentTimeMillis + "__").concat(Configuration.INPUT_FILE_NAME + "__").concat(fileName).concat(LOG_FILE__POSTFIX);
     }
 
     private static String getDefaultOutputPath() {
