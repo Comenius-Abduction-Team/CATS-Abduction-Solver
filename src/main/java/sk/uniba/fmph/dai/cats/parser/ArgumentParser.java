@@ -29,6 +29,10 @@ public class ArgumentParser {
 
         for (String[] line: lines){
             String new_line = line[0].trim();
+
+            if (new_line.equals("//"))
+                    continue;
+
             if (read_concepts || read_individuals || read_prefixes || read_roles || read_abducibles){
                 if (new_line.equals("}")){
                     read_prefixes = false;
