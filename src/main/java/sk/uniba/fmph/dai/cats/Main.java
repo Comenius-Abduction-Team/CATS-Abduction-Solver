@@ -1,9 +1,6 @@
 package sk.uniba.fmph.dai.cats;
 
-import sk.uniba.fmph.dai.abduction_api.abducer.IAbducer;
-import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
-import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.abduction_api.monitor.Percentage;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
@@ -12,7 +9,7 @@ import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ConsoleExplanationManager;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.MxpSolver;
-import sk.uniba.fmph.dai.cats.api_implementation.CatsAbductionFactory;
+import sk.uniba.fmph.dai.cats.api_implementation.CatsAbducer;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
@@ -26,12 +23,11 @@ import sk.uniba.fmph.dai.cats.reasoner.*;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static final boolean TESTING = false;
+    private static final boolean TESTING = true;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
@@ -65,34 +61,27 @@ public class Main {
 
         Configuration.PRINT_PROGRESS = true;
 
-        CatsAbductionFactory factory = CatsAbductionFactory.getFactory();
-
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        File file = new File("files/testExtractingModel9_1.owl");
-        OWLOntology ont = ontologyManager.loadOntologyFromOntologyDocument(file);
+        File file = new File("files/toothache.rdf");
+        OWLOntology backgroundKnowledge = ontologyManager.loadOntologyFromOntologyDocument(file);
 
         OWLDataFactory dataFactory = ontologyManager.getOWLDataFactory();
-        String prefix = "http://www.co-ode.org/ontologies/ont.owl#";
+        String prefix = "http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#";
+
         PrefixManager pm = new DefaultPrefixManager(prefix);
-        OWLClass A = dataFactory.getOWLClass(":A", pm);
-        OWLClass C = dataFactory.getOWLClass(":C", pm);
-        OWLClass E = dataFactory.getOWLClass(":E", pm);
-        OWLNamedIndividual a = dataFactory.getOWLNamedIndividual(":a", pm);
-        OWLClassAssertionAxiom classAssertion = dataFactory.getOWLClassAssertionAxiom(
-                dataFactory.getOWLObjectIntersectionOf(A,C,E), a);
 
-        ISymbolAbducibles abducibles = factory.getSymbolAbducibles();
-        abducibles.add(A);
-        abducibles.add(C);
+        OWLClass toothache = dataFactory.getOWLClass(":Toothache", pm);
+        OWLNamedIndividual john = dataFactory.getOWLNamedIndividual(":john", pm);
 
-        IAbducer abducer = factory.getAbducer(ont, Collections.singleton(classAssertion));
-        abducer.setSolverSpecificParameters("");
+        OWLClassAssertionAxiom observation = dataFactory.getOWLClassAssertionAxiom(toothache, john);
 
-        IThreadAbducer threadAbducer = (IThreadAbducer) abducer;
-        AbductionMonitor monitor = threadAbducer.getAbductionMonitor();
+        CatsAbducer abducer = new CatsAbducer(backgroundKnowledge, observation);
+        abducer.setAlgorithm(Algorithm.MXP);
+
+        AbductionMonitor monitor = abducer.getAbductionMonitor();
         monitor.setWaitLimit(1000);
 
-        Thread thread = new Thread(threadAbducer);
+        Thread thread = new Thread(abducer);
         thread.start();
 
         while(true){
@@ -101,8 +90,8 @@ public class Main {
                     monitor.wait();
 
                     if (monitor.areNewExplanationsAvailable()){
-                        Set<IExplanation> expl = monitor.getUnprocessedExplanations();
-                        System.out.println(expl);
+                        Set<IExplanation> newExplanations = monitor.getUnprocessedExplanations();
+                        System.out.println(newExplanations);
                         monitor.markExplanationsAsProcessed();
                         monitor.clearExplanations();
                     }
@@ -110,7 +99,7 @@ public class Main {
                     if (monitor.isNewProgressAvailable()){
                         Percentage progress = monitor.getProgressPercentage();
                         String message = monitor.getStatusMessage();
-                        System.out.println(progress + "//" + message);
+                        System.out.println(progress + " | " + message);
                         monitor.markProgressAsProcessed();
                     }
 
@@ -127,13 +116,13 @@ public class Main {
             }
 
         }
-        System.out.println("EXPLANATIONS FOUND: " + threadAbducer.getExplanations());
+        System.out.println("EXPLANATIONS FOUND: " + abducer.getExplanations());
 
-        System.out.println("-----------------------------------------");
-        System.out.println("OUTPUT MESSAGE: " + threadAbducer.getOutputMessage());
-        System.out.println("-----------------------------------------");
-        System.out.println("FULL LOG:");
-        System.out.println(threadAbducer.getFullLog());
+//        System.out.println("-----------------------------------------");
+//        System.out.println("OUTPUT MESSAGE: " + abducer.getOutputMessage());
+//        System.out.println("-----------------------------------------");
+//        System.out.println("FULL LOG:");
+//        System.out.println(abducer.getFullLog());
     }
 
     public static ISolver runSolving(String[] args, ThreadTimes threadTimes) throws Exception {
