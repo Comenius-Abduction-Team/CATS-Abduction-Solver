@@ -7,7 +7,7 @@ import sk.uniba.fmph.dai.cats.models.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
+import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.*;
 
@@ -21,9 +21,9 @@ public class HstHybridSolver extends HybridSolver {
     //MIN
     int globalMin;
 
-    public HstHybridSolver(ThreadTimes threadTimes, IExplanationManager explanationManager,
-                        IProgressManager progressManager, IPrinter printer){
-        super(threadTimes, explanationManager, progressManager, printer);
+    public HstHybridSolver(ThreadTimer timer, IExplanationManager explanationManager,
+                           IProgressManager progressManager, IPrinter printer){
+        super(timer, explanationManager, progressManager, printer);
     }
 
     @Override

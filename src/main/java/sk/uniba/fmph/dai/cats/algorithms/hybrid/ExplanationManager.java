@@ -94,13 +94,13 @@ public abstract class ExplanationManager implements IExplanationManager {
         StringBuilder result = showExplanationsAccordingToLength(filteredExplanations);
         printer.print(result.toString());
         if (Configuration.LOGGING)
-            FileLogger.appendToFile(FileLogger.FINAL_LOG__PREFIX, solver.currentTimeMillis, result.toString());
+            FileLogger.appendToFile(FileLogger.FINAL_LOG__PREFIX, solver.startTime, result.toString());
 
         logExplanationsTimes(finalExplanations);
 
         if(Configuration.ALGORITHM.usesMxp()){
             StringBuilder resultLevel = showExplanationsAccordingToLevel(new ArrayList<>(finalExplanations));
-            FileLogger.appendToFile(FileLogger.LEVEL_LOG___PREFIX, solver.currentTimeMillis, resultLevel.toString());
+            FileLogger.appendToFile(FileLogger.LEVEL_LOG___PREFIX, solver.startTime, resultLevel.toString());
         }
     }
 
@@ -126,7 +126,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);
 
-        FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, solver.currentTimeMillis, result.toString());
+        FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, solver.startTime, result.toString());
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class ExplanationManager implements IExplanationManager {
             result.append("\n\n").append(message);
         }
 
-        FileLogger.appendToFile(FileLogger.INFO_LOG__PREFIX, solver.currentTimeMillis, result.toString());
+        FileLogger.appendToFile(FileLogger.INFO_LOG__PREFIX, solver.startTime, result.toString());
     }
 
 
@@ -167,7 +167,7 @@ public abstract class ExplanationManager implements IExplanationManager {
             depth++;
         }
 
-        String line = String.format("%.2f", solver.threadTimes.getTotalUserTimeInSec());
+        String line = String.format("%.2f", solver.timer.getTotalUserTimeInSec());
         printer.print(line);
         result.append(line);
 
@@ -187,7 +187,7 @@ public abstract class ExplanationManager implements IExplanationManager {
             result.append(line);
             level++;
         }
-        String line = String.format("%.2f", solver.threadTimes.getTotalUserTimeInSec());
+        String line = String.format("%.2f", solver.timer.getTotalUserTimeInSec());
         result.append(line);
         return result;
     }
@@ -244,7 +244,7 @@ public abstract class ExplanationManager implements IExplanationManager {
             String line = String.format("%.2f; %s\n", exp.getAcquireTime(), exp);
             result.append(line);
         }
-        FileLogger.appendToFile(FileLogger.EXP_TIMES_LOG__PREFIX, solver.currentTimeMillis, result.toString());
+        FileLogger.appendToFile(FileLogger.EXP_TIMES_LOG__PREFIX, solver.startTime, result.toString());
     }
 
 
@@ -294,7 +294,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
         String line = String.format("%d; %d; %.2f%s%s; { %s }\n", depth, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, solver.currentTimeMillis, line);
+        FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, solver.startTime, line);
     }
 
     @Override
@@ -304,7 +304,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getLevel().equals(level)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
         String line = String.format("%d; %d; %.2f%s%s; { %s }\n", level, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LEVEL_LOG__PREFIX, solver.currentTimeMillis, line);
+        FileLogger.appendToFile(FileLogger.PARTIAL_LEVEL_LOG__PREFIX, solver.startTime, line);
     }
 
     public List<Explanation> getFinalExplanations() {
