@@ -42,7 +42,7 @@ public class HybridSolver implements ISolver {
     protected int lastUsableModelIndex;
     public OWLAxiom negObservation;
     public ThreadTimes threadTimes;
-    public long currentTimeMillis;
+    public long startTime;
     public Map<Integer, Double> levelTimes = new HashMap<>();
     public boolean checkingMinimalityWithQXP = false;
     protected IRuleChecker ruleChecker;
@@ -65,7 +65,7 @@ public class HybridSolver implements ISolver {
         this.progressManager = progressManager;
 
         this.threadTimes = threadTimes;
-        this.currentTimeMillis = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
     }
 
     public IExplanationManager getExplanationManager(){
@@ -457,7 +457,7 @@ public class HybridSolver implements ISolver {
         if (reuseIndex >= 0){
             if(isRoot){
                 modelNode.data = negModels.get(reuseIndex).data;
-                modelNode.label = new LinkedList<>();
+                modelNode.label = new ArrayList<>();
                 modelNode.depth = 0;
             } else {
                 modelNode.label = explanation.getAxioms();
@@ -558,7 +558,6 @@ public class HybridSolver implements ISolver {
 
         Set<OWLAxiom> copy = new HashSet<>();
 
-
         List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
 
         for (OWLAxiom a : abducibleAxioms.getAxioms()){
@@ -580,9 +579,6 @@ public class HybridSolver implements ISolver {
     protected Conflict findConflicts(Set<OWLAxiom> axioms) {
 
         path.remove(negObservation);
-
-        // ???
-
 
         if (isTimeout()) {
             return new Conflict(new HashSet<>(), new ArrayList<>());
