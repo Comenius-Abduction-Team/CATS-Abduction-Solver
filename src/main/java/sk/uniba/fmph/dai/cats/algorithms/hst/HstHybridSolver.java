@@ -131,7 +131,7 @@ public class HstHybridSolver extends HybridSolver {
                         return;
                     }
                     if(!Configuration.ALGORITHM.usesMxp()){
-                        if(!isOntologyConsistent()){
+                        if(!isOntologyConsistent(abducibles)){
                             explanation.setDepth(explanation.getAxioms().size());
                             explanationManager.addPossibleExplanation(explanation);
                             path.clear();
@@ -156,7 +156,7 @@ public class HstHybridSolver extends HybridSolver {
                 else{
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
                 }
-                addNodeToTree(queue, explanation, model, index, reuseIndex);
+                addNodeToTree(abducibles, queue, explanation, model, index, reuseIndex);
             }
         }
         path.clear();
@@ -181,8 +181,8 @@ public class HstHybridSolver extends HybridSolver {
         }
     }
 
-    private void addNodeToTree(Queue<TreeNode> queue, Explanation explanation, ModelNode parent, int index, int reuseIndex){
-        ModelNode newNode = createModelNodeFromExistingModel(false, explanation, parent.depth + 1, reuseIndex);
+    private void addNodeToTree(INumberedAbducibles abducibles, Queue<TreeNode> queue, Explanation explanation, ModelNode parent, int index, int reuseIndex){
+        ModelNode newNode = createModelNodeFromExistingModel(abducibles, explanation, parent.depth + 1, reuseIndex);
         if(newNode == null){
             path.clear();
             return;
@@ -197,6 +197,19 @@ public class HstHybridSolver extends HybridSolver {
         queue.add(newNode);
         numberOfNodes++;
         path.clear();
+    }
+
+    private ModelNode createModelNodeFromExistingModel(INumberedAbducibles abducibles, Explanation explanation, Integer depth, int reuseIndex){
+
+        if (abducibles.areAllAbduciblesIndexed()){
+
+            ModelNode node = new ModelNode();
+            node.label = explanation.getAxioms();
+            node.depth = depth;
+            return node;
+        }
+
+        return createModelNodeFromExistingModel(false,explanation,depth,reuseIndex);
     }
 
     @Override
@@ -235,27 +248,10 @@ public class HstHybridSolver extends HybridSolver {
                 child.equals(loader.getObservation().getOwlAxiom());
     }
 
-//    @Override
-//    protected List<Explanation> findExplanations(){
-//        AxiomSet copy = new AxiomSet();
-//
-//        List<OWLAxiom> lengthOneExplanations = explanationManager.getLengthOneExplanations();
-//
-//        for (OWLAxiom a : abducibleAxioms.getAxioms()){
-//            if (path.contains(a))
-//                continue;
-//            if (lengthOneExplanations.contains(a))
-//                continue;
-//            copy.add(a);
-//        }
-//
-//        if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
-//            setDivider.setIndexesOfExplanations(
-//                    explanationManager.getPossibleExplanationsSize());
-//        }
-//        Conflict conflict = findConflicts(copy);
-//
-//        return conflict.getExplanations();
-//    }
+    protected boolean isOntologyConsistent(INumberedAbducibles abducibles){
+        if (abducibles.areAllAbduciblesIndexed())
+            return modelExtractor.isOntologyConsistentWithPath();
+        return isOntologyConsistent();
+    }
 
 }
