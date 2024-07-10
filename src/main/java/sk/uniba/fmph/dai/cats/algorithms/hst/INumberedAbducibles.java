@@ -11,4 +11,6 @@ public interface INumberedAbducibles extends IAbducibleAxioms {
 
     OWLAxiom getAxiomByIndex(int index);
 
+    boolean areAllAbduciblesIndexed();
+
 }

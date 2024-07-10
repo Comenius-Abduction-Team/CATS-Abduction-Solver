@@ -1,7 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.models.AxiomSet;
 
 import java.util.*;
 
@@ -31,17 +30,6 @@ public class NumberedAxiomsMap implements INumberedAbducibles {
         axioms.forEach(this::add);
     }
 
-//    @Override
-//    public void addAll(IAxioms axioms) {
-//        axioms.toSet().forEach(this::add);
-//    }
-
-//    @Override
-//    public void set(Collection<OWLAxiom> axioms) {
-//        this.axioms = new HashMap<>();
-//        addAll(axioms);
-//    }
-
     public void remove(OWLAxiom axiom) {
         Integer index = axiomToIndex.get(axiom);
         if (index == null)
@@ -54,51 +42,9 @@ public class NumberedAxiomsMap implements INumberedAbducibles {
         axioms.forEach(this::remove);
     }
 
-//    @Override
-//    public void removeAll(IAxioms axioms) {
-//        this.axioms.keySet().removeAll(axioms.toSet());
-//    }
-
     public boolean contains(OWLAxiom axiom) {
         return axiomToIndex.containsKey(axiom);
     }
-
-    @Override
-    public AxiomSet getAsAxiomSet() {
-        return new AxiomSet(getAxioms());
-    }
-
-//    @Override
-//    public boolean containsAll(Collection<OWLAxiom> axioms) {
-//        return this.axioms.keySet().containsAll(axioms);
-//    }
-
-//    @Override
-//    public boolean containsAll(IAxioms axioms) {
-//        return this.axioms.keySet().containsAll(axioms.toSet());
-//    }
-
-//    @Override
-//    public int size() {
-//        return axioms.size();
-//    }
-//
-//    @Override
-//    public boolean isEmpty() {
-//        return axioms.isEmpty();
-//    }
-
-//    @Override
-//    public IAxioms copy() {
-//        NumberedAxioms copy = new NumberedAxioms();
-//        axioms.forEach(copy::addAxiom);
-//        return copy;
-//    }
-
-//    @Override
-//    public Stream<OWLAxiom> stream() {
-//        return axioms.keySet().stream();
-//    }
 
     public Integer getIndex(OWLAxiom axiom){
         return axiomToIndex.get(axiom);
@@ -127,5 +73,13 @@ public class NumberedAxiomsMap implements INumberedAbducibles {
     @Override
     public int size() {
         return axiomToIndex.size();
+    }
+
+    @Override
+    public boolean areAllAbduciblesIndexed() {
+        for (OWLAxiom axiom : axiomToIndex.keySet())
+            if (shouldBeIndexed(axiom))
+                return false;
+        return true;
     }
 }

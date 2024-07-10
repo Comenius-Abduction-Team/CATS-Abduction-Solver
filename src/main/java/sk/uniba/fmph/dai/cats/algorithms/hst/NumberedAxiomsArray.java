@@ -1,7 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.models.AxiomSet;
 
 import java.util.*;
 
@@ -46,51 +45,9 @@ public class NumberedAxiomsArray implements INumberedAbducibles {
         axioms.forEach(this::remove);
     }
 
-//    @Override
-//    public void removeAll(IAxioms axioms) {
-//        this.axioms.keySet().removeAll(axioms.toSet());
-//    }
-
     public boolean contains(OWLAxiom axiom) {
         return axiomToIndex.containsKey(axiom);
     }
-
-    @Override
-    public AxiomSet getAsAxiomSet() {
-        return new AxiomSet(getAxioms());
-    }
-
-//    @Override
-//    public boolean containsAll(Collection<OWLAxiom> axioms) {
-//        return this.axioms.keySet().containsAll(axioms);
-//    }
-
-//    @Override
-//    public boolean containsAll(IAxioms axioms) {
-//        return this.axioms.keySet().containsAll(axioms.toSet());
-//    }
-
-//    @Override
-//    public int size() {
-//        return axioms.size();
-//    }
-//
-//    @Override
-//    public boolean isEmpty() {
-//        return axioms.isEmpty();
-//    }
-
-//    @Override
-//    public IAxioms copy() {
-//        NumberedAxioms copy = new NumberedAxioms();
-//        axioms.forEach(copy::addAxiom);
-//        return copy;
-//    }
-
-//    @Override
-//    public Stream<OWLAxiom> stream() {
-//        return axioms.keySet().stream();
-//    }
 
     public Integer getIndex(OWLAxiom axiom){
         return axiomToIndex.get(axiom);
@@ -122,5 +79,14 @@ public class NumberedAxiomsArray implements INumberedAbducibles {
     @Override
     public int size() {
         return max;
+    }
+
+    @Override
+    public boolean areAllAbduciblesIndexed() {
+        for (int i = 0; i < max; i++) {
+            if (indexToAxiom[i] == null)
+                return false;
+        }
+        return true;
     }
 }
