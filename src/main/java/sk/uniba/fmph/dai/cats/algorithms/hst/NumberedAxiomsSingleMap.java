@@ -1,13 +1,12 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.models.AxiomSet;
 
 import java.util.*;
 
 public class NumberedAxiomsSingleMap implements INumberedAbducibles {
 
-    public static final Integer DEFAULT_INDEX = -100;
+    public static final int DEFAULT_INDEX = -100;
 
     Map<OWLAxiom, Integer> axiomToIndex = new HashMap<>();
 
@@ -36,11 +35,6 @@ public class NumberedAxiomsSingleMap implements INumberedAbducibles {
         return axiomToIndex.containsKey(axiom);
     }
 
-    @Override
-    public AxiomSet getAsAxiomSet() {
-        return new AxiomSet(axiomToIndex.keySet());
-    }
-
     public Integer getIndex(OWLAxiom axiom){
         return axiomToIndex.get(axiom);
     }
@@ -64,11 +58,19 @@ public class NumberedAxiomsSingleMap implements INumberedAbducibles {
 
     @Override
     public boolean shouldBeIndexed(OWLAxiom axiom) {
-        return (DEFAULT_INDEX.equals(getIndex(axiom)));
+        return (DEFAULT_INDEX == getIndex(axiom));
     }
 
     @Override
     public int size() {
         return axiomToIndex.size();
+    }
+
+    @Override
+    public boolean areAllAbduciblesIndexed() {
+        for (OWLAxiom axiom : axiomToIndex.keySet())
+            if (shouldBeIndexed(axiom))
+                return false;
+        return true;
     }
 }

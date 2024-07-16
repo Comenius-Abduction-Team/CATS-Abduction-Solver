@@ -1,27 +1,28 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.models.AxiomSet;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.*;
 
 public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 
-    Set<OWLAxiom> unindexed = new HashSet<>();
+    private final Set<OWLAxiom> unindexed = new HashSet<>();
+    private int unindexedSize;
 
-    OWLAxiom[] indexToAxiom;
+    private final OWLAxiom[] indexToAxiom;
 
     private final int max;
 
     public NumberedAxiomsUnindexedSet(Collection<OWLAxiom> owlAxioms) {
         addAll(owlAxioms);
-        max = owlAxioms.size();
+        max = unindexedSize = owlAxioms.size();
         indexToAxiom = new OWLAxiom[max];
     }
 
     @Override
     public Set<OWLAxiom> getAxioms() {
-        if (unindexed.size() == max)
+        if (unindexedSize == max)
             return new HashSet<>(unindexed);
         Set<OWLAxiom> result = new HashSet<>(unindexed);
         for (int i = 0; i < max; i++) {
@@ -33,11 +34,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
         return result;
     }
 
-    public void add(OWLAxiom axiom) {
-        unindexed.add(axiom);
-    }
-
-    public void addAll(Collection<OWLAxiom> axioms) {
+    private void addAll(Collection<OWLAxiom> axioms) {
         unindexed.addAll(axioms);
     }
 
@@ -47,11 +44,29 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
             throw new IndexOutOfBoundsException("Index " + index + "out of bounds of the numbered axioms.");
         indexToAxiom[index-1] = axiom;
         unindexed.remove(axiom);
+        unindexedSize--;
     }
 
     @Override
     public String toString() {
-        return unindexed.toString();
+        StringBuilder builder = new StringBuilder("{ ");
+        for (int i = 0; i < max; i++) {
+            OWLAxiom axiom = indexToAxiom[i];
+            if (axiom == null)
+                continue;
+
+            builder.append(i);
+            builder.append(" -> ");
+            builder.append(StringFactory.getRepresentation(axiom));
+            builder.append("; ");
+        }
+        for (OWLAxiom axiom : unindexed){
+            builder.append(StringFactory.getRepresentation(axiom));
+            builder.append("; ");
+        }
+        builder.append(" }");
+
+        return builder.toString();
     }
 
     @Override
@@ -68,7 +83,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 
     private boolean indexedContains(OWLAxiom axiom){
         for (int i = 0; i < max; i++) {
-            if (indexToAxiom[i] != null && indexToAxiom[i].equals(axiom))
+            if (axiom.equals(indexToAxiom[i]))
                 return true;
         }
         return false;
@@ -85,7 +100,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
     }
 
     @Override
-    public AxiomSet getAsAxiomSet() {
-        return new AxiomSet(getAxioms());
+    public boolean areAllAbduciblesIndexed() {
+        return unindexedSize == 0;
     }
 }

@@ -11,7 +11,7 @@ import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
 import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
+import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.*;
 
@@ -41,17 +41,16 @@ public class HybridSolver implements ISolver {
     public Abducibles abducibles;
     protected int lastUsableModelIndex;
     public OWLAxiom negObservation;
-    public ThreadTimes threadTimes;
-    public long currentTimeMillis;
+    public final ThreadTimer timer;
+    public final long startTime;
     public Map<Integer, Double> levelTimes = new HashMap<>();
     public boolean checkingMinimalityWithQXP = false;
     protected IRuleChecker ruleChecker;
     protected int currentDepth = 0;
-    protected int globalMin;
 
     protected int numberOfNodes = 0;
 
-    public HybridSolver(ThreadTimes threadTimes,
+    public HybridSolver(ThreadTimer timer,
                         IExplanationManager explanationManager, IProgressManager progressManager, IPrinter printer) {
 
         String info = String.join("\n", getInfo());
@@ -64,8 +63,8 @@ public class HybridSolver implements ISolver {
 
         this.progressManager = progressManager;
 
-        this.threadTimes = threadTimes;
-        this.currentTimeMillis = System.currentTimeMillis();
+        this.timer = timer;
+        this.startTime = System.currentTimeMillis();
     }
 
     public IExplanationManager getExplanationManager(){
@@ -144,7 +143,7 @@ public class HybridSolver implements ISolver {
     protected void makeErrorAndPartialLog(Throwable e) {
         explanationManager.logError(e);
 
-        Double time = threadTimes.getTotalUserTimeInSec();
+        Double time = timer.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, false, true, time);
         if(Configuration.ALGORITHM.usesMxp()){
@@ -372,13 +371,13 @@ public class HybridSolver implements ISolver {
         Explanation explanation = new Explanation();
         explanation.addAxioms(model.label);
         explanation.addAxiom(child);
-        explanation.setAcquireTime(threadTimes.getTotalUserTimeInSec());
+        explanation.setAcquireTime(timer.getTotalUserTimeInSec());
         explanation.setLevel(currentDepth);
         return explanation;
     }
 
     protected void makePartialLog() {
-        Double time = threadTimes.getTotalUserTimeInSec();
+        Double time = timer.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, false, false, time);
         if(Configuration.ALGORITHM.usesMxp()){
@@ -457,7 +456,7 @@ public class HybridSolver implements ISolver {
         if (reuseIndex >= 0){
             if(isRoot){
                 modelNode.data = negModels.get(reuseIndex).data;
-                modelNode.label = new LinkedList<>();
+                modelNode.label = new ArrayList<>();
                 modelNode.depth = 0;
             } else {
                 modelNode.label = explanation.getAxioms();
@@ -476,7 +475,7 @@ public class HybridSolver implements ISolver {
         if (node.depth > currentDepth){
             makePartialLog();
             if (Configuration.PRINT_PROGRESS)
-                progressManager.updateProgress(currentDepth, threadTimes.getTotalUserTimeInSec());
+                progressManager.updateProgress(currentDepth, timer.getTotalUserTimeInSec());
             if (Configuration.DEBUG_PRINT)
                 System.out.println("NUMBER OF NODES: " + numberOfNodes);
             numberOfNodes = 0;
@@ -486,14 +485,14 @@ public class HybridSolver implements ISolver {
     }
 
     protected boolean isTimeout(){
-        if (Configuration.TIMEOUT > 0 && threadTimes.getTotalUserTimeInSec() > Configuration.TIMEOUT) {
+        if (Configuration.TIMEOUT > 0 && timer.getTotalUserTimeInSec() > Configuration.TIMEOUT) {
             return true;
         }
         return false;
     }
 
     protected void makeTimeoutPartialLog() {
-        Double time = threadTimes.getTotalUserTimeInSec();
+        Double time = timer.getTotalUserTimeInSec();
         levelTimes.put(currentDepth, time);
         explanationManager.logExplanationsWithDepth(currentDepth, true, false, time);
         if(Configuration.ALGORITHM.usesMxp()){
@@ -558,7 +557,6 @@ public class HybridSolver implements ISolver {
 
         Set<OWLAxiom> copy = new HashSet<>();
 
-
         List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
 
         for (OWLAxiom a : abducibleAxioms.getAxioms()){
@@ -581,9 +579,6 @@ public class HybridSolver implements ISolver {
 
         path.remove(negObservation);
 
-        // ???
-
-
         if (isTimeout()) {
             return new Conflict(new HashSet<>(), new ArrayList<>());
         }
@@ -600,7 +595,7 @@ public class HybridSolver implements ISolver {
         // if |C| = 1 then return [∅, {C}];
         if (axioms.size() == 1) {
             List<Explanation> explanations = new ArrayList<>();
-            explanations.add(new Explanation(axioms, axioms.size(), currentDepth, threadTimes.getTotalUserTimeInSec()));
+            explanations.add(new Explanation(axioms, axioms.size(), currentDepth, timer.getTotalUserTimeInSec()));
             return new Conflict(new HashSet<>(), explanations);
         }
 
@@ -645,7 +640,7 @@ public class HybridSolver implements ISolver {
 
             if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
-                    progressManager.updateProgress(currentDepth, threadTimes.getTotalUserTimeInSec());
+                    progressManager.updateProgress(currentDepth, timer.getTotalUserTimeInSec());
 
             if (isTimeout()) break;
 
@@ -709,7 +704,7 @@ public class HybridSolver implements ISolver {
 
         // if |C| = 1 then return C;
         if (literals.size() == 1) {
-            return new Explanation(literals, 1, currentDepth, threadTimes.getTotalUserTimeInSec());
+            return new Explanation(literals, 1, currentDepth, timer.getTotalUserTimeInSec());
         }
 
         // Split C into disjoint, non-empty sets
@@ -727,7 +722,7 @@ public class HybridSolver implements ISolver {
         conflicts.addAll(D1.getAxioms());
         conflicts.addAll(D2.getAxioms());
 
-        return new Explanation(conflicts, conflicts.size(), currentDepth, threadTimes.getTotalUserTimeInSec());
+        return new Explanation(conflicts, conflicts.size(), currentDepth, timer.getTotalUserTimeInSec());
     }
 
     protected int findReuseIndex(){

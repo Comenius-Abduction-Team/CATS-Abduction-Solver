@@ -62,8 +62,4 @@ public class AxiomSet implements IAbducibleAxioms {
         return axioms.contains(axiom);
     }
 
-    @Override
-    public AxiomSet getAsAxiomSet() {
-        return this;
-    }
 }

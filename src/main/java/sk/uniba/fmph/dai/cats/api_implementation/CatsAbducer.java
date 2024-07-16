@@ -20,7 +20,7 @@ import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimes;
+import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ public class CatsAbducer implements IThreadAbducer {
     HybridSolver solver;
     ApiLoader loader;
     ReasonerManager reasonerManager;
-    ThreadTimes timer;
+    ThreadTimer timer;
 
     public CatsAbducer() {
 
@@ -213,7 +213,7 @@ public class CatsAbducer implements IThreadAbducer {
         ApiExplanationManager explanationManager = new ApiExplanationManager(loader, reasonerManager, this);
         ApiProgressManager progressManager = new ApiProgressManager(this);
 
-        timer = new ThreadTimes(100);
+        timer = new ThreadTimer(100);
         timer.start();
 
         setSolverConfiguration();
