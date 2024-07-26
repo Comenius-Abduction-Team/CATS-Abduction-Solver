@@ -130,26 +130,23 @@ public class HstHybridSolver extends HybridSolver {
                         makeTimeoutPartialLog();
                         return;
                     }
-                    if(!Configuration.ALGORITHM.usesMxp()){
+                    if (Configuration.ALGORITHM.usesMxp()){
+                        {
+                            boolean newExplanationsFound = addNewExplanations();
+                            if (!newExplanationsFound)
+                                continue;
+                            if (isTimeout()) {
+                                makeTimeoutPartialLog();
+                                return;
+                            }
+                        }
+                    }
+                    else {
                         if(!isOntologyConsistent(abducibles)){
                             explanation.setDepth(explanation.getAxioms().size());
                             explanationManager.addPossibleExplanation(explanation);
                             path.clear();
                             continue;
-                        }
-                    } else {
-                        if (!addNewExplanations()){
-                            path.clear();
-                            if (isTimeout()) {
-                                makeTimeoutPartialLog();
-                                //System.out.println("PRUNED BY MHS-MXP");
-                                return;
-                            }
-                            continue;
-                        }
-                        if (isTimeout()) {
-                            makeTimeoutPartialLog();
-                            return;
                         }
                     }
                 }
@@ -187,10 +184,7 @@ public class HstHybridSolver extends HybridSolver {
             path.clear();
             return;
         }
-        if(Configuration.ALGORITHM.usesMxp()){
-            newNode.addLengthOneExplanationsFromNode(parent);
-            newNode.addLengthOneExplanations(explanationManager.getLengthOneExplanations());
-        }
+
         newNode.index = index;
         newNode.parentIndex = parent.index;
 

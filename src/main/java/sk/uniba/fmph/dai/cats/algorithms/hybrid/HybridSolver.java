@@ -432,10 +432,6 @@ public class HybridSolver implements ISolver {
             path.clear();
             return;
         }
-        if(Configuration.ALGORITHM.usesMxp()){
-            newNode.addLengthOneExplanationsFromNode(parent);
-            newNode.addLengthOneExplanations(explanationManager.getLengthOneExplanations());
-        }
 
         queue.add(newNode);
         numberOfNodes++;
