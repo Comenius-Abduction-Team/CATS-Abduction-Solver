@@ -1,8 +1,11 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
+import sk.uniba.fmph.dai.cats.algorithms.ITreeNode;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.*;
+import sk.uniba.fmph.dai.cats.algorithms.rctree.Model;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.models.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
@@ -19,7 +22,7 @@ import java.util.*;
 public class HstHybridSolver extends HybridSolver {
 
     //MIN
-    int globalMin;
+    int globalMin, currentChildIndex;
 
     public HstHybridSolver(ThreadTimer timer, IExplanationManager explanationManager,
                            IProgressManager progressManager, IPrinter printer){
@@ -33,7 +36,7 @@ public class HstHybridSolver extends HybridSolver {
         addNegatedObservation();
 
         abducibleAxioms = new NumberedAxiomsUnindexedSet(createAbducibleAxioms());
-        modelExtractor.initialiseAbducibles();
+        modelManager.setExtractor(new ModelExtractor(this, abducibleAxioms));
 
         //Initially, MIN is set to |COMP|
         globalMin = abducibleAxioms.size();
@@ -43,8 +46,9 @@ public class HstHybridSolver extends HybridSolver {
     protected void startSolving() throws OWLOntologyCreationException {
         currentDepth = 0;
 
-        Queue<TreeNode> queue = new ArrayDeque<>();
-        ModelNode root = createRoot();
+        Queue<ITreeNode> queue = new ArrayDeque<>();
+
+        HstTreeNode root = (HstTreeNode) createRoot();
         if (root == null)
             return;
 
@@ -59,44 +63,53 @@ public class HstHybridSolver extends HybridSolver {
         }
 
         while (!queue.isEmpty()) {
-            TreeNode node = queue.poll();
+
+            HstTreeNode node = (HstTreeNode) queue.poll();
 
             if(increaseDepth(node)){
                 currentDepth++;
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("----------CURRENT DEPTH: " + currentDepth);
             }
-            if(isTimeout() || !ModelNode.class.isAssignableFrom(node.getClass())){
+            if(isTimeout()){
                 makeTimeoutPartialLog();
                 break;
             }
 
-            ModelNode model = (ModelNode) node;
-            if (depthLimitReached(model)) {
+            if (depthLimitReached(node)) {
                 break;
             }
 
-            //System.out.println("IDEME SPRACOVAT VRCHOL ID " + model.id + "s indexom " + model.index);
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("*********\n" + "PROCESSING node: "
+                        + node.index + ". "
+                        + StringFactory.getRepresentation(node.model.getNegatedData()));
 
             NumberedAxiomsUnindexedSet abducibles = (NumberedAxiomsUnindexedSet) abducibleAxioms;
 
             if (globalMin > 0)
-                indexAxiomsFromModel(model, abducibles);
+                indexAxiomsFromModel(node, abducibles);
 
             //Let min(v) be MIN + 1
-            model.min = globalMin + 1;
+            node.min = globalMin + 1;
 
             // If i(v) > min(v) create a new array ranging over min(v), . . . , i(v)−1.
             // Otherwise, let mark(v) = × and create no child nodes for v.
 
-            if (model.index <= model.min){
+            if (node.index <= node.min){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println(node.index + " <= " + node.min + " , closing");
                 continue;
             }
 
-            for (int index = model.min; index < model.index; index++){
-                //for (int index = model.index-1; index >= model.min; index--){
+            for (int index = node.min; index < node.index; index++){
+
+                currentChildIndex = index;
 
                 OWLAxiom child = abducibles.getAxiomByIndex(index);
+
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("TRYING EDGE: " + index + ". " + StringFactory.getRepresentation(child));
 
                 if (child == null)
                     continue;
@@ -106,11 +119,11 @@ public class HstHybridSolver extends HybridSolver {
                     return;
                 }
 
-                if(isIncorrectPath(model, child)){
+                if(isIncorrectPath(node, child)){
                     continue;
                 }
 
-                Explanation explanation = createPossibleExplanation(model, child);
+                Explanation explanation = createPossibleExplanation(node, child);
                 //explanation.setLevel(currentDepth + 1);
 
                 path = new HashSet<>(explanation.getAxioms());
@@ -142,7 +155,7 @@ public class HstHybridSolver extends HybridSolver {
                         }
                     }
                     else {
-                        if(!isOntologyConsistent(abducibles)){
+                        if(!checkConsistency(abducibles)){
                             explanation.setDepth(explanation.getAxioms().size());
                             explanationManager.addPossibleExplanation(explanation);
                             path.clear();
@@ -153,7 +166,7 @@ public class HstHybridSolver extends HybridSolver {
                 else{
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
                 }
-                addNodeToTree(abducibles, queue, explanation, model, index, reuseIndex);
+                addNodeToTree(queue, explanation, node);
             }
         }
         path.clear();
@@ -163,8 +176,8 @@ public class HstHybridSolver extends HybridSolver {
         currentDepth = 0;
     }
 
-    private void indexAxiomsFromModel(ModelNode model, INumberedAbducibles abducibles){
-        for (OWLAxiom child : model.data){
+    private void indexAxiomsFromModel(TreeNode node, INumberedAbducibles abducibles){
+        for (OWLAxiom child : node.model.getNegatedData()){
             //For every component C in y with no previously defined index ci,
             // let ci(C) be MIN and decrement MIN afterwards.
             if (abducibles.shouldBeIndexed(child)){
@@ -178,32 +191,30 @@ public class HstHybridSolver extends HybridSolver {
         }
     }
 
-    private void addNodeToTree(INumberedAbducibles abducibles, Queue<TreeNode> queue, Explanation explanation, ModelNode parent, int index, int reuseIndex){
-        ModelNode newNode = createModelNodeFromExistingModel(abducibles, explanation, parent.depth + 1, reuseIndex);
-        if(newNode == null){
-            path.clear();
-            return;
-        }
+    @Override
+    protected ITreeNode createNodeFromExistingModel(boolean isRoot, Explanation explanation, Integer depth){
 
-        newNode.index = index;
-        newNode.parentIndex = parent.index;
+        INumberedAbducibles numAbducibles = (INumberedAbducibles) abducibleAxioms;
 
-        queue.add(newNode);
-        numberOfNodes++;
-        path.clear();
-    }
+        if (numAbducibles.areAllAbduciblesIndexed()){
 
-    private ModelNode createModelNodeFromExistingModel(INumberedAbducibles abducibles, Explanation explanation, Integer depth, int reuseIndex){
-
-        if (abducibles.areAllAbduciblesIndexed()){
-
-            ModelNode node = new ModelNode();
+            TreeNode node = createTreeNode();
             node.label = explanation.getAxioms();
             node.depth = depth;
+            node.model = new Model();
             return node;
         }
 
-        return createModelNodeFromExistingModel(false,explanation,depth,reuseIndex);
+        return super.createNodeFromExistingModel(isRoot, explanation, depth);
+    }
+
+    @Override
+    protected TreeNode createTreeNode() {
+        HstTreeNode node = new HstTreeNode();
+        node.index = currentChildIndex;
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("Creating node: " + node.index);
+        return node;
     }
 
     @Override
@@ -237,15 +248,15 @@ public class HstHybridSolver extends HybridSolver {
     }
 
     @Override
-    protected boolean isIncorrectPath(ModelNode model, OWLAxiom child){
+    protected boolean isIncorrectPath(TreeNode model, OWLAxiom child){
         return  model.label.contains(AxiomManager.getComplementOfOWLAxiom(loader, child)) ||
                 child.equals(loader.getObservation().getOwlAxiom());
     }
 
-    protected boolean isOntologyConsistent(INumberedAbducibles abducibles){
+    protected boolean checkConsistency(INumberedAbducibles abducibles){
         if (abducibles.areAllAbduciblesIndexed())
-            return modelExtractor.isOntologyConsistentWithPath();
-        return isOntologyConsistent();
+            return checkConsistency();
+        return checkConsistencyWithModelExtraction();
     }
 
 }

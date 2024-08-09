@@ -2,6 +2,8 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.algorithms.ISolver;
 import com.google.common.collect.Iterables;
+import sk.uniba.fmph.dai.cats.algorithms.ITreeNode;
+import sk.uniba.fmph.dai.cats.algorithms.rctree.ModelManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
@@ -25,21 +27,18 @@ public class HybridSolver implements ISolver {
     protected ILoader loader;
     protected IReasonerManager reasonerManager;
     protected IAbducibleAxioms abducibleAxioms;
-    protected ModelExtractor modelExtractor;
+    protected ModelManager modelManager;
     protected final IExplanationManager explanationManager;
     protected final IProgressManager progressManager;
     protected SetDivider setDivider;
     protected Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
 
     public OWLOntology ontology;
-    public List<ModelNode> models;
-    public List<ModelNode> negModels;
     public List<OWLAxiom> assertionsAxioms;
     public List<OWLAxiom> negAssertionsAxioms;
     public Set<OWLAxiom> path = new HashSet<>();
     public Set<OWLAxiom> pathDuringCheckingMinimality;
     public Abducibles abducibles;
-    protected int lastUsableModelIndex;
     public OWLAxiom negObservation;
     public final ThreadTimer timer;
     public final long startTime;
@@ -100,7 +99,8 @@ public class HybridSolver implements ISolver {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
         this.ontology = this.loader.getOriginalOntology();
-        this.modelExtractor = new ModelExtractor(loader, reasonerManager, this);
+        this.modelManager = new ModelManager();
+
         this.setDivider = new SetDivider(this);
         this.ruleChecker = new RuleChecker(loader, reasonerManager);
 
@@ -158,13 +158,10 @@ public class HybridSolver implements ISolver {
         addNegatedObservation();
 
         abducibleAxioms = new AxiomSet(createAbducibleAxioms());
-        modelExtractor.initialiseAbducibles();
+        modelManager.setExtractor(new ModelExtractor(this, abducibleAxioms));
     }
 
     protected void setupCollections(){
-        models = new ArrayList<>();
-        negModels = new ArrayList<>();
-
         assertionsAxioms = new ArrayList<>();
         negAssertionsAxioms = new ArrayList<>();
     }
@@ -237,8 +234,8 @@ public class HybridSolver implements ISolver {
 
         currentDepth = 0;
 
-        Queue<TreeNode> queue = new ArrayDeque<>();
-        ModelNode root = createRoot();
+        Queue<ITreeNode> queue = new ArrayDeque<>();
+        ITreeNode root = createRoot();
         if (root == null)
             return;
 
@@ -250,7 +247,7 @@ public class HybridSolver implements ISolver {
         }
 
         while (!queue.isEmpty()) {
-            TreeNode node = queue.poll();
+            TreeNode node = (TreeNode) queue.poll();
 
             if(increaseDepth(node)){
                 currentDepth++;
@@ -260,16 +257,15 @@ public class HybridSolver implements ISolver {
                 break;
             }
 
-            ModelNode model = (ModelNode) node;
-
             if (Configuration.DEBUG_PRINT)
-                System.out.println("*********\n" + "PROCESSING node: " + StringFactory.getRepresentation(model.data));
+                System.out.println("*********\n" + "PROCESSING node: "
+                        + StringFactory.getRepresentation(node.model.getNegatedData()));
 
-            if (depthLimitReached(model)) {
+            if (depthLimitReached(node)) {
                 break;
             }
 
-            for (OWLAxiom child : model.data){
+            for (OWLAxiom child : node.model.getNegatedData()){
 
                 if (child == null)
                     continue;
@@ -285,14 +281,14 @@ public class HybridSolver implements ISolver {
                 //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
                 //ak axiom nie je v abducibles
                 //nepokracujeme vo vetve
-                if(isIncorrectPath(model, child)){
+                if(isIncorrectPath(node, child)){
                     if (Configuration.DEBUG_PRINT)
                         System.out.println("INCORRECT PATH!");
                     continue;
                 }
 
                 //rovno pridame potencialne vysvetlenie
-                Explanation explanation = createPossibleExplanation(model, child);
+                Explanation explanation = createPossibleExplanation(node, child);
 
                 path = new HashSet<>(explanation.getAxioms());
 
@@ -304,12 +300,10 @@ public class HybridSolver implements ISolver {
                     continue;
                 }
 
-                int reuseIndex = -1;
-
                 if (Configuration.REUSE_OF_MODELS)
-                    reuseIndex = findReuseIndex();
+                    findReuseIndex();
 
-                if (reuseIndex == -1) {
+                if (!modelManager.canReuseModel()) {
 
                     if (Configuration.DEBUG_PRINT){
                         System.out.println("Model was not reused.");
@@ -320,7 +314,7 @@ public class HybridSolver implements ISolver {
                         return;
                     }
                     if(!Configuration.ALGORITHM.usesMxp()){
-                        if(!isOntologyConsistent()){
+                        if(!checkConsistencyWithModelExtraction()){
 
                             if (Configuration.DEBUG_PRINT){
                                 System.out.println("inconsistent ontology!");
@@ -352,7 +346,7 @@ public class HybridSolver implements ISolver {
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
                 }
 
-                addNodeToTree(queue, explanation, model, reuseIndex);
+                addNodeToTree(queue, explanation, node);
             }
         }
         path.clear();
@@ -363,13 +357,13 @@ public class HybridSolver implements ISolver {
         currentDepth = 0;
     }
 
-    protected boolean depthLimitReached(ModelNode model){
-        return Configuration.DEPTH > 0 && model.depth.equals(Configuration.DEPTH);
+    protected boolean depthLimitReached(TreeNode node){
+        return Configuration.DEPTH > 0 && node.depth.equals(Configuration.DEPTH);
     }
 
-    protected Explanation createPossibleExplanation(ModelNode model, OWLAxiom child){
+    protected Explanation createPossibleExplanation(TreeNode node, OWLAxiom child){
         Explanation explanation = new Explanation();
-        explanation.addAxioms(model.label);
+        explanation.addAxioms(node.label);
         explanation.addAxiom(child);
         explanation.setAcquireTime(timer.getTotalUserTimeInSec());
         explanation.setLevel(currentDepth);
@@ -386,20 +380,20 @@ public class HybridSolver implements ISolver {
         pathsInCertainDepth = new HashSet<>();
     }
 
-    protected ModelNode createRoot() {
+    protected ITreeNode createRoot() {
         if( Configuration.ALGORITHM.usesMxp() ){
 
             runMxpInRoot();
 
         } else {
 
-            if(!isOntologyConsistent()){
+            if(!checkConsistencyWithModelExtraction()){
                 return null;
             }
 
         }
 
-        return createModelNodeFromExistingModel(true, null, null, findReuseIndex());
+        return createNodeFromExistingModel(true, null, null);
     }
 
     protected void runMxpInRoot(){
@@ -426,8 +420,10 @@ public class HybridSolver implements ISolver {
         }
     }
 
-    protected void addNodeToTree(Queue<TreeNode> queue, Explanation explanation, ModelNode parent, int reuseIndex){
-        ModelNode newNode = createModelNodeFromExistingModel(false, explanation, parent.depth + 1, reuseIndex);
+    protected void addNodeToTree(Queue<ITreeNode> queue, Explanation explanation, TreeNode parent){
+
+        ITreeNode newNode = createNodeFromExistingModel(false, explanation, parent.depth + 1);
+
         if(newNode == null){
             path.clear();
             return;
@@ -443,28 +439,40 @@ public class HybridSolver implements ISolver {
         path.clear();
     }
 
-    protected ModelNode createModelNodeFromExistingModel(boolean isRoot, Explanation explanation, Integer depth, int reuseIndex){
+    protected ITreeNode createNodeFromExistingModel(boolean isRoot, Explanation explanation, Integer depth){
 
-        if (reuseIndex < 0)
-            reuseIndex = findReuseIndex();
+        if (!modelManager.canReuseModel())
+            findReuseIndex();
 
-        ModelNode modelNode = new ModelNode();
-        if (reuseIndex >= 0){
+        TreeNode node = createTreeNode();
+
+        if (!modelManager.canReuseModel())
+            return null;
+
+        node.model = modelManager.getReusableModel();
+
+        if (modelManager.canReuseModel()){
+
             if(isRoot){
-                modelNode.data = negModels.get(reuseIndex).data;
-                modelNode.label = new ArrayList<>();
-                modelNode.depth = 0;
+
+                node.label = new ArrayList<>();
+                node.depth = 0;
+
             } else {
-                modelNode.label = explanation.getAxioms();
-                modelNode.data = negModels.get(reuseIndex).data;
-                modelNode.data.removeAll(path);
-                modelNode.depth = depth;
+
+                node.label = explanation.getAxioms();
+                //TODO nebude toto fungovat!!! nesmieme vymazat data z modelu!
+                node.model.getNegatedData().removeAll(path);
+                node.depth = depth;
+
             }
         }
-        if(modelNode.data == null || modelNode.data.isEmpty()){
-            return null;
-        }
-        return modelNode;
+
+        return node;
+    }
+
+    protected TreeNode createTreeNode(){
+        return new TreeNode();
     }
 
     protected boolean increaseDepth(TreeNode node){
@@ -533,8 +541,8 @@ public class HybridSolver implements ISolver {
         return false;
     }
 
-    protected boolean isIncorrectPath(ModelNode model, OWLAxiom child){
-        if (model.label.contains(AxiomManager.getComplementOfOWLAxiom(loader, child))){
+    protected boolean isIncorrectPath(TreeNode node, OWLAxiom child){
+        if (node.label.contains(AxiomManager.getComplementOfOWLAxiom(loader, child))){
             return true;
         }
 
@@ -694,7 +702,7 @@ public class HybridSolver implements ISolver {
         }
 
         // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
-        if (!axioms.isEmpty() && !isOntologyConsistent()) {
+        if (!axioms.isEmpty() && !checkConsistencyWithModelExtraction()) {
             return new Explanation();
         }
 
@@ -723,13 +731,7 @@ public class HybridSolver implements ISolver {
 
     protected int findReuseIndex(){
 
-        for (int i = models.size()-1; i >= 0 ; i--){
-            if (models.get(i).data.containsAll(path)){
-                lastUsableModelIndex = i;
-                return i;
-            }
-        }
-        return -1;
+        return modelManager.findReuseIndexForPath(path);
     }
 
     protected boolean addNewExplanations(){
@@ -761,14 +763,48 @@ public class HybridSolver implements ISolver {
 
     protected boolean isOntologyWithLiteralsConsistent(Collection<OWLAxiom> axioms){
         path.addAll(axioms);
-        boolean isConsistent = isOntologyConsistent();
+        boolean isConsistent = checkConsistencyWithModelExtraction();
         path.removeAll(axioms);
         return isConsistent;
     }
 
-    protected boolean isOntologyConsistent(){
-        ModelNode node = modelExtractor.getNegModelByOntology();
-        return node.modelIsValid;
+    protected boolean checkConsistencyWithModelExtraction(){
+
+        boolean isConsistent = checkConsistency();
+
+        if (!isConsistent)
+            return false;
+
+        modelManager.storeModelFoundByConsistencyCheck();
+
+        return true;
+    }
+
+    public boolean checkConsistency(){
+        if(checkingMinimalityWithQXP) {
+            return checkConsistency(pathDuringCheckingMinimality);
+        }
+        else {
+            return checkConsistency(path);
+        }
+    }
+
+    public boolean checkConsistency(Set<OWLAxiom> path){
+        if (path != null) {
+            if(loader.isMultipleObservationOnInput()){
+                for(OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()){
+                    path.remove(AxiomManager.getComplementOfOWLAxiom(loader, axiom));
+                }
+            } else {
+                path.remove(negObservation);
+            }
+            reasonerManager.addAxiomsToOntology(path);
+            if (!reasonerManager.isOntologyConsistent()){
+                resetOntologyToOriginal();
+                return false;
+            }
+        }
+        return true;
     }
 
     public Explanation getMinimalExplanationByCallingQXP(Explanation explanation){
