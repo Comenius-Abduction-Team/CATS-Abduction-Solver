@@ -14,7 +14,7 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     @Override
     void setUpInput() {
-        ONTOLOGY_FILE = "files/toothache_ontology.rdf";
+        ONTOLOGY_FILE = "files/toothache.rdf";
 
         OBSERVATION =
                 "Prefix: o: <http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#>"
