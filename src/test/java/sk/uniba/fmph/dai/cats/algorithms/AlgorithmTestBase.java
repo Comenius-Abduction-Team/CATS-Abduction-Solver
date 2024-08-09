@@ -139,6 +139,8 @@ public abstract class AlgorithmTestBase {
 
     public void solve(){
         manager.solveAbduction();
+        if (manager.getOutputMessage() != null && !manager.getOutputMessage().isEmpty())
+        System.err.println(manager.getOutputMessage());
     }
 
     void mhs(){
