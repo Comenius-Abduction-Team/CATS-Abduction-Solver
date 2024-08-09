@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.*;
@@ -40,11 +41,16 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 
     @Override
     public void addWithIndex(OWLAxiom axiom, Integer index){
+        if (!unindexed.contains(axiom))
+            throw new RuntimeException("Axiom " + StringFactory.getRepresentation(axiom) + " is not in the abducibles!");
         if (index < 1 || index > max)
             throw new IndexOutOfBoundsException("Index " + index + "out of bounds of the numbered axioms.");
         indexToAxiom[index-1] = axiom;
         unindexed.remove(axiom);
         unindexedSize--;
+        if (Configuration.DEBUG_PRINT){
+            System.out.println("New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
+        }
     }
 
     @Override
