@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.reasoner;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import sk.uniba.fmph.dai.cats.models.Individuals;
+import sk.uniba.fmph.dai.cats.data.Individuals;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.parser.*;

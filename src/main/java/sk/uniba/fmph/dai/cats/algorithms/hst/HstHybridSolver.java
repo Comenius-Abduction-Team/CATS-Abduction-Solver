@@ -2,11 +2,11 @@ package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import sk.uniba.fmph.dai.cats.algorithms.ITreeNode;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.*;
-import sk.uniba.fmph.dai.cats.algorithms.rctree.Model;
+import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -133,12 +133,11 @@ public class HstHybridSolver extends HybridSolver {
                     continue;
                 }
 
-                int reuseIndex = -1;
 
                 if (Configuration.REUSE_OF_MODELS)
-                    reuseIndex = findReuseIndex();
+                    findModelToUse();
 
-                if (reuseIndex == -1) {
+                if (!Configuration.REUSE_OF_MODELS || !modelManager.canReuseModel()) {
                     if(isTimeout()){
                         makeTimeoutPartialLog();
                         return;

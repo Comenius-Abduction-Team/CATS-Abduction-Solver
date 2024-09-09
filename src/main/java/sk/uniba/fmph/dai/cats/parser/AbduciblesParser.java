@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.parser;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.Prefixes;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
+import sk.uniba.fmph.dai.cats.data.Abducibles;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.io.StringDocumentTarget;

@@ -1,6 +1,6 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.cats.models.Abducibles;
+import sk.uniba.fmph.dai.cats.data.Abducibles;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
 

@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 
 import java.util.HashSet;
 import java.util.LinkedList;

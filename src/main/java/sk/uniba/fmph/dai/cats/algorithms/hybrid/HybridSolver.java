@@ -3,11 +3,12 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 import sk.uniba.fmph.dai.cats.algorithms.ISolver;
 import com.google.common.collect.Iterables;
 import sk.uniba.fmph.dai.cats.algorithms.ITreeNode;
-import sk.uniba.fmph.dai.cats.algorithms.rctree.ModelManager;
+import sk.uniba.fmph.dai.cats.model.Model;
+import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.models.*;
+import sk.uniba.fmph.dai.cats.data.*;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -301,9 +302,9 @@ public class HybridSolver implements ISolver {
                 }
 
                 if (Configuration.REUSE_OF_MODELS)
-                    findReuseIndex();
+                    findModelToUse();
 
-                if (!modelManager.canReuseModel()) {
+                if (!Configuration.REUSE_OF_MODELS || !modelManager.canReuseModel()) {
 
                     if (Configuration.DEBUG_PRINT){
                         System.out.println("Model was not reused.");
@@ -442,33 +443,31 @@ public class HybridSolver implements ISolver {
     protected ITreeNode createNodeFromExistingModel(boolean isRoot, Explanation explanation, Integer depth){
 
         if (!modelManager.canReuseModel())
-            findReuseIndex();
-
-        TreeNode node = createTreeNode();
+            findModelToUse();
 
         if (!modelManager.canReuseModel())
             return null;
 
+        TreeNode node = createTreeNode();
+
         node.model = modelManager.getReusableModel();
 
-        if (modelManager.canReuseModel()){
+        if(isRoot){
 
-            if(isRoot){
+            node.label = new ArrayList<>();
+            node.depth = 0;
 
-                node.label = new ArrayList<>();
-                node.depth = 0;
+        } else {
 
-            } else {
+            node.label = explanation.getAxioms();
+            //TODO nebude toto fungovat!!! nesmieme vymazat data z modelu!
+            node.model.getNegatedData().removeAll(path);
+            node.depth = depth;
 
-                node.label = explanation.getAxioms();
-                //TODO nebude toto fungovat!!! nesmieme vymazat data z modelu!
-                node.model.getNegatedData().removeAll(path);
-                node.depth = depth;
-
-            }
         }
 
         return node;
+
     }
 
     protected TreeNode createTreeNode(){
@@ -729,9 +728,9 @@ public class HybridSolver implements ISolver {
         return new Explanation(conflicts, conflicts.size(), currentDepth, timer.getTotalUserTimeInSec());
     }
 
-    protected int findReuseIndex(){
+    protected Model findModelToUse(){
 
-        return modelManager.findReuseIndexForPath(path);
+        return modelManager.findReuseModelForPath(path);
     }
 
     protected boolean addNewExplanations(){

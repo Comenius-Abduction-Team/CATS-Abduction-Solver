@@ -11,7 +11,7 @@ import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;

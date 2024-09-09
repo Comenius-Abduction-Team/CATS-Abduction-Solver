@@ -1,13 +1,11 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ExplanationManager;
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
 import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
-
-import java.util.HashSet;
 
 public class ApiExplanationManager extends ExplanationManager {
 

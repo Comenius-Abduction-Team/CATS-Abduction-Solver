@@ -1,6 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.List;

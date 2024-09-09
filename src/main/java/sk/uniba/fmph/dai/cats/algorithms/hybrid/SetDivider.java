@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.models.*;
+import sk.uniba.fmph.dai.cats.data.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.*;

@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import sk.uniba.fmph.dai.cats.models.Explanation;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
 import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;

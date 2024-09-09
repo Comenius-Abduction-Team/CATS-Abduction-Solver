@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.algorithms.rctree;
+package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 

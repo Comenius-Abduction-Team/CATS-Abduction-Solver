@@ -1,6 +1,5 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
-import sk.uniba.fmph.dai.cats.algorithms.rctree.Model;
-import sk.uniba.fmph.dai.cats.algorithms.rctree.ModelManager;
+import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -8,7 +7,7 @@ import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorer
 import org.semanticweb.owlapi.search.EntitySearcher;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
