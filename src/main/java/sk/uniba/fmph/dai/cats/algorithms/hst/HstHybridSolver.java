@@ -168,11 +168,8 @@ public class HstHybridSolver extends HybridSolver {
                 addNodeToTree(queue, explanation, node);
             }
         }
-        path.clear();
-        if(!levelTimes.containsKey(currentDepth)){
-            makePartialLog();
-        }
-        currentDepth = 0;
+
+        finishTreeTraversal();
     }
 
     private void indexAxiomsFromModel(TreeNode node, INumberedAbducibles abducibles){

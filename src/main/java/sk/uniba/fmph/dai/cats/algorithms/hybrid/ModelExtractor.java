@@ -1,4 +1,5 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+import sk.uniba.fmph.dai.cats.data.Abducibles;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -15,25 +16,27 @@ import static java.util.stream.Collectors.toSet;
 public class ModelExtractor {
 
     private final ILoader loader;
+    private final Abducibles abducibles;
     private final HybridSolver solver;
     private final OWLOntologyManager ontologyManager;
 
-    private Set<OWLAxiom> abducibles;
+    private Set<OWLAxiom> abducibleAxioms;
     //private HashMap<Integer,OWLAxiom> abducibles;
 
-    public ModelExtractor(HybridSolver solver, IAbducibleAxioms abducibles){
+    public ModelExtractor(HybridSolver solver, IAbducibleAxioms abducibleAxioms){
         this.solver = solver;
         this.loader = solver.loader;
-        initialiseAbducibles(abducibles.getAxioms());
+        abducibles = loader.getAbducibles();
+        initialiseAbducibles(abducibleAxioms);
         this.ontologyManager = OWLManager.createOWLOntologyManager();
     }
 
-    public void initialiseAbducibles(Set<OWLAxiom> abducibles){
+    public void initialiseAbducibles(IAbducibleAxioms abducibleAxioms){
 //        abducibles = new HashMap<>();
 //        for (OWLAxiom axiom : solver.abducibleAxioms.getAxioms()){
 //            abducibles.put(axiom.hashCode(), axiom);
 //        }
-        this.abducibles = abducibles;
+        this.abducibleAxioms = abducibleAxioms.getAxioms();
     }
 
     public Model extractModel() {  // mrozek
@@ -44,7 +47,7 @@ public class ModelExtractor {
         if(loader.isAxiomBasedAbduciblesOnInput()){
             individualArray = new ArrayList<>(loader.getOntology().getIndividualsInSignature());
         } else {
-            individualArray = new ArrayList<>(solver.abducibles.getIndividuals());
+            individualArray = new ArrayList<>(loader.getAbducibles().getIndividuals());
         }
 
         OWLDataFactory dfactory = ontologyManager.getOWLDataFactory();
@@ -62,8 +65,8 @@ public class ModelExtractor {
 
         if(loader.isAxiomBasedAbduciblesOnInput()){
 
-            model.getData().retainAll(solver.abducibles.getAxiomBasedAbducibles());
-            model.getNegatedData().retainAll(solver.abducibles.getAxiomBasedAbducibles());
+            model.getData().retainAll(abducibles.getAxiomBasedAbducibles());
+            model.getNegatedData().retainAll(abducibles.getAxiomBasedAbducibles());
 
         }
 
@@ -210,7 +213,7 @@ public class ModelExtractor {
 
         for (OWLClassExpression classExpression : foundTypes) {
             if(!loader.isAxiomBasedAbduciblesOnInput()){
-                if (!solver.abducibles.getClasses().contains(classExpression)){
+                if (!abducibles.getClasses().contains(classExpression)){
                     continue;
                 }
             }
@@ -248,7 +251,7 @@ public class ModelExtractor {
 
         for (OWLClassExpression classExpression : newNotTypes) {
             if (!loader.isAxiomBasedAbduciblesOnInput()) {
-                if (!solver.abducibles.getClasses().contains(classExpression)) {
+                if (!abducibles.getClasses().contains(classExpression)) {
                     continue;
                 }
             }
@@ -287,7 +290,7 @@ public class ModelExtractor {
 
     private OWLAxiom getFromAbducibles(OWLAxiom axiom){
         OWLAxiom fromAbducibles = null;
-        for (OWLAxiom abducible : abducibles){
+        for (OWLAxiom abducible : abducibleAxioms){
             if (axiom.equals(abducible)){
                 fromAbducibles = abducible;
                 break;
@@ -300,7 +303,7 @@ public class ModelExtractor {
 
         for (OWLObjectPropertyAssertionAxiom axiom : foundTypes) {
             if(!loader.isAxiomBasedAbduciblesOnInput()){
-                if (!solver.abducibles.getRoles().contains(axiom.getProperty().getNamedProperty())) {
+                if (!abducibles.getRoles().contains(axiom.getProperty().getNamedProperty())) {
                     continue;
                 }
             }
@@ -313,7 +316,7 @@ public class ModelExtractor {
 
         for (OWLAxiom axiom : newNotTypes) {
             if (!loader.isAxiomBasedAbduciblesOnInput()) {
-                if (!solver.abducibles.getRoles().contains(((OWLObjectPropertyAssertionAxiom)axiom).getProperty().getNamedProperty())) {
+                if (!abducibles.getRoles().contains(((OWLObjectPropertyAssertionAxiom)axiom).getProperty().getNamedProperty())) {
                     continue;
                 }
             }

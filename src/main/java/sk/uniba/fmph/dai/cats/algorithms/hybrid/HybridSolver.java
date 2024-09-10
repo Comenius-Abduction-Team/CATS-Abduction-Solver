@@ -39,32 +39,32 @@ public class HybridSolver implements ISolver {
     public List<OWLAxiom> negAssertionsAxioms;
     public Set<OWLAxiom> path = new HashSet<>();
     public Set<OWLAxiom> pathDuringCheckingMinimality;
-    public Abducibles abducibles;
+    //public Abducibles abducibles;
     public OWLAxiom negObservation;
-    public final ThreadTimer timer;
-    public final long startTime;
-    public Map<Integer, Double> levelTimes = new HashMap<>();
+
+    final TimeManager timer;
     public boolean checkingMinimalityWithQXP = false;
     protected IRuleChecker ruleChecker;
     protected int currentDepth = 0;
 
     protected int numberOfNodes = 0;
 
-    public HybridSolver(ThreadTimer timer,
-                        IExplanationManager explanationManager, IProgressManager progressManager, IPrinter printer) {
+    public HybridSolver(ThreadTimer threadTimer, IExplanationManager explanationManager,
+                        IProgressManager progressManager, IPrinter printer) {
 
         String info = String.join("\n", getInfo());
         printer.print("");
         printer.print(info);
         printer.print("");
 
+        this.timer = new TimeManager(threadTimer);
+
         this.explanationManager = explanationManager;
         explanationManager.setSolver(this);
-
         this.progressManager = progressManager;
 
-        this.timer = timer;
-        this.startTime = System.currentTimeMillis();
+        this.timer.setStartTime();
+
     }
 
     public IExplanationManager getExplanationManager(){
@@ -106,7 +106,6 @@ public class HybridSolver implements ISolver {
         this.ruleChecker = new RuleChecker(loader, reasonerManager);
 
         negObservation = loader.getNegObservation().getOwlAxiom();
-        this.abducibles = loader.getAbducibles();
 
         initialize();
 
@@ -144,8 +143,9 @@ public class HybridSolver implements ISolver {
     protected void makeErrorAndPartialLog(Throwable e) {
         explanationManager.logError(e);
 
-        Double time = timer.getTotalUserTimeInSec();
-        levelTimes.put(currentDepth, time);
+        double time = timer.getTime();
+        timer.setTimeForLevel(time, currentDepth);
+
         explanationManager.logExplanationsWithDepth(currentDepth, false, true, time);
         if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithDepth(currentDepth + 1, false, true, time);
@@ -173,6 +173,9 @@ public class HybridSolver implements ISolver {
     }
 
     protected Set<OWLAxiom> createAbducibleAxioms(){
+
+        Abducibles abducibles = loader.getAbducibles();
+
         if(loader.isAxiomBasedAbduciblesOnInput()){
             Set<OWLAxiom> abduciblesWithoutObservation = abducibles.getAxiomBasedAbducibles();
             if (loader.isMultipleObservationOnInput()){
@@ -350,11 +353,18 @@ public class HybridSolver implements ISolver {
                 addNodeToTree(queue, explanation, node);
             }
         }
+
+        finishTreeTraversal();
+
+    }
+
+    protected void finishTreeTraversal(){
         path.clear();
 
-        if(!levelTimes.containsKey(currentDepth)){
+        if(!timer.levelHasTime(currentDepth)){
             makePartialLog();
         }
+
         currentDepth = 0;
     }
 
@@ -366,19 +376,29 @@ public class HybridSolver implements ISolver {
         Explanation explanation = new Explanation();
         explanation.addAxioms(node.label);
         explanation.addAxiom(child);
-        explanation.setAcquireTime(timer.getTotalUserTimeInSec());
+        explanation.setAcquireTime(timer.getTime());
         explanation.setLevel(currentDepth);
         return explanation;
     }
 
     protected void makePartialLog() {
-        Double time = timer.getTotalUserTimeInSec();
-        levelTimes.put(currentDepth, time);
+        Double time = timer.getTime();
+        timer.setTimeForLevel(time, currentDepth);
         explanationManager.logExplanationsWithDepth(currentDepth, false, false, time);
         if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithLevel(currentDepth, false, false, time);
         }
         pathsInCertainDepth = new HashSet<>();
+    }
+
+    protected void makeTimeoutPartialLog() {
+        Double time = timer.getTime();
+        timer.setTimeForLevel(time, currentDepth);
+        explanationManager.logExplanationsWithDepth(currentDepth, true, false, time);
+        if(Configuration.ALGORITHM.usesMxp()){
+            explanationManager.logExplanationsWithDepth(currentDepth + 1, true, false, time);
+            explanationManager.logExplanationsWithLevel(currentDepth, true,false, time);
+        }
     }
 
     protected ITreeNode createRoot() {
@@ -478,7 +498,7 @@ public class HybridSolver implements ISolver {
         if (node.depth > currentDepth){
             makePartialLog();
             if (Configuration.PRINT_PROGRESS)
-                progressManager.updateProgress(currentDepth, timer.getTotalUserTimeInSec());
+                progressManager.updateProgress(currentDepth, timer.getTime());
             if (Configuration.DEBUG_PRINT)
                 System.out.println("NUMBER OF NODES: " + numberOfNodes);
             numberOfNodes = 0;
@@ -488,21 +508,9 @@ public class HybridSolver implements ISolver {
     }
 
     protected boolean isTimeout(){
-        if (Configuration.TIMEOUT > 0 && timer.getTotalUserTimeInSec() > Configuration.TIMEOUT) {
-            return true;
-        }
-        return false;
+        return timer.isTimeout();
     }
 
-    protected void makeTimeoutPartialLog() {
-        Double time = timer.getTotalUserTimeInSec();
-        levelTimes.put(currentDepth, time);
-        explanationManager.logExplanationsWithDepth(currentDepth, true, false, time);
-        if(Configuration.ALGORITHM.usesMxp()){
-            explanationManager.logExplanationsWithDepth(currentDepth + 1, true, false, time);
-            explanationManager.logExplanationsWithLevel(currentDepth, true,false, time);
-        }
-    }
 
     protected boolean canBePruned(Explanation explanation) throws OWLOntologyCreationException {
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
@@ -598,7 +606,7 @@ public class HybridSolver implements ISolver {
         // if |C| = 1 then return [∅, {C}];
         if (axioms.size() == 1) {
             List<Explanation> explanations = new ArrayList<>();
-            explanations.add(new Explanation(axioms, axioms.size(), currentDepth, timer.getTotalUserTimeInSec()));
+            explanations.add(new Explanation(axioms, axioms.size(), currentDepth, timer.getTime()));
             return new Conflict(new HashSet<>(), explanations);
         }
 
@@ -643,7 +651,7 @@ public class HybridSolver implements ISolver {
 
             if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
-                    progressManager.updateProgress(currentDepth, timer.getTotalUserTimeInSec());
+                    progressManager.updateProgress(currentDepth, timer.getTime());
 
             if (isTimeout()) break;
 
@@ -707,7 +715,7 @@ public class HybridSolver implements ISolver {
 
         // if |C| = 1 then return C;
         if (literals.size() == 1) {
-            return new Explanation(literals, 1, currentDepth, timer.getTotalUserTimeInSec());
+            return new Explanation(literals, 1, currentDepth, timer.getTime());
         }
 
         // Split C into disjoint, non-empty sets
@@ -725,7 +733,7 @@ public class HybridSolver implements ISolver {
         conflicts.addAll(D1.getAxioms());
         conflicts.addAll(D2.getAxioms());
 
-        return new Explanation(conflicts, conflicts.size(), currentDepth, timer.getTotalUserTimeInSec());
+        return new Explanation(conflicts, conflicts.size(), currentDepth, timer.getTime());
     }
 
     protected Model findModelToUse(){
