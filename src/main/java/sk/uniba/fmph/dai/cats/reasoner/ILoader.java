@@ -18,11 +18,15 @@ public interface ILoader {
 
     Observation getObservation();
 
+    OWLAxiom getObservationAxiom();
+
     void setObservation(OWLAxiom observation);
 
     void setObservation(OWLAxiom observation, List<OWLAxiom> axiomsInMultipleObservations, OWLNamedIndividual reductionIndividual);
 
     Observation getNegObservation();
+
+    OWLAxiom getNegObservationAxiom();
 
     void setNegObservation(OWLAxiom negObservation);
 

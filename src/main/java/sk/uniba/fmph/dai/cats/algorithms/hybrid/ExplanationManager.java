@@ -11,7 +11,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,14 +28,14 @@ public abstract class ExplanationManager implements IExplanationManager {
     protected List<Explanation> finalExplanations;
     protected HybridSolver solver;
     private final ILoader loader;
-    private final IReasonerManager reasonerManager;
+    private final ReasonerManager reasonerManager;
     private final IRuleChecker checkRules;
     protected IPrinter printer;
 
     long startTime;
     TimeManager timer;
 
-    public ExplanationManager(ILoader loader, IReasonerManager reasonerManager){
+    public ExplanationManager(ILoader loader, ReasonerManager reasonerManager){
         this.loader = loader;
         this.reasonerManager = reasonerManager;
         this.checkRules = new RuleChecker(loader, reasonerManager);

@@ -17,6 +17,9 @@ public class ModelExtractor {
 
     private final ILoader loader;
     private final Abducibles abducibles;
+    
+    private final OWLOntology originalOntology;
+    
     private final HybridSolver solver;
     private final OWLOntologyManager ontologyManager;
 
@@ -27,6 +30,7 @@ public class ModelExtractor {
         this.solver = solver;
         this.loader = solver.loader;
         abducibles = loader.getAbducibles();
+        originalOntology = loader.getOriginalOntology();
         initialiseAbducibles(abducibleAxioms);
         this.ontologyManager = OWLManager.createOWLOntologyManager();
     }
@@ -78,13 +82,13 @@ public class ModelExtractor {
 
     public void assignTypesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, Model model){
         //complex concepts from original ontology
-        Set<OWLClassExpression> ontologyTypes = EntitySearcher.getTypes(ind, solver.ontology).collect(toSet());
+        Set<OWLClassExpression> ontologyTypes = EntitySearcher.getTypes(ind, originalOntology).collect(toSet());
 
         Set<OWLClassExpression> knownTypes = new HashSet<>(); //concepts assigned to ind from original ontology
         Set<OWLClassExpression> knownNotTypes = new HashSet<>(); //neg concepts assigned to ind from original ontology
         divideTypesAccordingOntology(ontologyTypes, knownTypes, knownNotTypes);
 
-        Set<OWLClassExpression> newNotTypes = classSet2classExpSet(solver.ontology.classesInSignature().collect(toSet()));
+        Set<OWLClassExpression> newNotTypes = classSet2classExpSet(originalOntology.classesInSignature().collect(toSet()));
         newNotTypes.remove(dfactory.getOWLThing());
         newNotTypes.removeAll(knownNotTypes);
 
@@ -106,12 +110,12 @@ public class ModelExtractor {
     }
 
     public void assignRolesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, ArrayList<OWLNamedIndividual> individuals, Model model) {
-        Set<OWLAxiom> ontologyPropertyAxioms = solver.ontology.axioms()
+        Set<OWLAxiom> ontologyPropertyAxioms = originalOntology.axioms()
                 .filter(a -> a.isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION)
                         && ((OWLObjectPropertyAssertionAxiom)a).getSubject() == ind)
                 .collect(toSet()); //object properties where ind is a subject -> objectProperty(ind,x)
 
-        ontologyPropertyAxioms.addAll(solver.ontology.axioms()
+        ontologyPropertyAxioms.addAll(originalOntology.axioms()
                 .filter(a -> a.isOfType(AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION)
                         && ((OWLNegativeObjectPropertyAssertionAxiom)a).getSubject() == ind)
                 .collect(toSet())); //add neg object properties where ind is a subject -> not(objectProperty(ind,x))

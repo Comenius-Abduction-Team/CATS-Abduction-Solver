@@ -8,16 +8,16 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.List;
 
 public class RuleChecker implements IRuleChecker {
 
     private final ILoader loader;
-    private final IReasonerManager reasonerManager;
+    private final ReasonerManager reasonerManager;
 
-    RuleChecker(ILoader loader, IReasonerManager reasonerManager) {
+    RuleChecker(ILoader loader, ReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
     }

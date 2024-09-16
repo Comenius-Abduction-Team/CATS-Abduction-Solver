@@ -13,7 +13,7 @@ import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.progress.IProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.*;
@@ -26,7 +26,7 @@ import java.util.*;
 public class HybridSolver implements ISolver {
 
     protected ILoader loader;
-    protected IReasonerManager reasonerManager;
+    protected ReasonerManager reasonerManager;
     protected IAbducibleAxioms abducibleAxioms;
     protected ModelManager modelManager;
     protected final IExplanationManager explanationManager;
@@ -34,13 +34,10 @@ public class HybridSolver implements ISolver {
     protected SetDivider setDivider;
     protected Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
 
-    public OWLOntology ontology;
     public List<OWLAxiom> assertionsAxioms;
     public List<OWLAxiom> negAssertionsAxioms;
     public Set<OWLAxiom> path = new HashSet<>();
     public Set<OWLAxiom> pathDuringCheckingMinimality;
-    //public Abducibles abducibles;
-    public OWLAxiom negObservation;
 
     final TimeManager timer;
     public boolean checkingMinimalityWithQXP = false;
@@ -96,16 +93,13 @@ public class HybridSolver implements ISolver {
     }
 
     @Override
-    public void solve(ILoader loader, IReasonerManager reasonerManager) throws OWLOntologyStorageException, OWLOntologyCreationException {
+    public void solve(ILoader loader, ReasonerManager reasonerManager) throws OWLOntologyStorageException, OWLOntologyCreationException {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
-        this.ontology = this.loader.getOriginalOntology();
         this.modelManager = new ModelManager();
 
         this.setDivider = new SetDivider(this);
         this.ruleChecker = new RuleChecker(loader, reasonerManager);
-
-        negObservation = loader.getNegObservation().getOwlAxiom();
 
         initialize();
 
@@ -117,7 +111,7 @@ public class HybridSolver implements ISolver {
         }
 
         else {
-            reasonerManager.isOntologyWithLiteralsConsistent(abducibleAxioms.getAxioms(), ontology);
+            reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
             trySolve();
         }
         if (Configuration.PRINT_PROGRESS)
@@ -168,8 +162,7 @@ public class HybridSolver implements ISolver {
     }
 
     protected void addNegatedObservation(){
-        loader.getOntologyManager().addAxiom(ontology, loader.getNegObservation().getOwlAxiom());
-        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.addNegatedObservationToOntologies();
     }
 
     protected Set<OWLAxiom> createAbducibleAxioms(){
@@ -180,7 +173,8 @@ public class HybridSolver implements ISolver {
             Set<OWLAxiom> abduciblesWithoutObservation = abducibles.getAxiomBasedAbducibles();
             if (loader.isMultipleObservationOnInput()){
                 if (Configuration.STRICT_RELEVANCE) {
-                    loader.getObservation().getAxiomsInMultipleObservations().forEach(abduciblesWithoutObservation::remove);
+                    loader.getObservation().getAxiomsInMultipleObservations()
+                                        .forEach(abduciblesWithoutObservation::remove);
                 }
             } else {
                 abduciblesWithoutObservation.remove(loader.getObservation().getOwlAxiom());
@@ -220,8 +214,8 @@ public class HybridSolver implements ISolver {
                 negAssertionsAxioms.removeAll(loader.getObservation().getAxiomsInMultipleObservations());
             }
         } else {
-            assertionsAxioms.remove(loader.getObservation().getOwlAxiom());
-            negAssertionsAxioms.remove(loader.getObservation().getOwlAxiom());
+            assertionsAxioms.remove(loader.getObservationAxiom());
+            negAssertionsAxioms.remove(loader.getObservationAxiom());
         }
 
         Set<OWLAxiom> toAbd = new HashSet<>(assertionsAxioms);
@@ -553,7 +547,7 @@ public class HybridSolver implements ISolver {
             return true;
         }
 
-        if (child.equals(loader.getObservation().getOwlAxiom())){
+        if (child.equals(loader.getObservationAxiom())){
             return true;
         }
 
@@ -588,7 +582,7 @@ public class HybridSolver implements ISolver {
 
     protected Conflict findConflicts(Set<OWLAxiom> axioms) {
 
-        path.remove(negObservation);
+        path.remove(loader.getNegObservationAxiom());
 
         if (isTimeout()) {
             return new Conflict(new HashSet<>(), new ArrayList<>());
@@ -803,7 +797,7 @@ public class HybridSolver implements ISolver {
                     path.remove(AxiomManager.getComplementOfOWLAxiom(loader, axiom));
                 }
             } else {
-                path.remove(negObservation);
+                path.remove(loader.getNegObservation().getOwlAxiom());
             }
             reasonerManager.addAxiomsToOntology(path);
             if (!reasonerManager.isOntologyConsistent()){
@@ -830,7 +824,7 @@ public class HybridSolver implements ISolver {
     }
 
     public void resetOntologyToOriginal(){
-        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
+        reasonerManager.resetOntologyToOriginal();
     }
 
 }

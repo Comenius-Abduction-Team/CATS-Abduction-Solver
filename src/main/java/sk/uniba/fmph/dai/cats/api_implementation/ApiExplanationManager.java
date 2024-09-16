@@ -5,13 +5,13 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 public class ApiExplanationManager extends ExplanationManager {
 
     private final CatsAbducer Abducer;
 
-    public ApiExplanationManager(ILoader loader, IReasonerManager reasonerManager, CatsAbducer Abducer) {
+    public ApiExplanationManager(ILoader loader, ReasonerManager reasonerManager, CatsAbducer Abducer) {
         super(loader, reasonerManager);
         this.Abducer = Abducer;
         printer = new ApiPrinter(Abducer);

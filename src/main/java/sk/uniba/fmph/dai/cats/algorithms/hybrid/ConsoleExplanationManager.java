@@ -4,11 +4,11 @@ import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
+import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 public class ConsoleExplanationManager extends ExplanationManager {
 
-    public ConsoleExplanationManager(ILoader loader, IReasonerManager reasonerManager){
+    public ConsoleExplanationManager(ILoader loader, ReasonerManager reasonerManager){
         super(loader, reasonerManager);
         printer = new ConsolePrinter();
     }

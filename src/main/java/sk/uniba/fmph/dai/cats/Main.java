@@ -154,7 +154,7 @@ public class Main {
             ILoader loader = new ConsoleLoader();
             loader.initialize(Configuration.REASONER);
 
-            IReasonerManager reasonerManager = new ReasonerManager(loader);
+            ReasonerManager reasonerManager = new ReasonerManager(loader);
 
             solver = createSolver(timer, loader, reasonerManager);
             solver.solve(loader, reasonerManager);
@@ -167,7 +167,7 @@ public class Main {
         return solver;
     }
 
-    private static ISolver createSolver(ThreadTimer timer, ILoader loader, IReasonerManager reasonerManager) {
+    private static ISolver createSolver(ThreadTimer timer, ILoader loader, ReasonerManager reasonerManager) {
 
         ConsoleExplanationManager explanationManager = new ConsoleExplanationManager(loader, reasonerManager);
         ConsoleProgressManager progressManager = new ConsoleProgressManager();

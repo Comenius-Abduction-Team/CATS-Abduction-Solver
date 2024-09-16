@@ -105,6 +105,11 @@ public abstract class Loader implements ILoader {
     }
 
     @Override
+    public OWLAxiom getObservationAxiom() {
+        return observation.getOwlAxiom();
+    }
+
+    @Override
     public void setObservation(OWLAxiom observation) {
         this.observation = new Observation(observation);
     }
@@ -117,6 +122,11 @@ public abstract class Loader implements ILoader {
     @Override
     public Observation getNegObservation() {
         return negObservation;
+    }
+
+    @Override
+    public OWLAxiom getNegObservationAxiom() {
+        return negObservation.getOwlAxiom();
     }
 
     @Override
