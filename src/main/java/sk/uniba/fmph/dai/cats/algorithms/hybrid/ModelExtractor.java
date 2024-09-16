@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.*;
 
@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toSet;
 
 public class ModelExtractor {
 
-    private final ILoader loader;
+    private final Loader loader;
     private final Abducibles abducibles;
     
     private final OWLOntology originalOntology;

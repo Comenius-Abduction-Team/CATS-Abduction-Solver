@@ -4,20 +4,18 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 
 import java.text.DecimalFormat;
 
-public abstract class ProgressManager implements IProgressManager {
+public abstract class ProgressManager {
 
     private static final DecimalFormat formatter = new DecimalFormat("0.00");
 
     protected double currentPercentage = 0;
     protected String message;
 
-    @Override
     public void updateProgress(int depth, double time) {
         updateProgressAccordingToCorrectFactor(depth, time);
         processProgress();
     }
 
-    @Override
     public void updateProgress(double newPercentage, String message) {
         currentPercentage = newPercentage;
         this.message = message;

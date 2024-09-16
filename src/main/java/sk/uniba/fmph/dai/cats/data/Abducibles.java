@@ -5,7 +5,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,26 +17,26 @@ public class Abducibles {
     private Set<OWLClass> classes = new HashSet<>();
     private Set<OWLObjectProperty> roles = new HashSet<>();
     private Set<OWLAxiom> axioms = new HashSet<>();
-    private ILoader loader;
+    private Loader loader;
     private Set<OWLAxiom> axiomBasedAbducibles = new HashSet<>();
 
-    public Abducibles(ILoader loader) {
+    public Abducibles(Loader loader) {
         this.individuals = new HashSet<>(loader.getOntology().getIndividualsInSignature());
         this.classes = new HashSet<>(loader.getOntology().getClassesInSignature());
         this.roles = new HashSet<>(loader.getOntology().getObjectPropertiesInSignature());
-        this.individuals.addAll(loader.getObservation().getOwlAxiom().getIndividualsInSignature());
+        this.individuals.addAll(loader.getObservationAxiom().getIndividualsInSignature());
         this.loader = loader;
         if(loader.isMultipleObservationOnInput()){
-            this.individuals.remove(loader.getObservation().getReductionIndividual());
+            this.individuals.remove(loader.getObservationReductionIndividual());
         }
     }
 
-    public Abducibles(ILoader loader, Set<OWLAxiom> axiomBasedAbducibles){
+    public Abducibles(Loader loader, Set<OWLAxiom> axiomBasedAbducibles){
         this.loader = loader;
         this.axiomBasedAbducibles = axiomBasedAbducibles;
     }
 
-    public Abducibles(ILoader loader, Set<OWLNamedIndividual> ind, Set<OWLClass> cl, Set<OWLObjectProperty> op) {
+    public Abducibles(Loader loader, Set<OWLNamedIndividual> ind, Set<OWLClass> cl, Set<OWLObjectProperty> op) {
         this.individuals = ind;
         this.classes = cl;
         this.roles = op;
@@ -59,7 +59,7 @@ public class Abducibles {
         if (axioms == null /*|| axioms.size() < individuals.size() * classes.size() * 2*/){
             this.axioms = new HashSet<>();
             for (OWLNamedIndividual ind: individuals){
-                if(loader.isMultipleObservationOnInput() && ind.equals(loader.getObservation().getReductionIndividual())){
+                if(loader.isMultipleObservationOnInput() && ind.equals(loader.getObservationReductionIndividual())){
                     continue;
                 }
 
@@ -72,7 +72,7 @@ public class Abducibles {
                     if (!Configuration.LOOPING_ALLOWED && ind.equals(object)){
                         continue;
                     }
-                    if(loader.isMultipleObservationOnInput() && object.equals(loader.getObservation().getReductionIndividual())){
+                    if(loader.isMultipleObservationOnInput() && object.equals(loader.getObservationReductionIndividual())){
                         continue;
                     }
                     for (OWLObjectProperty op: roles){

@@ -8,7 +8,7 @@ import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
-import sk.uniba.fmph.dai.cats.progress.IProgressManager;
+import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
@@ -24,8 +24,8 @@ public class HstHybridSolver extends HybridSolver {
     //MIN
     int globalMin, currentChildIndex;
 
-    public HstHybridSolver(ThreadTimer timer, IExplanationManager explanationManager,
-                           IProgressManager progressManager, IPrinter printer){
+    public HstHybridSolver(ThreadTimer timer, ExplanationManager explanationManager,
+                           ProgressManager progressManager, IPrinter printer){
         super(timer, explanationManager, progressManager, printer);
     }
 
@@ -246,7 +246,7 @@ public class HstHybridSolver extends HybridSolver {
     @Override
     protected boolean isIncorrectPath(TreeNode model, OWLAxiom child){
         return  model.label.contains(AxiomManager.getComplementOfOWLAxiom(loader, child)) ||
-                child.equals(loader.getObservation().getOwlAxiom());
+                child.equals(loader.getObservationAxiom());
     }
 
     protected boolean checkConsistency(INumberedAbducibles abducibles){

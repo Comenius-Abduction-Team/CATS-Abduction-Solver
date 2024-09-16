@@ -10,9 +10,9 @@ import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.*;
 import org.semanticweb.owlapi.model.*;
-import sk.uniba.fmph.dai.cats.progress.IProgressManager;
+import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
@@ -25,12 +25,12 @@ import java.util.*;
 
 public class HybridSolver implements ISolver {
 
-    protected ILoader loader;
+    protected Loader loader;
     protected ReasonerManager reasonerManager;
     protected IAbducibleAxioms abducibleAxioms;
     protected ModelManager modelManager;
-    protected final IExplanationManager explanationManager;
-    protected final IProgressManager progressManager;
+    protected final ExplanationManager explanationManager;
+    protected final ProgressManager progressManager;
     protected SetDivider setDivider;
     protected Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
 
@@ -41,13 +41,13 @@ public class HybridSolver implements ISolver {
 
     final TimeManager timer;
     public boolean checkingMinimalityWithQXP = false;
-    protected IRuleChecker ruleChecker;
+    protected RuleChecker ruleChecker;
     protected int currentDepth = 0;
 
     protected int numberOfNodes = 0;
 
-    public HybridSolver(ThreadTimer threadTimer, IExplanationManager explanationManager,
-                        IProgressManager progressManager, IPrinter printer) {
+    public HybridSolver(ThreadTimer threadTimer, ExplanationManager explanationManager,
+                        ProgressManager progressManager, IPrinter printer) {
 
         String info = String.join("\n", getInfo());
         printer.print("");
@@ -64,7 +64,7 @@ public class HybridSolver implements ISolver {
 
     }
 
-    public IExplanationManager getExplanationManager(){
+    public ExplanationManager getExplanationManager(){
         return explanationManager;
     }
 
@@ -93,7 +93,7 @@ public class HybridSolver implements ISolver {
     }
 
     @Override
-    public void solve(ILoader loader, ReasonerManager reasonerManager) throws OWLOntologyStorageException, OWLOntologyCreationException {
+    public void solve(Loader loader, ReasonerManager reasonerManager) throws OWLOntologyStorageException, OWLOntologyCreationException {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
         this.modelManager = new ModelManager();
@@ -177,7 +177,7 @@ public class HybridSolver implements ISolver {
                                         .forEach(abduciblesWithoutObservation::remove);
                 }
             } else {
-                abduciblesWithoutObservation.remove(loader.getObservation().getOwlAxiom());
+                abduciblesWithoutObservation.remove(loader.getObservationAxiom());
             }
             return abduciblesWithoutObservation;
         }

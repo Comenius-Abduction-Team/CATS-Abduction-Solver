@@ -5,7 +5,7 @@ import sk.uniba.fmph.dai.cats.data.Abducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import sk.uniba.fmph.dai.cats.parser.IObservationParser;
+import sk.uniba.fmph.dai.cats.parser.ObservationParser;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
@@ -50,7 +50,7 @@ public class ApiLoader extends Loader {
     @Override
     protected void loadObservation() throws Exception {
         namedIndividuals = new Individuals();
-        IObservationParser observationParser = new ApiObservationParser(this, Abducer);
+        ObservationParser observationParser = new ApiObservationParser(this, Abducer);
         observationParser.parse();
     }
 

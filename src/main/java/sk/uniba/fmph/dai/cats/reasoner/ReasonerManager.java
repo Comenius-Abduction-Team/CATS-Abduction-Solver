@@ -6,9 +6,9 @@ import java.util.stream.Stream;
 
 public class ReasonerManager {
 
-    private final ILoader loader;
+    private final Loader loader;
 
-    public ReasonerManager(ILoader loader) {
+    public ReasonerManager(Loader loader) {
         this.loader = loader;
     }
 

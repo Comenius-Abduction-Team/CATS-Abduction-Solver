@@ -8,7 +8,7 @@ import java.util.*;
 
 public class SetDivider {
 
-    IExplanationManager explanationManager;
+    ExplanationManager explanationManager;
     private Map<AxiomPair, Integer> tableOfAxiomPairOccurance;
     private List<Integer> numberOfAxiomPairOccurance;
     private double median = 0;

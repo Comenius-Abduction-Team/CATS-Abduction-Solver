@@ -14,7 +14,7 @@ import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.util.List;
 
-public abstract class Loader implements ILoader {
+public abstract class Loader {
 
     protected OWLOntologyManager ontologyManager;
     protected OWLReasonerFactory reasonerFactory;
@@ -35,6 +35,8 @@ public abstract class Loader implements ILoader {
 
     protected IPrinter printer;
 
+    abstract public void initialize(ReasonerType reasonerType) throws Exception;
+
     protected void loadReasoner(ReasonerType reasonerType) {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
@@ -45,20 +47,18 @@ public abstract class Loader implements ILoader {
             if (reasoner.isConsistent()) {
                 printer.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
-                //printer.logError(LogMessage.ERROR_ONTOLOGY_CONSISTENCY, null);
                 reasoner.dispose();
                 throw new RuntimeException(LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
             }
 
         } catch (OWLOntologyCreationException exception) {
-            //printer.logError(LogMessage.ERROR_CREATING_ONTOLOGY, exception);
             throw new RuntimeException(LogMessage.ERROR_CREATING_ONTOLOGY);
         }
     }
 
     protected abstract void setupOntology() throws OWLOntologyCreationException;
 
-    @Override
+    
     public void changeReasoner(ReasonerType reasonerType) {
         // Note: we only use JFact for now
 
@@ -81,7 +81,7 @@ public abstract class Loader implements ILoader {
         printer.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
     }
 
-    @Override
+    
     public void initializeReasoner() {
         reasoner.flush();
     }
@@ -99,62 +99,66 @@ public abstract class Loader implements ILoader {
         return abducibles;
     }
 
-    @Override
+    
     public Observation getObservation() {
         return observation;
     }
 
-    @Override
+    
     public OWLAxiom getObservationAxiom() {
         return observation.getOwlAxiom();
     }
 
-    @Override
+    public OWLIndividual getObservationReductionIndividual(){
+        return observation.getReductionIndividual();
+    }
+
+    
     public void setObservation(OWLAxiom observation) {
         this.observation = new Observation(observation);
     }
 
-    @Override
+    
     public void setObservation(OWLAxiom observation, List<OWLAxiom> axiomsInMultipleObservations, OWLNamedIndividual reductionIndividual){
         this.observation = new Observation(observation, axiomsInMultipleObservations, reductionIndividual);
     }
 
-    @Override
+    
     public Observation getNegObservation() {
         return negObservation;
     }
 
-    @Override
+    
     public OWLAxiom getNegObservationAxiom() {
         return negObservation.getOwlAxiom();
     }
 
-    @Override
+    
     public void setNegObservation(OWLAxiom negObservation) {
         this.negObservation = new Observation(negObservation);
     }
 
-    @Override
+    
     public OWLOntologyManager getOntologyManager() {
         return ontologyManager;
     }
 
-    @Override
+    
     public OWLOntology getOntology() {
         return ontology;
     }
 
-    @Override
+    
     public OWLKnowledgeExplorerReasoner getReasoner() {
         return reasoner;
     }
 
-    @Override
+    
     public void setOWLReasonerFactory(OWLReasonerFactory reasonerFactory) {
         this.reasonerFactory = reasonerFactory;
     }
 
-    @Override
+    
     public String getOntologyIRI() {
         if (ontologyIRI == null) {
             ontologyIRI = ontology.getOntologyID().getOntologyIRI().get().toString();
@@ -162,27 +166,27 @@ public abstract class Loader implements ILoader {
         return ontologyIRI;
     }
 
-    @Override
+    
     public OWLDataFactory getDataFactory() {
         return ontologyManager.getOWLDataFactory();
     }
 
-    @Override
+    
     public Individuals getIndividuals() {
         return namedIndividuals;
     }
 
-    @Override
+    
     public void addNamedIndividual(OWLNamedIndividual namedIndividual) {
         namedIndividuals.addNamedIndividual(namedIndividual);
     }
 
-    @Override
+    
     public OWLOntology getOriginalOntology() {
         return originalOntology;
     }
 
-    @Override
+    
     public OWLOntology getInitialOntology() {
         return initialOntology;
     }

@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.io.PrintWriter;
@@ -21,71 +21,75 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class ExplanationManager implements IExplanationManager {
+public abstract class ExplanationManager {
 
     protected List<Explanation> possibleExplanations = new ArrayList<>();
     protected List<OWLAxiom> lengthOneExplanations = new ArrayList<>();
     protected List<Explanation> finalExplanations;
     protected HybridSolver solver;
-    private final ILoader loader;
+    private final Loader loader;
     private final ReasonerManager reasonerManager;
-    private final IRuleChecker checkRules;
+    private final RuleChecker checkRules;
     protected IPrinter printer;
 
     long startTime;
     TimeManager timer;
 
-    public ExplanationManager(ILoader loader, ReasonerManager reasonerManager){
+    abstract public void addPossibleExplanation(Explanation explanation);
+
+    abstract public void processExplanations(String message);
+
+    public ExplanationManager(Loader loader, ReasonerManager reasonerManager){
         this.loader = loader;
         this.reasonerManager = reasonerManager;
         this.checkRules = new RuleChecker(loader, reasonerManager);
     }
 
-    @Override
+    
     public void setSolver(HybridSolver solver) {
         this.solver = solver;
         timer = solver.timer;
         startTime = timer.getStartTime();
     }
 
-    @Override
+    
     public void setPossibleExplanations(Collection<Explanation> possibleExplanations) {
         this.possibleExplanations = new ArrayList<>();
         possibleExplanations.forEach(this::addPossibleExplanation);
     }
 
-    @Override
+    
     public List<Explanation> getPossibleExplanations() {
         return possibleExplanations;
     }
 
-    @Override
+    
     public int getPossibleExplanationsSize(){
         return possibleExplanations.size();
     }
 
-    @Override
+    
     public void addLengthOneExplanation(OWLAxiom explanation){
         lengthOneExplanations.add(explanation);
     }
 
-    @Override
+    
     public void setLengthOneExplanations(Collection<OWLAxiom> lengthOneExplanations) {
         this.lengthOneExplanations = new ArrayList<>(lengthOneExplanations);
     }
 
-    @Override
+    
     public List<OWLAxiom> getLengthOneExplanations() {
         return lengthOneExplanations;
     }
 
-    @Override
+    
     public int getLengthOneExplanationsSize(){
         return lengthOneExplanations.size();
     }
 
-    @Override
-    public void showExplanations() throws OWLOntologyStorageException, OWLOntologyCreationException {
+    
+    public void showExplanations() {
         List<Explanation> filteredExplanations;
         if(!Configuration.ALGORITHM.usesMxp()){
             filteredExplanations = possibleExplanations;
@@ -109,7 +113,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         }
     }
 
-    private List<Explanation> getConsistentExplanations() throws OWLOntologyStorageException {
+    private List<Explanation> getConsistentExplanations() {
         reasonerManager.resetOntology(loader.getInitialOntology().axioms());
 
         List<Explanation> filteredExplanations = new ArrayList<>();
@@ -125,7 +129,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         return filteredExplanations;
     }
 
-    @Override
+    
     public void logError(Throwable e) {
         StringWriter result = new StringWriter();
         PrintWriter printWriter = new PrintWriter(result);
@@ -134,7 +138,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, startTime, result.toString());
     }
 
-    @Override
+    
     public void logMessages(List<String> info, String message) {
         StringBuilder result = new StringBuilder();
         result.append(String.join("\n", info));
@@ -147,7 +151,7 @@ public abstract class ExplanationManager implements IExplanationManager {
     }
 
 
-    private StringBuilder showExplanationsAccordingToLength(List<Explanation> filteredExplanations) throws OWLOntologyCreationException {
+    private StringBuilder showExplanationsAccordingToLength(List<Explanation> filteredExplanations) {
         StringBuilder result = new StringBuilder();
         int depth = 1;
         while (!filteredExplanations.isEmpty()) {
@@ -208,7 +212,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         explanations.removeAll(notMinimalExplanations);
     }
 
-    private void filterIfNotRelevant(List<Explanation> explanations) throws OWLOntologyCreationException {
+    private void filterIfNotRelevant(List<Explanation> explanations) {
         List<Explanation> notRelevantExplanations = new LinkedList<>();
         for(Explanation e : explanations){
             if(!checkRules.isRelevant(e)){
@@ -289,7 +293,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         return name.contains(DLSyntax.DISPLAY_NEGATION);
     }
 
-    @Override
+    
     public void logExplanationsWithDepth(Integer depth, boolean timeout, boolean error, Double time) {
         if (!Configuration.LOGGING)
             return;
@@ -299,7 +303,7 @@ public abstract class ExplanationManager implements IExplanationManager {
         FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, startTime, line);
     }
 
-    @Override
+    
     public void logExplanationsWithLevel(Integer level, boolean timeout, boolean error, Double time){
         if (!Configuration.LOGGING)
             return;

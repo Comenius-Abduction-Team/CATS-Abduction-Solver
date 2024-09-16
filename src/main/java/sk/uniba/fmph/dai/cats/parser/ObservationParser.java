@@ -7,7 +7,7 @@ import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.*;
 
-public abstract class ObservationParser implements IObservationParser {
+public abstract class ObservationParser {
 
     protected Loader loader;
     protected IPrinter printer;
@@ -18,7 +18,6 @@ public abstract class ObservationParser implements IObservationParser {
 
     protected abstract void createOntologyFromObservation() throws OWLOntologyCreationException, OWLOntologyStorageException;
 
-    @Override
     public void parse() throws Exception {
         try{
             createOntologyFromObservation();

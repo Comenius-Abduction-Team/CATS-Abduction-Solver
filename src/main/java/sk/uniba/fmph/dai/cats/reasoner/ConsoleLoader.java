@@ -36,7 +36,7 @@ public class ConsoleLoader extends Loader {
     protected void loadObservation() throws Exception {
         namedIndividuals = new Individuals();
 
-        IObservationParser observationParser = new ConsoleObservationParser(this);
+        ObservationParser observationParser = new ConsoleObservationParser(this);
         observationParser.parse();
     }
 

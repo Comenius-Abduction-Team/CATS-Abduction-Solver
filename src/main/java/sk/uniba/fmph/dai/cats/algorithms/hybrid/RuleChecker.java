@@ -7,22 +7,22 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
+import java.util.HashSet;
 import java.util.List;
 
-public class RuleChecker implements IRuleChecker {
+public class RuleChecker {
 
-    private final ILoader loader;
+    private final Loader loader;
     private final ReasonerManager reasonerManager;
 
-    RuleChecker(ILoader loader, ReasonerManager reasonerManager) {
+    RuleChecker(Loader loader, ReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
     }
 
-    @Override
     public boolean isConsistent(Explanation explanation) {
         reasonerManager.resetOntology(loader.getInitialOntology().axioms());
         reasonerManager.addAxiomsToOntology(explanation.getAxioms());
@@ -31,7 +31,6 @@ public class RuleChecker implements IRuleChecker {
         return isConsistent;
     }
 
-    @Override
     public boolean isExplanation(Explanation explanation) {
         reasonerManager.addAxiomsToOntology(explanation.getAxioms());
         boolean isConsistent = reasonerManager.isOntologyConsistent();
@@ -39,24 +38,29 @@ public class RuleChecker implements IRuleChecker {
         return !isConsistent;
     }
 
-    @Override
     public boolean isMinimal(List<Explanation> explanationList, Explanation explanation) {
-        if (explanation == null || !(explanation.getAxioms() instanceof List)) {
+        if (explanation == null || explanation.getAxioms() == null) {
             return false;
         }
 
         for (Explanation minimalExplanation : explanationList) {
-            if (explanation.getAxioms().containsAll(minimalExplanation.getAxioms())) {
+            if (new HashSet<>(explanation.getAxioms()).containsAll(minimalExplanation.getAxioms())) {
                 return false;
             }
         }
         return true;
     }
 
-    @Override
-    public boolean isRelevant(Explanation explanation) throws OWLOntologyCreationException {
+    public boolean isRelevant(Explanation explanation) {
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = ontologyManager.createOntology(explanation.getAxioms());
+
+        OWLOntology ontology = null;
+
+        try {
+            ontology = ontologyManager.createOntology(explanation.getAxioms());
+        } catch(OWLOntologyCreationException e){
+            throw new RuntimeException("Could not create ontology while checking relevancy: " + e.getMessage());
+        }
 
         OWLReasoner reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
         //OWLReasoner reasoner = new ReasonerFactory().createNonBufferingReasoner(ontology);
