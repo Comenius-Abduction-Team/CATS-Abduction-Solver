@@ -25,25 +25,30 @@ import java.util.*;
 
 public class HybridSolver implements ISolver {
 
+
+    // HELPER OBJECTS
     protected Loader loader;
     protected ReasonerManager reasonerManager;
-    protected IAbducibleAxioms abducibleAxioms;
     protected ModelManager modelManager;
     protected final ExplanationManager explanationManager;
     protected final ProgressManager progressManager;
+    protected RuleChecker ruleChecker;
     protected SetDivider setDivider;
-    protected Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
+    final TimeManager timer;
 
-    public List<OWLAxiom> assertionsAxioms;
-    public List<OWLAxiom> negAssertionsAxioms;
+    // COLLECTIONS
     public Set<OWLAxiom> path = new HashSet<>();
+    protected final Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
+    protected IAbducibleAxioms abducibleAxioms;
+    public final List<OWLAxiom> assertionsAxioms = new ArrayList<>();
+    public final List<OWLAxiom> negAssertionsAxioms = new ArrayList<>();
+
+    // MINIMALITY CHECKING
+    public boolean checkingMinimalityWithQXP = false;
     public Set<OWLAxiom> pathDuringCheckingMinimality;
 
-    final TimeManager timer;
-    public boolean checkingMinimalityWithQXP = false;
-    protected RuleChecker ruleChecker;
+    // INTEGERS
     protected int currentDepth = 0;
-
     protected int numberOfNodes = 0;
 
     public HybridSolver(ThreadTimer threadTimer, ExplanationManager explanationManager,
@@ -149,16 +154,10 @@ public class HybridSolver implements ISolver {
 
     protected void initialize() {
 
-        setupCollections();
         addNegatedObservation();
 
         abducibleAxioms = new AxiomSet(createAbducibleAxioms());
         modelManager.setExtractor(new ModelExtractor(this, abducibleAxioms));
-    }
-
-    protected void setupCollections(){
-        assertionsAxioms = new ArrayList<>();
-        negAssertionsAxioms = new ArrayList<>();
     }
 
     protected void addNegatedObservation(){
@@ -382,7 +381,7 @@ public class HybridSolver implements ISolver {
         if(Configuration.ALGORITHM.usesMxp()){
             explanationManager.logExplanationsWithLevel(currentDepth, false, false, time);
         }
-        pathsInCertainDepth = new HashSet<>();
+        pathsInCertainDepth.clear();
     }
 
     protected void makeTimeoutPartialLog() {

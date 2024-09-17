@@ -32,7 +32,6 @@ public class HstHybridSolver extends HybridSolver {
     @Override
     protected void initialize() {
 
-        setupCollections();
         reasonerManager.addNegatedObservationToOntologies();
 
         abducibleAxioms = new NumberedAxiomsUnindexedSet(createAbducibleAxioms());
