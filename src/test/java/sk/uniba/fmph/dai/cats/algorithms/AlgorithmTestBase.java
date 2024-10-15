@@ -46,7 +46,7 @@ public abstract class AlgorithmTestBase {
     /**
      * The Manager.
      */
-    protected CatsAbducer manager;
+    protected CatsAbducer abducer;
     /**
      * The No neg.
      */
@@ -99,7 +99,7 @@ public abstract class AlgorithmTestBase {
      */
     @BeforeEach
     void setUp() {
-        manager = new CatsAbducer(backgroundKnowledge,observation);
+        abducer = new CatsAbducer(backgroundKnowledge,observation);
     }
 
     /**
@@ -132,112 +132,112 @@ public abstract class AlgorithmTestBase {
     }
 
     public void testExplanationsFound(int expectedCount){
-        Collection<IExplanation> explanations = manager.getExplanations();
+        Collection<IExplanation> explanations = abducer.getExplanations();
         //System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
     }
 
     public void solve(){
-        manager.solveAbduction();
-        if (manager.getOutputMessage() != null && !manager.getOutputMessage().isEmpty())
-        System.err.println(manager.getOutputMessage());
+        abducer.solveAbduction();
+        if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty())
+            System.err.println(abducer.getOutputMessage());
     }
 
     void mhs(){
-        manager.setAlgorithm(Algorithm.MHS);
+        abducer.setAlgorithm(Algorithm.MHS);
     }
 
     void hst(){
-        manager.setAlgorithm(Algorithm.HST);
+        abducer.setAlgorithm(Algorithm.HST);
     }
 
-    void mxp(){ manager.setAlgorithm(Algorithm.MXP); }
+    void mxp(){ abducer.setAlgorithm(Algorithm.MXP); }
 
     void mhsMxp(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
     }
 
     void hstMxp(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setAlgorithm(Algorithm.HST_MXP);
     }
 
     void mhsNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MHS);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void hstNoNeg(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void mxpNoNeg(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MXP);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void mhsMxpNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void hstMxpNoNeg(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void mhsSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setAbducibles(symbolAbd);
+        abducer.setAlgorithm(Algorithm.MHS);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void hstSymbolAbd(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void mxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setAbducibles(symbolAbd);
+        abducer.setAlgorithm(Algorithm.MXP);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void mhsMxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setAbducibles(symbolAbd);
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void hstMxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void mhsSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MHS);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void hstSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void mxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MXP);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void mhsMxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
     }
 
     void hstMxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
     }
 }

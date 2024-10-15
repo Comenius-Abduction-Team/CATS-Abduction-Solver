@@ -59,7 +59,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     @Override
     void mxp() {
 
-        super.hst();
+        super.mxp();
         solve();
         testExplanationsFound(3);
 
@@ -109,7 +109,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     @Override
     void mxpNoNeg() {
 
-        super.hstNoNeg();
+        super.mxpNoNeg();
         solve();
         testExplanationsFound(3);
 
@@ -159,7 +159,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     @Override
     void mxpSymbolAbd() {
 
-        super.hstSymbolAbd();
+        super.mxpSymbolAbd();
         solve();
         testExplanationsFound(2);
 
@@ -199,7 +199,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     @Override
     void hstSymbolAbdNoNeg() {
 
-        super.mhsSymbolAbdNoNeg();
+        super.hstSymbolAbdNoNeg();
         solve();
         testExplanationsFound(2);
 
@@ -209,7 +209,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     @Override
     void mxpSymbolAbdNoNeg() {
 
-        super.mhsSymbolAbdNoNeg();
+        super.mxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(2);
 

@@ -38,7 +38,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void mhs() {
 
         super.mhs();
-        manager.setDepth(3);
+        abducer.setDepth(3);
         solve();
         testExplanationsFound(3);
 
@@ -49,7 +49,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void hst() {
 
         super.hst();
-        manager.setDepth(3);
+        abducer.setDepth(3);
         solve();
         testExplanationsFound(3);
 
@@ -60,7 +60,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void mhsMxp() {
 
         super.mhsMxp();
-        manager.setDepth(3);
+        abducer.setDepth(3);
         solve();
         testExplanationsFound(3);
 
@@ -71,7 +71,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void hstMxp() {
 
         super.hstMxp();
-        manager.setDepth(3);
+        abducer.setDepth(3);
         solve();
         testExplanationsFound(3);
 
