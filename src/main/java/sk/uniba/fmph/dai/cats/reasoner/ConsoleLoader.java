@@ -17,7 +17,7 @@ public class ConsoleLoader extends Loader {
     }
 
     @Override
-    public void initialize(ReasonerType reasonerType) throws Exception {
+    public void initialize(ReasonerType reasonerType) {
         loadReasoner(reasonerType);
         loadObservation();
         loadPrefixes();
@@ -33,7 +33,7 @@ public class ConsoleLoader extends Loader {
     }
 
     @Override
-    protected void loadObservation() throws Exception {
+    protected void loadObservation() {
         namedIndividuals = new Individuals();
 
         ObservationParser observationParser = new ConsoleObservationParser(this);

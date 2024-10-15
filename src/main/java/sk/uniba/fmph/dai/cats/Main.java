@@ -2,11 +2,8 @@ package sk.uniba.fmph.dai.cats;
 
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
-import sk.uniba.fmph.dai.cats.algorithms.ISolver;
-import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.ConsoleExplanationManager;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.MxpSolver;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbducer;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
@@ -16,7 +13,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.progress.ConsoleProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.*;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
@@ -25,7 +21,7 @@ import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static final boolean TESTING = false;
+    private static final boolean TESTING = true;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
@@ -140,9 +136,7 @@ public class Main {
 //        System.out.println(threadAbducer.getFullLog());
     }
 
-    public static ISolver runSolving(String[] args, ThreadTimer timer) throws Exception {
-
-        ISolver solver = null;
+    public static void runSolving(String[] args, ThreadTimer timer) {
 
         try{
 
@@ -154,29 +148,13 @@ public class Main {
             Loader loader = new ConsoleLoader();
             loader.initialize(Configuration.REASONER);
 
-            ReasonerManager reasonerManager = new ReasonerManager(loader);
-
-            solver = createSolver(timer, loader, reasonerManager);
-            solver.solve(loader, reasonerManager);
+            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(timer, Configuration.ALGORITHM);
+            solver.solve();
 
         } catch(Throwable e){
             new ConsolePrinter().logError("An error occurred:", e);
             throw e;
         }
 
-        return solver;
-    }
-
-    private static ISolver createSolver(ThreadTimer timer, Loader loader, ReasonerManager reasonerManager) {
-
-        ConsoleExplanationManager explanationManager = new ConsoleExplanationManager(loader, reasonerManager);
-        ConsoleProgressManager progressManager = new ConsoleProgressManager();
-
-        if (Configuration.ALGORITHM == Algorithm.MXP)
-            return new MxpSolver(timer, explanationManager, progressManager, new ConsolePrinter());
-        else if (Configuration.ALGORITHM.isHst())
-            return new HstHybridSolver(timer, explanationManager, progressManager, new ConsolePrinter());
-        else
-            return new HybridSolver(timer, explanationManager, progressManager, new ConsolePrinter());
     }
 }

@@ -4,7 +4,6 @@ import sk.uniba.fmph.dai.cats.algorithms.ITreeNode;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.TreeNode;
 
 public class HstTreeNode extends TreeNode implements ITreeNode {
-
-    int min, index;
+    public int min, index;
 
 }

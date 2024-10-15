@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.data;
 
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -40,6 +41,17 @@ public class AxiomSet implements IAbducibleAxioms {
 
     public void removeAll(Collection<OWLAxiom> literals){
         axioms.removeAll(literals);
+    }
+
+    public Set<OWLAxiom> removeAllAndReturn(Collection<OWLAxiom> axioms){
+        Set<OWLAxiom> removed = new HashSet<>();
+        for (OWLAxiom axiom : axioms){
+            if (this.axioms.contains(axiom)){
+                this.axioms.remove(axiom);
+                removed.add(axiom);
+            }
+        }
+        return removed;
     }
 
     public void add(OWLAxiom literal) {

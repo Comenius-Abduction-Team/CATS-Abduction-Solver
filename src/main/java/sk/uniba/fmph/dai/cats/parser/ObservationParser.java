@@ -18,11 +18,11 @@ public abstract class ObservationParser {
 
     protected abstract void createOntologyFromObservation() throws OWLOntologyCreationException, OWLOntologyStorageException;
 
-    public void parse() throws Exception {
+    public void parse() {
         try{
             createOntologyFromObservation();
-        } catch (OWLOntologyCreationException e){
-            throw new OWLOntologyCreationException("Invalid format of observation");
+        } catch (OWLOntologyCreationException | OWLOntologyStorageException e){
+            throw new RuntimeException("Probem while creating ontology observation");
         }
         printer.logInfo("Observation: ".concat(Configuration.OBSERVATION));
     }

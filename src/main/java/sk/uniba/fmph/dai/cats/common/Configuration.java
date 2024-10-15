@@ -4,6 +4,8 @@ import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Configuration {
     public static String OBSERVATION = "";
@@ -30,7 +32,7 @@ public class Configuration {
     public static boolean CHECKING_MINIMALITY_BY_QXP = false;
     public static boolean CACHED_CONFLICTS_LONGEST_CONFLICT = false;
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
-    public static boolean CHECK_RELEVANCE_DURING_BUILDING_TREE_IN_MHS_MXP = false;
+    public static boolean CONTINUOUS_RELEVANCE_CHECKS = false;
 
     public static boolean CACHE_ABDUCIBLES = true;
 
@@ -42,4 +44,23 @@ public class Configuration {
     public static boolean DEBUG_PRINT = false;
 
     public static boolean LOGGING = true;
+
+    public static List<String> getInfo() {
+//        String optimizationQXP = "Optimization QXP: " + CHECKING_MINIMALITY_BY_QXP;
+//        String optimizationLongestConf = "Optimization Cached Conflicts - The Longest Conflict: " + CACHED_CONFLICTS_LONGEST_CONFLICT;
+//        String optimizationMedian = "Optimization Cached Conflicts - Median: " + CACHED_CONFLICTS_MEDIAN;
+        String roles = "Roles: " + ROLES_IN_EXPLANATIONS_ALLOWED;
+        String looping = "Looping allowed: " + LOOPING_ALLOWED;
+        String negation = "Negation: " +  NEGATION_ALLOWED;
+        String mhs_mode = "Algorithm: " + ALGORITHM;
+        String caching = "Abducible caching: " + CACHE_ABDUCIBLES;
+        String relevance = "Strict relevance: " + STRICT_RELEVANCE;
+        String depth = "Depth limit: ";
+        if (DEPTH > 0) depth += DEPTH; else depth += "none";
+        String timeout = "Timeout: ";
+        if (TIMEOUT > 0) timeout += TIMEOUT; else timeout += "none";
+
+        return Arrays.asList(
+                roles, looping, negation, mhs_mode, caching, relevance, depth, timeout);
+    }
 }

@@ -8,8 +8,6 @@ import sk.uniba.fmph.dai.cats.logger.FileLogger;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
@@ -26,30 +24,26 @@ public abstract class ExplanationManager {
     protected List<Explanation> possibleExplanations = new ArrayList<>();
     protected List<OWLAxiom> lengthOneExplanations = new ArrayList<>();
     protected List<Explanation> finalExplanations;
-    protected HybridSolver solver;
-    private final Loader loader;
-    private final ReasonerManager reasonerManager;
-    private final RuleChecker checkRules;
+    protected AlgorithmSolver solver;
+    private Loader loader;
+    private ReasonerManager reasonerManager;
+    private RuleChecker ruleChecker;
     protected IPrinter printer;
-
-    long startTime;
     TimeManager timer;
 
     abstract public void addPossibleExplanation(Explanation explanation);
 
     abstract public void processExplanations(String message);
 
-    public ExplanationManager(Loader loader, ReasonerManager reasonerManager){
-        this.loader = loader;
-        this.reasonerManager = reasonerManager;
-        this.checkRules = new RuleChecker(loader, reasonerManager);
-    }
+    public ExplanationManager(){}
 
     
-    public void setSolver(HybridSolver solver) {
+    public void setSolver(AlgorithmSolver solver) {
         this.solver = solver;
+        loader = solver.loader;
+        reasonerManager = loader.reasonerManager;
+        ruleChecker = solver.ruleChecker;
         timer = solver.timer;
-        startTime = timer.getStartTime();
     }
 
     
@@ -103,13 +97,13 @@ public abstract class ExplanationManager {
         StringBuilder result = showExplanationsAccordingToLength(filteredExplanations);
         printer.print(result.toString());
         if (Configuration.LOGGING)
-            FileLogger.appendToFile(FileLogger.FINAL_LOG__PREFIX, startTime, result.toString());
+            FileLogger.appendToFile(FileLogger.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
 
         logExplanationsTimes(finalExplanations);
 
         if(Configuration.ALGORITHM.usesMxp()){
             StringBuilder resultLevel = showExplanationsAccordingToLevel(new ArrayList<>(finalExplanations));
-            FileLogger.appendToFile(FileLogger.LEVEL_LOG___PREFIX, startTime, resultLevel.toString());
+            FileLogger.appendToFile(FileLogger.LEVEL_LOG___PREFIX, timer.getStartTime(), resultLevel.toString());
         }
     }
 
@@ -135,7 +129,7 @@ public abstract class ExplanationManager {
         PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);
 
-        FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, startTime, result.toString());
+        FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, timer.getStartTime(), result.toString());
     }
 
     
@@ -147,7 +141,7 @@ public abstract class ExplanationManager {
             result.append("\n\n").append(message);
         }
 
-        FileLogger.appendToFile(FileLogger.INFO_LOG__PREFIX, startTime, result.toString());
+        FileLogger.appendToFile(FileLogger.INFO_LOG__PREFIX, timer.getStartTime(), result.toString());
     }
 
 
@@ -215,7 +209,7 @@ public abstract class ExplanationManager {
     private void filterIfNotRelevant(List<Explanation> explanations) {
         List<Explanation> notRelevantExplanations = new LinkedList<>();
         for(Explanation e : explanations){
-            if(!checkRules.isRelevant(e)){
+            if(!ruleChecker.isRelevant(e)){
                 notRelevantExplanations.add(e);
             }
         }
@@ -252,7 +246,7 @@ public abstract class ExplanationManager {
             String line = String.format("%.2f; %s\n", exp.getAcquireTime(), exp);
             result.append(line);
         }
-        FileLogger.appendToFile(FileLogger.EXP_TIMES_LOG__PREFIX, startTime, result.toString());
+        FileLogger.appendToFile(FileLogger.EXP_TIMES_LOG__PREFIX, timer.getStartTime(), result.toString());
     }
 
     private boolean isExplanation(Explanation explanation) {
@@ -300,7 +294,7 @@ public abstract class ExplanationManager {
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
         String line = String.format("%d; %d; %.2f%s%s; { %s }\n", depth, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, startTime, line);
+        FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, timer.getStartTime(), line);
     }
 
     
@@ -310,7 +304,7 @@ public abstract class ExplanationManager {
         List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getLevel().equals(level)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
         String line = String.format("%d; %d; %.2f%s%s; { %s }\n", level, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LEVEL_LOG__PREFIX, startTime, line);
+        FileLogger.appendToFile(FileLogger.PARTIAL_LEVEL_LOG__PREFIX, timer.getStartTime(), line);
     }
 
     public List<Explanation> getFinalExplanations() {

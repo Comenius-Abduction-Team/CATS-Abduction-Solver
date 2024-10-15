@@ -8,8 +8,8 @@ import sk.uniba.fmph.dai.abduction_api.exception.CommonException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidObservationException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidSolverParameterException;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
-import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import org.semanticweb.owlapi.model.*;
@@ -19,7 +19,6 @@ import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.*;
@@ -46,9 +45,7 @@ public class CatsAbducer implements IThreadAbducer {
 
     boolean multithread = false;
 
-    HybridSolver solver;
-    ApiLoader loader;
-    ReasonerManager reasonerManager;
+    AlgorithmSolver solver;
     ThreadTimer timer;
 
     public CatsAbducer() {
@@ -198,36 +195,17 @@ public class CatsAbducer implements IThreadAbducer {
 
     private void setupSolver() {
 
-        loader = new ApiLoader(this);
-        ApiPrinter printer = new ApiPrinter(this);
-
-        try {
-            loader.initialize(ReasonerType.JFACT);
-        } catch (Exception e){
-            printer.logError("An error occurred while initialising the internal reasoner: ",e);
-            return;
-        }
-
-        reasonerManager = new ReasonerManager(loader);
-
-        ApiExplanationManager explanationManager = new ApiExplanationManager(loader, reasonerManager, this);
-        ApiProgressManager progressManager = new ApiProgressManager(this);
-
         timer = new ThreadTimer(100);
-        timer.start();
 
         setSolverConfiguration();
 
-        if (algorithm.isHst())
-            solver = new HstHybridSolver(timer, explanationManager, progressManager, printer);
-        else
-            solver = new HybridSolver(timer, explanationManager, progressManager, printer);
+        solver = AlgorithmSolverFactory.createApiSolver(timer, algorithm, this);
 
     }
 
     private void solve(){
         try {
-            solver.solve(loader, reasonerManager);
+            solver.solve();
         } catch (Throwable e) {
             new ApiPrinter(this).logError("An error occured while solving: ", e);
         }
@@ -253,6 +231,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
         Configuration.LOGGING = logging;
+        Configuration.ALGORITHM = algorithm;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

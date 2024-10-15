@@ -17,31 +17,35 @@ public class ModelExtractor {
 
     private final Loader loader;
     private final Abducibles abducibles;
+    private final Set<OWLAxiom> abducibleAxioms;
+    //private HashMap<Integer,OWLAxiom> abducibleMap;
+    private final List<OWLAxiom> assertionAxioms;
+    private final List<OWLAxiom> negAssertionAxioms;
     
     private final OWLOntology originalOntology;
-    
-    private final HybridSolver solver;
+
     private final OWLOntologyManager ontologyManager;
 
-    private Set<OWLAxiom> abducibleAxioms;
-    //private HashMap<Integer,OWLAxiom> abducibles;
+    public ModelExtractor(Loader loader, TransformedAbducibles transformedAbducibles){
 
-    public ModelExtractor(HybridSolver solver, IAbducibleAxioms abducibleAxioms){
-        this.solver = solver;
-        this.loader = solver.loader;
+        this.loader = loader;
         abducibles = loader.getAbducibles();
         originalOntology = loader.getOriginalOntology();
-        initialiseAbducibles(abducibleAxioms);
+
+        abducibleAxioms = transformedAbducibles.abducibleAxioms;
+        assertionAxioms = transformedAbducibles.assertionAxioms;
+        negAssertionAxioms = transformedAbducibles.negAssertionAxioms;
+
         this.ontologyManager = OWLManager.createOWLOntologyManager();
     }
 
-    public void initialiseAbducibles(IAbducibleAxioms abducibleAxioms){
-//        abducibles = new HashMap<>();
-//        for (OWLAxiom axiom : solver.abducibleAxioms.getAxioms()){
-//            abducibles.put(axiom.hashCode(), axiom);
-//        }
-        this.abducibleAxioms = abducibleAxioms.getAxioms();
-    }
+//    public void initialiseAbducibles(IAbducibleAxioms abducibleAxioms){
+////        abducibles = new HashMap<>();
+////        for (OWLAxiom axiom : solver.abducibleAxioms.getAxioms()){
+////            abducibles.put(axiom.hashCode(), axiom);
+////        }
+//        this.abducibleAxioms = abducibleAxioms.getAxioms();
+//    }
 
     public Model extractModel() {  // mrozek
 
@@ -167,12 +171,12 @@ public class ModelExtractor {
     }
 
     private Set<OWLAxiom> getAllRolesAssertionWithIndividual(OWLNamedIndividual individual) {
-        Set<OWLAxiom> roleAssertions = solver.assertionsAxioms.stream()
+        Set<OWLAxiom> roleAssertions = assertionAxioms.stream()
                 .filter(a -> a.isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION)
                         && ((OWLObjectPropertyAssertionAxiom)a).getSubject() == individual)
                 .collect(toSet());
 
-        Set<OWLAxiom> negativeRoleAssertions = solver.negAssertionsAxioms.stream()
+        Set<OWLAxiom> negativeRoleAssertions = negAssertionAxioms.stream()
                 .filter(a -> a.isOfType(AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION)
                         && ((OWLNegativeObjectPropertyAssertionAxiom)a).getSubject() == individual)
                 .collect(toSet());
@@ -242,11 +246,11 @@ public class ModelExtractor {
             else {
 
                 OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                if (solver.abducibleAxioms.contains(axiom))
+                if (abducibleAxioms.contains(axiom))
                     model.add(axiom);
 
                 OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                if (Configuration.NEGATION_ALLOWED && solver.abducibleAxioms.contains(negatedAxiom))
+                if (Configuration.NEGATION_ALLOWED && abducibleAxioms.contains(negatedAxiom))
                     model.addNegated(negatedAxiom);
 
             }
@@ -281,11 +285,11 @@ public class ModelExtractor {
             else {
 
                 OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                if (solver.abducibleAxioms.contains(axiom))
+                if (abducibleAxioms.contains(axiom))
                     model.addNegated(axiom);
 
                 OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                if (Configuration.NEGATION_ALLOWED && solver.abducibleAxioms.contains(negatedAxiom))
+                if (Configuration.NEGATION_ALLOWED && abducibleAxioms.contains(negatedAxiom))
                     model.add(negatedAxiom);
 
             }
@@ -333,7 +337,7 @@ public class ModelExtractor {
     }
 
     public void deletePathFromOntology() {
-        solver.resetOntologyToOriginal();
+        loader.reasonerManager.resetOntologyToOriginal();
     }
 
 }

@@ -10,6 +10,11 @@ public class Model {
 
     public Model(){}
 
+    public Model(Model other){
+        data = new ModelData(other.data);
+        negatedData = new ModelData(other.negatedData);
+    }
+
     public Model(ModelData data, ModelData negatedData) {
         this.data = data;
         this.negatedData = negatedData;

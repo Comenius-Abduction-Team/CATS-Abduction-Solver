@@ -35,7 +35,9 @@ public abstract class Loader {
 
     protected IPrinter printer;
 
-    abstract public void initialize(ReasonerType reasonerType) throws Exception;
+    public ReasonerManager reasonerManager;
+
+    abstract public void initialize(ReasonerType reasonerType);
 
     protected void loadReasoner(ReasonerType reasonerType) {
         try {

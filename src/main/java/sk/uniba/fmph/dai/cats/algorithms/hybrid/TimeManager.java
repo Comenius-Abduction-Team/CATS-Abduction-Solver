@@ -12,12 +12,12 @@ public class TimeManager {
     private long startTime;
     Map<Integer, Double> levelTimes = new HashMap<>();
 
-    TimeManager(ThreadTimer timer){
+    public TimeManager(ThreadTimer timer){
         this.timer = timer;
 
     }
 
-    void setStartTime(){
+    public void setStartTime(){
         startTime = System.currentTimeMillis();
     }
 

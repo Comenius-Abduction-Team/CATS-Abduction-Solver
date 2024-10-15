@@ -18,9 +18,9 @@ public class RuleChecker {
     private final Loader loader;
     private final ReasonerManager reasonerManager;
 
-    RuleChecker(Loader loader, ReasonerManager reasonerManager) {
+    RuleChecker(Loader loader) {
         this.loader = loader;
-        this.reasonerManager = reasonerManager;
+        this.reasonerManager = loader.reasonerManager;
     }
 
     public boolean isConsistent(Explanation explanation) {

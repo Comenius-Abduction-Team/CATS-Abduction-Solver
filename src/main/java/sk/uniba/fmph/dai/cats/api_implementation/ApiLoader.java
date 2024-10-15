@@ -21,7 +21,7 @@ public class ApiLoader extends Loader {
     }
 
     @Override
-    public void initialize(ReasonerType reasonerType) throws Exception {
+    public void initialize(ReasonerType reasonerType) {
         loadReasoner(reasonerType);
         loadObservation();
         loadAbducibles();
@@ -48,7 +48,7 @@ public class ApiLoader extends Loader {
     }
 
     @Override
-    protected void loadObservation() throws Exception {
+    protected void loadObservation() {
         namedIndividuals = new Individuals();
         ObservationParser observationParser = new ApiObservationParser(this, Abducer);
         observationParser.parse();

@@ -9,14 +9,14 @@ import java.util.*;
 public class SetDivider {
 
     ExplanationManager explanationManager;
-    private Map<AxiomPair, Integer> tableOfAxiomPairOccurance;
-    private List<Integer> numberOfAxiomPairOccurance;
+    private final Map<AxiomPair, Integer> tableOfAxiomPairOccurance;
+    private final List<Integer> numberOfAxiomPairOccurance;
     private double median = 0;
     public Set<Integer> notUsedExplanations;
     private int lastUsedIndex;
 
-    public SetDivider(HybridSolver hybridSolver){
-        this.explanationManager = hybridSolver.getExplanationManager();
+    public SetDivider(ExplanationManager explanationManager){
+        this.explanationManager = explanationManager;
         tableOfAxiomPairOccurance = new HashMap<>();
         numberOfAxiomPairOccurance = new ArrayList<>();
         notUsedExplanations = new HashSet<>();

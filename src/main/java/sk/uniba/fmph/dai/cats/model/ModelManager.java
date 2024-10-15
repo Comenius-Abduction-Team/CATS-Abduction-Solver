@@ -81,18 +81,18 @@ public class ModelManager {
 //        return -1;
 //    }
 
-    public Model findReuseModelForPath(Set<OWLAxiom> path){
+    public boolean findReuseModelForPath(Set<OWLAxiom> path){
 
         for (int i = models.size() - 1; i >= 0; i--) {
             Model model = models.get(i);
             if (model.getData().containsAll(path)){
                 modelToReuse = model;
-                return modelToReuse;
+                return true;
             }
         }
 
         modelToReuse = null;
-        return null;
+        return false;
     }
 
     public void storeModelFoundByConsistencyCheck(){

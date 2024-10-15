@@ -49,7 +49,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
         unindexed.remove(axiom);
         unindexedSize--;
         if (Configuration.DEBUG_PRINT){
-            System.out.println("New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
+            System.out.println("[HST] New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
         }
     }
 
