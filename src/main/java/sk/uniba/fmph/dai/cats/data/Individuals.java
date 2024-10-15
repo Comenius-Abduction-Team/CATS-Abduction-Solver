@@ -1,8 +1,8 @@
 package sk.uniba.fmph.dai.cats.data;
 
-import sk.uniba.fmph.dai.cats.common.DLSyntax;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import sk.uniba.fmph.dai.cats.common.DLSyntax;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -1,6 +1,8 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+
 import java.util.Collection;
 import java.util.stream.Stream;
 

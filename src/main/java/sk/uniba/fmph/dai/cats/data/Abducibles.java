@@ -1,10 +1,10 @@
 package sk.uniba.fmph.dai.cats.data;
 
-import sk.uniba.fmph.dai.cats.common.Configuration;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.HashSet;

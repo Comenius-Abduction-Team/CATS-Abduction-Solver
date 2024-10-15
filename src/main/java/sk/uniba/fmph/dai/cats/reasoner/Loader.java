@@ -1,14 +1,14 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
-import sk.uniba.fmph.dai.cats.common.LogMessage;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
-import sk.uniba.fmph.dai.cats.data.Abducibles;
-import sk.uniba.fmph.dai.cats.data.Individuals;
-import sk.uniba.fmph.dai.cats.data.Observation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
+import sk.uniba.fmph.dai.cats.common.IPrinter;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
+import sk.uniba.fmph.dai.cats.data.Abducibles;
+import sk.uniba.fmph.dai.cats.data.Individuals;
+import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 

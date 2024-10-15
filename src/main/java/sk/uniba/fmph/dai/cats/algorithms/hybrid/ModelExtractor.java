@@ -1,11 +1,12 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
-import sk.uniba.fmph.dai.cats.data.Abducibles;
-import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.common.Configuration;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
 import org.semanticweb.owlapi.search.EntitySearcher;
+import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.data.Abducibles;
+import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 

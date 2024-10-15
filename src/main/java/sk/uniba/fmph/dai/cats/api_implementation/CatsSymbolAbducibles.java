@@ -1,9 +1,9 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
 import sk.uniba.fmph.dai.abduction_api.exception.SymbolAbducibleException;
 import sk.uniba.fmph.dai.cats.data.Abducibles;
-import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.Collection;

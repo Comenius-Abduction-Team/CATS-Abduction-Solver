@@ -1,5 +1,8 @@
 package sk.uniba.fmph.dai.cats;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
@@ -9,14 +12,12 @@ import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.reasoner.*;
+import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
-import java.io.*;
+import java.io.File;
 import java.util.Set;
 public class Main {
 

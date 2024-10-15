@@ -1,8 +1,9 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
+import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
-import org.semanticweb.owlapi.model.*;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;

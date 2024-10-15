@@ -4,7 +4,9 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 

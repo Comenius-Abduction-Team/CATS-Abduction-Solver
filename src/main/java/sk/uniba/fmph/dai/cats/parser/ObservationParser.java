@@ -1,11 +1,13 @@
 package sk.uniba.fmph.dai.cats.parser;
 
+import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
-import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public abstract class ObservationParser {
 

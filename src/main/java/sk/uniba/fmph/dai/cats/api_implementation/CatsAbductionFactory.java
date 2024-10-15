@@ -1,20 +1,18 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLOntology;
+import sk.uniba.fmph.dai.abduction_api.abducer.IAbducer;
+import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.abducible.*;
 import sk.uniba.fmph.dai.abduction_api.exception.AxiomAbducibleException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidObservationException;
 import sk.uniba.fmph.dai.abduction_api.exception.NotSupportedException;
 import sk.uniba.fmph.dai.abduction_api.exception.SymbolAbducibleException;
 import sk.uniba.fmph.dai.abduction_api.factory.IAbductionFactory;
-import sk.uniba.fmph.dai.abduction_api.abducer.IAbducer;
-import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
-
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLOntology;
 import sk.uniba.fmph.dai.abduction_api.factory.ISolverDescriptor;
 
-import java.util.Collection;
 import java.util.Set;
 
 public class CatsAbductionFactory implements IAbductionFactory {

@@ -1,8 +1,8 @@
 package sk.uniba.fmph.dai.cats.data;
 
-import sk.uniba.fmph.dai.cats.common.StringFactory;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.List;
 

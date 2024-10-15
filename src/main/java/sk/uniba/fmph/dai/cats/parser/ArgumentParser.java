@@ -7,7 +7,6 @@ import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class ArgumentParser {

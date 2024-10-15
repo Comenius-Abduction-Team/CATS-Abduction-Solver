@@ -1,5 +1,9 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
+import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IExplanationConfigurator;
@@ -7,21 +11,19 @@ import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
 import sk.uniba.fmph.dai.abduction_api.exception.CommonException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidObservationException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidSolverParameterException;
+import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import org.semanticweb.owlapi.model.*;
-import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
-import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
-import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
-
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CatsAbducer implements IThreadAbducer {
 

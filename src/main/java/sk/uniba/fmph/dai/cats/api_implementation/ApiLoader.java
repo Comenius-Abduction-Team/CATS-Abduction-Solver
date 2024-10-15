@@ -1,10 +1,10 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
 import sk.uniba.fmph.dai.cats.data.Abducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import sk.uniba.fmph.dai.cats.parser.ObservationParser;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
