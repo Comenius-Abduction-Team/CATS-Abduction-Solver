@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.rctree.RcTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
@@ -19,11 +20,11 @@ import java.util.Set;
 
 public class AlgorithmSolver {
 
-    protected Loader loader;
+    public Loader loader;
     protected ModelManager modelManager;
-    protected final ExplanationManager explanationManager;
+    public final ExplanationManager explanationManager;
     protected final ProgressManager progressManager;
-    protected RuleChecker ruleChecker;
+    public RuleChecker ruleChecker;
     protected SetDivider setDivider;
     protected IPrinter printer;
     protected final TimeManager timer;
@@ -39,7 +40,7 @@ public class AlgorithmSolver {
     protected int numberOfNodes = 0;
 
     protected TreeBuilder treeBuilder;
-    NodeProcessor nodeProcessor;
+    public NodeProcessor nodeProcessor;
 
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
                               ProgressManager progressManager, ThreadTimer threadTimer, IPrinter printer) {
@@ -73,6 +74,10 @@ public class AlgorithmSolver {
 
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
+        else if (algorithm.isRcTree())
+            treeBuilder = new RcTreeBuilder(this);
+        else if (algorithm.isTreeOnly())
+            treeBuilder = new RootOnlyTreeBuilder(this);
         else
             treeBuilder = new MhsTreeBuilder(this);
 
@@ -162,6 +167,9 @@ public class AlgorithmSolver {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
 
+            if (node == null)
+                continue;
+
             if(increaseDepth(node)){
                 currentDepth++;
             }
@@ -180,8 +188,11 @@ public class AlgorithmSolver {
                         + StringFactory.getRepresentation(node.model.getNegatedData()));
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
-            if (!canIterateNodeChildren)
+            if (!canIterateNodeChildren){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[TREE] NO CHILDREN TO ITERATE!");
                 continue;
+            }
 
             while (!treeBuilder.noChildrenLeft()){
 
@@ -266,6 +277,9 @@ public class AlgorithmSolver {
             }
         }
 
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("[TREE] Finished iterating the tree.");
+
         path.clear();
 
         if(!timer.levelHasTime(currentDepth)){
@@ -280,6 +294,7 @@ public class AlgorithmSolver {
         Explanation explanation = new Explanation();
         explanation.addAxioms(node.label);
         explanation.addAxiom(child);
+        explanation.lastAxiom = child;
         explanation.setAcquireTime(timer.getTime());
         explanation.setLevel(currentDepth);
         return explanation;
@@ -357,7 +372,7 @@ public class AlgorithmSolver {
         }
     }
 
-    Model findAndGetModelToReuse(){
+    public Model findAndGetModelToReuse(){
         boolean modelFound = false;
 
         if (!modelManager.canReuseModel())
@@ -369,7 +384,7 @@ public class AlgorithmSolver {
         return modelManager.getReusableModel();
     }
 
-    Model removePathAxiomsFromModel(Model model){
+    public Model removePathAxiomsFromModel(Model model){
         Model copy = new Model(model);
         copy.getNegatedData().removeAll(path);
         return copy;
