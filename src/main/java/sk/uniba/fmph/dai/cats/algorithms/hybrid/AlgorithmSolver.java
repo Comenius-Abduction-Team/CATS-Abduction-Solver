@@ -167,14 +167,16 @@ public class AlgorithmSolver {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
 
-            if (node == null)
+            if (node == null && Configuration.DEBUG_PRINT){
+                System.out.println("[!!!] Null node!");
                 continue;
+            }
 
             if(increaseDepth(node)){
                 currentDepth++;
             }
 
-            if (depthLimitReached(node) || node.closed) {
+            if (depthLimitReached(node)) {
                 break;
             }
 
@@ -184,15 +186,23 @@ public class AlgorithmSolver {
             }
 
             if (Configuration.DEBUG_PRINT)
-                System.out.println("*********\n" + "[TREE] PROCESSING node: "
-                        + StringFactory.getRepresentation(node.model.getNegatedData()));
+                System.out.println("*********\n" + "[TREE] PROCESSING node: " + node);
+
+            if (node.closed) {
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[TREE] Closed node");
+                continue;
+            }
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
+
             if (!canIterateNodeChildren){
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[TREE] NO CHILDREN TO ITERATE!");
                 continue;
             }
+
+            numberOfNodes++;
 
             while (!treeBuilder.noChildrenLeft()){
 
@@ -203,11 +213,6 @@ public class AlgorithmSolver {
                         System.out.println("[!!!] NULL CHILD");
                     continue;
                 }
-
-//                if (child.getClassesInSignature().stream().findFirst().orElse(null).toString().contains("Cavity")
-//                        && currentDepth == 1){
-//                    System.out.println("BREAKPOINT HERE FOR DEBUGGING PURPOSES");
-//                }
 
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
@@ -220,7 +225,7 @@ public class AlgorithmSolver {
                 //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
                 //ak axiom nie je v abducibles
                 //nepokracujeme vo vetve
-                if(treeBuilder.isIncorrectPath(node.label, child)){
+                if(treeBuilder.isIncorrectPath(node.path, child)){
                     if (Configuration.DEBUG_PRINT)
                         System.out.println("[PRUNING] INCORRECT PATH!");
                     continue;
@@ -277,8 +282,10 @@ public class AlgorithmSolver {
             }
         }
 
-        if (Configuration.DEBUG_PRINT)
+        if (Configuration.DEBUG_PRINT) {
             System.out.println("[TREE] Finished iterating the tree.");
+            System.out.println("[TREE] Number of nodes: " + numberOfNodes);
+        }
 
         path.clear();
 
@@ -292,7 +299,7 @@ public class AlgorithmSolver {
 
     private Explanation createPossibleExplanation(TreeNode node, OWLAxiom child){
         Explanation explanation = new Explanation();
-        explanation.addAxioms(node.label);
+        explanation.addAxioms(node.path);
         explanation.addAxiom(child);
         explanation.lastAxiom = child;
         explanation.setAcquireTime(timer.getTime());
@@ -328,7 +335,7 @@ public class AlgorithmSolver {
                 updateProgress();
             if (Configuration.DEBUG_PRINT){}
                 //System.out.println("NUMBER OF NODES: " + numberOfNodes);
-            numberOfNodes = 0;
+            //numberOfNodes = 0;
             return true;
         }
         return false;

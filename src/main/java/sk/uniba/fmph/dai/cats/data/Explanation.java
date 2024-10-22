@@ -10,6 +10,8 @@ public class Explanation implements IExplanation {
 
     private final List<OWLAxiom> axioms;
 
+    public OWLAxiom lastAxiom;
+
     private Integer depth;
 
     private double acquireTime;

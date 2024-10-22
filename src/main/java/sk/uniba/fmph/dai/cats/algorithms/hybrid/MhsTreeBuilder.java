@@ -45,7 +45,6 @@ public class MhsTreeBuilder implements TreeBuilder {
     public boolean pruneTree(TreeNode node, Explanation explanation) {
 
         if (solver.isPathAlreadyStored()){
-            //node.closeNode();
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[PRUNING] PATH ALREADY STORED!");
             return true;
@@ -57,14 +56,12 @@ public class MhsTreeBuilder implements TreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            //node.closeNode();
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
 
         if (nodeProcessor.isInvalidExplanation(explanation)){
-            //node.closeNode();
             return true;
         }
 
@@ -85,13 +82,13 @@ public class MhsTreeBuilder implements TreeBuilder {
         return createNode(label, parent.depth + 1);
     }
 
-    public TreeNode createNode(Explanation label, Integer depth){
+    private TreeNode createNode(Explanation label, Integer depth){
 
 
         TreeNode node = new TreeNode();
 
         if (label != null) {
-            node.label = label.getAxioms();
+            node.path = label.getAxioms();
         }
         node.depth = depth;
 
