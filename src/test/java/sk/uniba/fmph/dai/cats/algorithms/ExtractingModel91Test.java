@@ -49,6 +49,16 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Test
     @Override
+    void mxp() {
+
+        super.mxp();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
     void hst() {
 
         super.hst();

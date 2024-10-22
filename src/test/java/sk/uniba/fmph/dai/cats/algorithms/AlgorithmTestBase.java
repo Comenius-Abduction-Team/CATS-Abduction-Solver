@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsExplanationConfigurator;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsSymbolAbducibles;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,7 +100,9 @@ public abstract class AlgorithmTestBase {
      */
     @BeforeEach
     void setUp() {
+        Configuration.DEBUG_PRINT = false;
         abducer = new CatsAbducer(backgroundKnowledge,observation);
+        abducer.setLogging(false);
     }
 
     /**
@@ -143,22 +146,10 @@ public abstract class AlgorithmTestBase {
             System.err.println(abducer.getOutputMessage());
     }
 
+    // ------- MHS -------
+    
     void mhs(){
         abducer.setAlgorithm(Algorithm.MHS);
-    }
-
-    void hst(){
-        abducer.setAlgorithm(Algorithm.HST);
-    }
-
-    void mxp(){ abducer.setAlgorithm(Algorithm.MXP); }
-
-    void mhsMxp(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-    }
-
-    void hstMxp(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
     }
 
     void mhsNoNeg(){
@@ -166,48 +157,8 @@ public abstract class AlgorithmTestBase {
         abducer.setExplanationConfigurator(noNeg);
     }
 
-    void hstNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setExplanationConfigurator(noNeg);
-    }
-
-    void mxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.MXP);
-        abducer.setExplanationConfigurator(noNeg);
-    }
-
-    void mhsMxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-        abducer.setExplanationConfigurator(noNeg);
-    }
-
-    void hstMxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
-        abducer.setExplanationConfigurator(noNeg);
-    }
-
     void mhsSymbolAbd(){
         abducer.setAlgorithm(Algorithm.MHS);
-        abducer.setAbducibles(symbolAbd);
-    }
-
-    void hstSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setAbducibles(symbolAbd);
-    }
-
-    void mxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.MXP);
-        abducer.setAbducibles(symbolAbd);
-    }
-
-    void mhsMxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-        abducer.setAbducibles(symbolAbd);
-    }
-
-    void hstMxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
         abducer.setAbducibles(symbolAbd);
     }
 
@@ -217,10 +168,18 @@ public abstract class AlgorithmTestBase {
         abducer.setExplanationConfigurator(noNeg);
     }
 
-    void hstSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setAbducibles(symbolAbd);
+    // ------- MXP -------
+
+    void mxp(){ abducer.setAlgorithm(Algorithm.MXP); }
+
+    void mxpNoNeg(){
+        abducer.setAlgorithm(Algorithm.MXP);
         abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void mxpSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.MXP);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void mxpSymbolAbdNoNeg(){
@@ -229,10 +188,64 @@ public abstract class AlgorithmTestBase {
         abducer.setExplanationConfigurator(noNeg);
     }
 
+    // ------- MHS-MXP -------
+
+    void mhsMxp(){
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+    }
+
+    void mhsMxpNoNeg(){
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void mhsMxpSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setAbducibles(symbolAbd);
+    }
+
     void mhsMxpSymbolAbdNoNeg(){
         abducer.setAlgorithm(Algorithm.MHS_MXP);
         abducer.setAbducibles(symbolAbd);
         abducer.setExplanationConfigurator(noNeg);
+    }
+
+    // ------- HST -------
+
+    void hst(){
+        abducer.setAlgorithm(Algorithm.HST);
+    }
+
+    void hstNoNeg(){
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void hstSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setAbducibles(symbolAbd);
+    }
+
+    void hstSymbolAbdNoNeg(){
+        abducer.setAlgorithm(Algorithm.HST);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    // ------- HST-MXP -------
+
+    void hstMxp(){
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+    }
+
+    void hstMxpNoNeg(){
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void hstMxpSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+        abducer.setAbducibles(symbolAbd);
     }
 
     void hstMxpSymbolAbdNoNeg(){
@@ -240,4 +253,86 @@ public abstract class AlgorithmTestBase {
         abducer.setAbducibles(symbolAbd);
         abducer.setExplanationConfigurator(noNeg);
     }
+
+    // ------- RCT -------
+
+    void rct(){
+        abducer.setAlgorithm(Algorithm.RCT);
+    }
+
+    void rctNoNeg(){
+        abducer.setAlgorithm(Algorithm.RCT);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void rctSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.RCT);
+        abducer.setAbducibles(symbolAbd);
+    }
+
+    void rctSymbolAbdNoNeg(){
+        abducer.setAlgorithm(Algorithm.RCT);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    // ------- RCT-MXP -------
+
+    void rctMxp(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+    }
+
+    void rctMxpNoNeg(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    void rctMxpSymbolAbd(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+        abducer.setAbducibles(symbolAbd);
+    }
+
+    void rctMxpSymbolAbdNoNeg(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+        abducer.setAbducibles(symbolAbd);
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    
+
+    
+
+    
+
+    
+
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 }
