@@ -60,13 +60,13 @@ public class HstTreeBuilder implements TreeBuilder {
 
     }
 
-    private TreeNode createNode(Explanation label, Integer depth, int index){
+    private HstTreeNode createNode(Explanation label, Integer depth, int index){
 
         HstTreeNode node = new HstTreeNode();
         node.index = index;
 
         if (label != null) {
-            node.label = label.getAxioms();
+            node.path = label.getAxioms();
         }
         node.depth = depth;
 
@@ -101,8 +101,6 @@ public class HstTreeBuilder implements TreeBuilder {
         HstTreeNode node = queue.poll();
         if (node == null)
             return null;
-        if (Configuration.DEBUG_PRINT)
-            System.out.print("[HST] node index: " + node.index + ", node min: " + node.min + " ");
         return node;
     }
 
