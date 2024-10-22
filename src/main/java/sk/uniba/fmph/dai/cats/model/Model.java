@@ -1,31 +1,18 @@
 package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
-public class Model {
+public class Model implements Comparable<Model>{
 
     ModelData data = new ModelData();
     ModelData negatedData = new ModelData();
-    boolean valid = true;
 
     public Model(){}
 
     public Model(Model other){
         data = new ModelData(other.data);
         negatedData = new ModelData(other.negatedData);
-    }
-
-    public Model(ModelData data, ModelData negatedData) {
-        this.data = data;
-        this.negatedData = negatedData;
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 
     public ModelData getData() {
@@ -52,8 +39,22 @@ public class Model {
     public boolean equals(Object obj) {
         if (obj instanceof Model) {
             Model other = (Model) obj;
-            return data.containsAll(other.getData()) && other.getData().containsAll(data);
+            return data.containsAll(other.data) && other.data.containsAll(data);
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(Model o) {
+        int compare = Integer.compare(negatedData.size(), o.negatedData.size());
+        if (compare == 0)
+            return 1;
+        return compare;
+        //return 1 * Integer.compare(negatedData.size(), o.negatedData.size());
+    }
+
+    @Override
+    public String toString() {
+        return StringFactory.getRepresentation(negatedData);
     }
 }

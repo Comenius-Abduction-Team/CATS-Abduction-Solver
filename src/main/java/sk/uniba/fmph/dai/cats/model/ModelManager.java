@@ -3,44 +3,32 @@ package sk.uniba.fmph.dai.cats.model;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ModelExtractor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ModelManager {
 
     ModelExtractor extractor;
 
-    final List<Model> models = new ArrayList<>();
+    Collection<Model> models;
 
     Model modelToReuse;
 
     int lastUsableModelIndex;
 
+    public ModelManager(){
+        models = new ArrayList<>();
+    }
+
     public void setExtractor(ModelExtractor extractor) {
         this.extractor = extractor;
     }
-
-//    public Model getReusableModel(){
-//        if (!canReuseModel())
-//            return null;
-//        return models.get(lastUsableModelIndex);
-//    }
 
     public Model getReusableModel(){
         return modelToReuse;
     }
 
-//    public boolean canReuseModel(){
-//        return lastUsableModelIndex >= 0;
-//    }
-
     public boolean canReuseModel(){
         return modelToReuse != null;
-    }
-
-    public void setLastModelAsReusable(){
-        lastUsableModelIndex = models.size();
     }
 
     public void setModelToReuse(Model model){
@@ -58,33 +46,28 @@ public class ModelManager {
 
     public boolean findReusableModel(Model model){
 
+//        List<Model> modelsList = (List<Model>) models;
+//        int index = modelsList.indexOf(model);
+//        if (index < 0){
+//            return false;
+//        }
+//        modelToReuse = modelsList.get(index);
+//        return true;
+
         for (int i = models.size() - 1; i >= 0; i--) {
-            Model storedModel = models.get(i);
+            Model storedModel = ((List<Model>)models).get(i);
             if (storedModel.equals(model)){
                 modelToReuse = storedModel;
                 return true;
             }
         }
-        modelToReuse = null;
         return false;
     }
-
-//    public int findReuseIndexForPath(Set<OWLAxiom> path){
-//
-//        for (int i = models.size()-1; i >= 0 ; i--){
-//            if (models.get(i).getData().containsAll(path)){
-//                lastUsableModelIndex = i;
-//                return i;
-//            }
-//        }
-//        lastUsableModelIndex = -1;
-//        return -1;
-//    }
 
     public boolean findReuseModelForPath(Set<OWLAxiom> path){
 
         for (int i = models.size() - 1; i >= 0; i--) {
-            Model model = models.get(i);
+            Model model = ((List<Model>)models).get(i);
             if (model.getData().containsAll(path)){
                 modelToReuse = model;
                 return true;
