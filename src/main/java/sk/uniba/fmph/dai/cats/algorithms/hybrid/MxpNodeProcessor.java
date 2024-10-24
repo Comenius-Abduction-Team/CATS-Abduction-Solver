@@ -54,7 +54,6 @@ public class MxpNodeProcessor implements NodeProcessor {
     }
 
     protected void addToExplanations(Explanation explanation){
-        explanation.setDepth(explanation.getAxioms().size());
         if(Configuration.CHECKING_MINIMALITY_BY_QXP){
             Explanation newExplanation = getMinimalExplanationByCallingQXP(explanation);
             explanationManager.addPossibleExplanation(newExplanation);
@@ -92,9 +91,6 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     void runMxpInRoot(){
         Conflict conflict = getMergeConflict();
-        for (Explanation e: conflict.getExplanations()){
-            e.setDepth(e.getAxioms().size());
-        }
         explanationManager.setPossibleExplanations(conflict.getExplanations());
     }
 
@@ -257,7 +253,6 @@ public class MxpNodeProcessor implements NodeProcessor {
         explanationManager.setLengthOneExplanations(new ArrayList<>());
         for (Explanation explanation : newExplanations){
             if (explanation.getAxioms().size() == 1){
-                //explanationManager.addLengthOneExplanation(explanation.getOwlAxioms().stream().findFirst().orElse(null));
                 explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
             }
             explanation.addAxioms(path);
@@ -266,7 +261,6 @@ public class MxpNodeProcessor implements NodeProcessor {
                 if(Configuration.CHECKING_MINIMALITY_BY_QXP){
                     newExplanation = getMinimalExplanationByCallingQXP(explanation);
                 }
-                newExplanation.setDepth(newExplanation.getAxioms().size());
                 explanationManager.addPossibleExplanation(newExplanation);
                 if(Configuration.CACHED_CONFLICTS_MEDIAN){
                     setDivider.addPairsOfLiteralsToTable(newExplanation);

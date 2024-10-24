@@ -8,32 +8,25 @@ import java.util.*;
 
 public class Explanation implements IExplanation {
 
-    private final List<OWLAxiom> axioms;
+    private List<OWLAxiom> axioms = new ArrayList<>();
 
     public OWLAxiom lastAxiom;
 
-    private Integer depth;
-
     private double acquireTime;
 
-    private Integer level;
+    private int level = -1;
 
     public Explanation(List<OWLAxiom> axioms) {
         this.axioms = axioms;
     }
 
-    public Explanation(Collection<OWLAxiom> axioms, Integer depth, Integer level, double acquireTime) {
+    public Explanation(Collection<OWLAxiom> axioms, int level, double acquireTime) {
         this.axioms = new ArrayList<>(axioms);
-        this.depth = depth;
         this.acquireTime = acquireTime;
         this.level = level;
     }
 
-    public Explanation() {
-        this.axioms = new ArrayList<>();
-        this.depth = 0;
-        this.level = -1;
-    }
+    public Explanation() {}
 
     public List<OWLAxiom> getAxioms() {
         return axioms;
@@ -54,17 +47,9 @@ public class Explanation implements IExplanation {
         return axioms.size();
     }
 
-    public Integer getDepth() {
-        return depth;
-    }
-
     public double getAcquireTime() { return acquireTime; }
 
     public void setAcquireTime(double time) { this.acquireTime = time; }
-
-    public void setDepth(Integer depth) {
-        this.depth = depth;
-    }
 
     public Integer getLevel() {
         return level;

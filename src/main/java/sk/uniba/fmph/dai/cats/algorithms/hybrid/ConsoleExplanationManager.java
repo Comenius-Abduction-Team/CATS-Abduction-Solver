@@ -19,7 +19,6 @@ public class ConsoleExplanationManager extends ExplanationManager {
     public void processExplanations(String message) {
 
         showExplanations();
-        logMessages(Configuration.getInfo(), message);
 
         if (message != null){
             printer.print('\n' + message);

@@ -42,7 +42,6 @@ public class ClassicNodeProcessor implements NodeProcessor {
             return false;
         if (Configuration.DEBUG_PRINT)
             System.out.println("[PRUNING] INCONSISTENT WITH ONTOLOGY!");
-        explanation.setDepth(explanation.getAxioms().size());
         explanationManager.addPossibleExplanation(explanation);
         return true;
     }

@@ -7,6 +7,7 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.logger.ExplanationLogger;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
@@ -23,11 +24,12 @@ public class AlgorithmSolver {
     public Loader loader;
     protected ModelManager modelManager;
     public final ExplanationManager explanationManager;
+    private final ExplanationLogger logger;
     protected final ProgressManager progressManager;
     public RuleChecker ruleChecker;
     protected SetDivider setDivider;
     protected IPrinter printer;
-    protected final TimeManager timer;
+    public final TimeManager timer;
     protected final ConsistencyChecker consistencyChecker;
 
     // COLLECTIONS
@@ -37,6 +39,7 @@ public class AlgorithmSolver {
 
     // INTEGERS
     protected int currentDepth = 0;
+    int maxDepth = -1;
     protected int numberOfNodes = 0;
 
     protected TreeBuilder treeBuilder;
@@ -52,6 +55,8 @@ public class AlgorithmSolver {
         this.explanationManager = explanationManager;
         explanationManager.setSolver(this);
         setDivider = new SetDivider(explanationManager);
+
+        logger = new ExplanationLogger(this);
 
         this.progressManager = progressManager;
 
@@ -107,6 +112,7 @@ public class AlgorithmSolver {
         if (!loader.reasonerManager.isOntologyConsistent()) {
             message = "The observation is already entailed!";
             explanationManager.processExplanations(message);
+            logger.logMessage(Configuration.getInfo(), message);
         }
 
         else {
@@ -114,7 +120,7 @@ public class AlgorithmSolver {
             try {
                 startSolving();
             } catch (Throwable e) {
-                makeErrorAndPartialLog(e);
+                logger.makeErrorAndPartialLog(currentDepth, e);
                 message = "An error occured: " + e.getMessage();
                 throw (e);
             } finally {
@@ -159,7 +165,7 @@ public class AlgorithmSolver {
         treeBuilder.addNodeToTree(root);
 
         if(isTimeout()) {
-            makeTimeoutPartialLog();
+            logger.makeTimeoutPartialLog(currentDepth);
             return;
         }
 
@@ -167,21 +173,21 @@ public class AlgorithmSolver {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
 
-            if (node == null && Configuration.DEBUG_PRINT){
-                System.out.println("[!!!] Null node!");
+            if (node == null){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[!!!] Null node!");
                 continue;
             }
 
-            if(increaseDepth(node)){
+            if (increaseDepth(node))
                 currentDepth++;
-            }
 
-            if (depthLimitReached(node)) {
+            if (depthLimitReached()) {
                 break;
             }
 
             if(isTimeout()){
-                makeTimeoutPartialLog();
+                logger.makeTimeoutPartialLog(currentDepth);
                 break;
             }
 
@@ -218,7 +224,7 @@ public class AlgorithmSolver {
                     System.out.println("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
 
                 if(isTimeout()){
-                    makeTimeoutPartialLog();
+                    logger.makeTimeoutPartialLog(currentDepth);
                     return;
                 }
 
@@ -259,7 +265,7 @@ public class AlgorithmSolver {
                     }
 
                     if(isTimeout()){
-                        makeTimeoutPartialLog();
+                        logger.makeTimeoutPartialLog(currentDepth);
                         return;
                     }
 
@@ -290,7 +296,8 @@ public class AlgorithmSolver {
         path.clear();
 
         if(!timer.levelHasTime(currentDepth)){
-            makePartialLog();
+            logger.makePartialLog(currentDepth);
+            pathsInCertainDepth.clear();
         }
 
         currentDepth = 0;
@@ -317,7 +324,7 @@ public class AlgorithmSolver {
     }
 
     Explanation createExplanationFromAxioms(Set<OWLAxiom> axioms){
-        return new Explanation(axioms, axioms.size(), currentDepth, timer.getTime());
+        return new Explanation(axioms, currentDepth, timer.getTime());
     }
 
     boolean isPathAlreadyStored(){
@@ -330,53 +337,36 @@ public class AlgorithmSolver {
 
     protected boolean increaseDepth(TreeNode node){
         if (node.depth > currentDepth){
-            makePartialLog();
+            logger.makePartialLog(currentDepth);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
-            if (Configuration.DEBUG_PRINT){}
-                //System.out.println("NUMBER OF NODES: " + numberOfNodes);
-            //numberOfNodes = 0;
             return true;
         }
         return false;
     }
 
-    protected boolean depthLimitReached(TreeNode node){
-        return Configuration.DEPTH > 0 && node.depth.equals(Configuration.DEPTH);
+    protected boolean depthLimitReached(){
+        return Configuration.DEPTH > 0 && currentDepth == Configuration.DEPTH;
     }
 
-    //TODO TOTO TREBA ODPRATAT DO INEJ TRIEDY
-    protected void makeErrorAndPartialLog(Throwable e) {
-        explanationManager.logError(e);
+    private void increaseDepthVoid(TreeNode node){
 
-        double time = timer.getTime();
-        timer.setTimeForLevel(time, currentDepth);
-
-        explanationManager.logExplanationsWithDepth(currentDepth, false, true, time);
-        if(Configuration.ALGORITHM.usesMxp()){
-            explanationManager.logExplanationsWithDepth(currentDepth + 1, false, true, time);
-            explanationManager.logExplanationsWithLevel(currentDepth, false, true, time);
+        if (node.depth != currentDepth) {
+            pathsInCertainDepth.clear();
         }
-    }
+        else return;
 
-    protected void makePartialLog() {
-        Double time = timer.getTime();
-        timer.setTimeForLevel(time, currentDepth);
-        explanationManager.logExplanationsWithDepth(currentDepth, false, false, time);
-        if(Configuration.ALGORITHM.usesMxp()){
-            explanationManager.logExplanationsWithLevel(currentDepth, false, false, time);
+        if (currentDepth == maxDepth){
+            logger.makePartialLog(currentDepth);
+            if (Configuration.PRINT_PROGRESS)
+                updateProgress();
         }
-        pathsInCertainDepth.clear();
-    }
 
-    protected void makeTimeoutPartialLog() {
-        Double time = timer.getTime();
-        timer.setTimeForLevel(time, currentDepth);
-        explanationManager.logExplanationsWithDepth(currentDepth, true, false, time);
-        if(Configuration.ALGORITHM.usesMxp()){
-            explanationManager.logExplanationsWithDepth(currentDepth + 1, true, false, time);
-            explanationManager.logExplanationsWithLevel(currentDepth, true,false, time);
-        }
+        if (node.depth > maxDepth)
+            maxDepth = node.depth;
+
+        currentDepth = node.depth;
+
     }
 
     public Model findAndGetModelToReuse(){

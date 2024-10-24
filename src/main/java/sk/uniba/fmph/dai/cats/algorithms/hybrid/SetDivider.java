@@ -106,7 +106,7 @@ public class SetDivider {
         int length = 0;
 
         for(Integer i : notUsedExplanations){
-            if(explanationManager.getPossibleExplanations().get(i).getDepth() > length){
+            if(explanationManager.getPossibleExplanations().get(i).size() > length){
                 indexOfLongestExp = i;
             }
         }

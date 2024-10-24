@@ -7,16 +7,11 @@ import sk.uniba.fmph.dai.cats.common.DLSyntax;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.logger.FileLogger;
+import sk.uniba.fmph.dai.cats.logger.FileManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class ExplanationManager {
@@ -36,7 +31,6 @@ public abstract class ExplanationManager {
     abstract public void processExplanations(String message);
 
     public ExplanationManager(){}
-
     
     public void setSolver(AlgorithmSolver solver) {
         this.solver = solver;
@@ -45,43 +39,35 @@ public abstract class ExplanationManager {
         ruleChecker = solver.ruleChecker;
         timer = solver.timer;
     }
-
     
     public void setPossibleExplanations(Collection<Explanation> possibleExplanations) {
         this.possibleExplanations = new ArrayList<>();
         possibleExplanations.forEach(this::addPossibleExplanation);
     }
-
     
     public List<Explanation> getPossibleExplanations() {
         return possibleExplanations;
     }
-
     
     public int getPossibleExplanationsSize(){
         return possibleExplanations.size();
     }
-
     
     public void addLengthOneExplanation(OWLAxiom explanation){
         lengthOneExplanations.add(explanation);
     }
-
     
     public void setLengthOneExplanations(Collection<OWLAxiom> lengthOneExplanations) {
         this.lengthOneExplanations = new ArrayList<>(lengthOneExplanations);
     }
-
     
     public List<OWLAxiom> getLengthOneExplanations() {
         return lengthOneExplanations;
     }
-
     
     public int getLengthOneExplanationsSize(){
         return lengthOneExplanations.size();
     }
-
     
     public void showExplanations() {
         List<Explanation> filteredExplanations;
@@ -92,18 +78,18 @@ public abstract class ExplanationManager {
         }
 
         solver.path.clear();
-        finalExplanations = new LinkedList<>();
+        finalExplanations = new ArrayList<>();
 
-        StringBuilder result = showExplanationsAccordingToLength(filteredExplanations);
+        StringBuilder result = formatExplanationsWithSize(filteredExplanations);
         printer.print(result.toString());
         if (Configuration.LOGGING)
-            FileLogger.appendToFile(FileLogger.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
+            FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
 
         logExplanationsTimes(finalExplanations);
 
         if(Configuration.ALGORITHM.usesMxp()){
-            StringBuilder resultLevel = showExplanationsAccordingToLevel(new ArrayList<>(finalExplanations));
-            FileLogger.appendToFile(FileLogger.LEVEL_LOG___PREFIX, timer.getStartTime(), resultLevel.toString());
+            result = formatExplanationsWithLevel(new ArrayList<>(finalExplanations));
+            FileManager.appendToFile(FileManager.LEVEL_LOG__PREFIX, timer.getStartTime(), result.toString());
         }
     }
 
@@ -123,33 +109,12 @@ public abstract class ExplanationManager {
         return filteredExplanations;
     }
 
-    
-    public void logError(Throwable e) {
-        StringWriter result = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(result);
-        e.printStackTrace(printWriter);
-
-        FileLogger.appendToFile(FileLogger.ERROR_LOG__PREFIX, timer.getStartTime(), result.toString());
-    }
-
-    
-    public void logMessages(List<String> info, String message) {
+    private StringBuilder formatExplanationsWithSize(List<Explanation> explanations) {
         StringBuilder result = new StringBuilder();
-        result.append(String.join("\n", info));
-
-        if (message != null && !message.isEmpty()) {
-            result.append("\n\n").append(message);
-        }
-
-        FileLogger.appendToFile(FileLogger.INFO_LOG__PREFIX, timer.getStartTime(), result.toString());
-    }
-
-
-    private StringBuilder showExplanationsAccordingToLength(List<Explanation> filteredExplanations) {
-        StringBuilder result = new StringBuilder();
-        int depth = 1;
-        while (!filteredExplanations.isEmpty()) {
-            List<Explanation> currentExplanations = removeExplanationsWithDepth(filteredExplanations, depth);
+        int size = 1;
+        while (!explanations.isEmpty()) {
+            List<Explanation> currentExplanations = filterExplanationsBySize(explanations, size);
+            explanations.removeAll(currentExplanations);
             if(Configuration.ALGORITHM.usesMxp()){
                 if(!Configuration.CHECKING_MINIMALITY_BY_QXP){
                     filterIfNotMinimal(currentExplanations);
@@ -157,17 +122,17 @@ public abstract class ExplanationManager {
                 filterIfNotRelevant(currentExplanations);
             }
             if (currentExplanations.isEmpty()) {
-                depth++;
+                size++;
                 continue;
             }
 
-            timer.setTimeForLevelIfNotSet(findLevelTime(currentExplanations), depth);
+            timer.setTimeForLevelIfNotSet(findLevelTime(currentExplanations), size);
             finalExplanations.addAll(currentExplanations);
             String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
-            String line = String.format("%d; %d; %.2f; { %s }\n", depth, currentExplanations.size(),
-                    timer.getTimeForLevel(depth), currentExplanationsFormat);
+            String line = String.format("%d; %d; %.2f; { %s }\n", size, currentExplanations.size(),
+                    timer.getTimeForLevel(size), currentExplanationsFormat);
             result.append(line);
-            depth++;
+            size++;
         }
 
         String line = String.format("%.2f", timer.getTime());
@@ -177,14 +142,15 @@ public abstract class ExplanationManager {
         return result;
     }
 
-    private StringBuilder showExplanationsAccordingToLevel(List<Explanation> filteredExplanations){
+    private StringBuilder formatExplanationsWithLevel(List<Explanation> explanations){
         StringBuilder result = new StringBuilder();
         int level = 0;
-        while (!filteredExplanations.isEmpty()) {
-            List<Explanation> currentExplanations = removeExplanationsWithLevel(filteredExplanations, level);
-            timer.setTimeForLevelIfNotSet(findLevelTime(currentExplanations), level);
-            String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
-            String line = String.format("%d; %d; %.2f; { %s }\n", level, currentExplanations.size(),
+        while (!explanations.isEmpty()) {
+            List<Explanation> filteredExplanations = filterExplanationsByLevel(explanations, level);
+            explanations.removeAll(filteredExplanations);
+            timer.setTimeForLevelIfNotSet(findLevelTime(filteredExplanations), level);
+            String currentExplanationsFormat = StringUtils.join(filteredExplanations, ", ");
+            String line = String.format("%d; %d; %.2f; { %s }\n", level, filteredExplanations.size(),
                     timer.getTimeForLevel(level), currentExplanationsFormat);
             result.append(line);
             level++;
@@ -198,7 +164,7 @@ public abstract class ExplanationManager {
         List<Explanation> notMinimalExplanations = new LinkedList<>();
         for (Explanation e: explanations){
             for (Explanation m: finalExplanations){
-                if (e.getAxioms().containsAll(m.getAxioms())){
+                if (new HashSet<>(e.getAxioms()).containsAll(m.getAxioms())){
                     notMinimalExplanations.add(e);
                 }
             }
@@ -216,16 +182,18 @@ public abstract class ExplanationManager {
         explanations.removeAll(notRelevantExplanations);
     }
 
-    private List<Explanation> removeExplanationsWithDepth(List<Explanation> filteredExplanations, Integer depth) {
-        List<Explanation> currentExplanations = filteredExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
-        filteredExplanations.removeAll(currentExplanations);
-        return currentExplanations;
+    private List<Explanation> filterExplanationsBySize(List<Explanation> explanations, int size) {
+        return explanations
+                .stream()
+                .filter(explanation -> size == explanation.size())
+                .collect(Collectors.toList());
     }
 
-    private List<Explanation> removeExplanationsWithLevel(List<Explanation> filteredExplanations, Integer level) {
-        List<Explanation> currentExplanations = filteredExplanations.stream().filter(explanation -> explanation.getLevel().equals(level)).collect(Collectors.toList());
-        filteredExplanations.removeAll(currentExplanations);
-        return currentExplanations;
+    private List<Explanation> filterExplanationsByLevel(List<Explanation> filteredExplanations, int level) {
+        return filteredExplanations
+                .stream()
+                .filter(explanation -> level == explanation.getLevel())
+                .collect(Collectors.toList());
     }
 
     private double findLevelTime(List<Explanation> explanations){
@@ -246,7 +214,7 @@ public abstract class ExplanationManager {
             String line = String.format("%.2f; %s\n", exp.getAcquireTime(), exp);
             result.append(line);
         }
-        FileLogger.appendToFile(FileLogger.EXP_TIMES_LOG__PREFIX, timer.getStartTime(), result.toString());
+        FileManager.appendToFile(FileManager.EXP_TIMES_LOG__PREFIX, timer.getStartTime(), result.toString());
     }
 
     private boolean isExplanation(Explanation explanation) {
@@ -287,24 +255,12 @@ public abstract class ExplanationManager {
         return name.contains(DLSyntax.DISPLAY_NEGATION);
     }
 
-    
-    public void logExplanationsWithDepth(Integer depth, boolean timeout, boolean error, Double time) {
-        if (!Configuration.LOGGING)
-            return;
-        List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
-        String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
-        String line = String.format("%d; %d; %.2f%s%s; { %s }\n", depth, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LOG__PREFIX, timer.getStartTime(), line);
+    public List<Explanation> getExplanationsBySize(int size) {
+        return filterExplanationsBySize(possibleExplanations, size);
     }
 
-    
-    public void logExplanationsWithLevel(Integer level, boolean timeout, boolean error, Double time){
-        if (!Configuration.LOGGING)
-            return;
-        List<Explanation> currentExplanations = possibleExplanations.stream().filter(explanation -> explanation.getLevel().equals(level)).collect(Collectors.toList());
-        String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
-        String line = String.format("%d; %d; %.2f%s%s; { %s }\n", level, currentExplanations.size(), time, timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.PARTIAL_LEVEL_LOG__PREFIX, timer.getStartTime(), line);
+    public List<Explanation> getExplanationsByLevel(int level) {
+        return filterExplanationsByLevel(possibleExplanations, level);
     }
 
     public List<Explanation> getFinalExplanations() {
