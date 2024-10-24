@@ -10,7 +10,7 @@ import java.util.List;
 
 public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
 
-    final int index;
+    final int id;
 
     OWLAxiom labelAxiom;
 
@@ -23,8 +23,8 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
 
     final List<OWLAxiom> usedLabels = new ArrayList<>();
 
-    RcTreeNode(int index){
-        this.index = index;
+    RcTreeNode(int id){
+        this.id = id;
     }
 
     boolean isSubsetOf(RcTreeNode other){
@@ -36,16 +36,16 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
     }
 
     @Override
-    public int compareTo(RcTreeNode o) {
-        //return depth.compareTo(o.depth);
-        return Integer.compare(index, o.index);
+    public int compareTo(RcTreeNode other) {
+        //return depth.compareTo(other.depth);
+        return Integer.compare(id, other.id);
     }
 
     @Override
     public String toString() {
         if (labelAxiom == null)
-            return index + "." + StringFactory.getRepresentation(model.getNegatedData());
-        return index + "." + StringFactory.getRepresentation(labelAxiom) + ":" +
+            return id + "." + StringFactory.getRepresentation(model.getNegatedData());
+        return id + "." + StringFactory.getRepresentation(labelAxiom) + ":" +
                 StringFactory.getRepresentation(model.getNegatedData());
     }
 }
