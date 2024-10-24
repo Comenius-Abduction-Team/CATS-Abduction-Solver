@@ -210,6 +210,8 @@ public class CatsAbducer implements IThreadAbducer {
             solver.solve();
         } catch (Throwable e) {
             new ApiPrinter(this).logError("An error occured while solving: ", e);
+        } finally {
+            timer.interrupt();
         }
     }
 

@@ -1,7 +1,6 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.timer;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,34 +17,35 @@ public class TimeManager {
     }
 
     public void setStartTime(){
+        timer.start();
         startTime = System.currentTimeMillis();
     }
 
-    double getTime(){
+    public double getTime(){
         return timer.getTotalUserTimeInSec();
     }
 
-    long getStartTime(){
+    public long getStartTime(){
         return startTime;
     }
 
-    void setTimeForLevel(double time, int depth){
+    public void setTimeForLevel(double time, int depth){
         levelTimes.put(depth, time);
     }
 
-    double getTimeForLevel(int depth){
+    public double getTimeForLevel(int depth){
         return levelTimes.get(depth);
     }
 
-    boolean levelHasTime(int depth){
+    public boolean levelHasTime(int depth){
         return levelTimes.containsKey(depth);
     }
 
-    boolean isTimeout(){
+    public boolean isTimeout(){
         return Configuration.TIMEOUT > 0 && getTime() > Configuration.TIMEOUT;
     }
 
-    void setTimeForLevelIfNotSet(double time, int depth){
+    public void setTimeForLevelIfNotSet(double time, int depth){
         if (!levelHasTime(depth))
             setTimeForLevel(time, depth);
     }

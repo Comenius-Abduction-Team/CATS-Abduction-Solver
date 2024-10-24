@@ -23,9 +23,7 @@ public class ThreadTimer extends Thread {
         setDaemon(true);
     }
 
-    /**
-     * Run the thread until interrupted.
-     */
+    @Override
     public void run() {
         while (!isInterrupted()) {
             update();
@@ -95,7 +93,7 @@ public class ThreadTimer extends Thread {
     /**
      * Get total user time so far in nanoseconds.
      */
-    public long getTotalUserTime() {
+    long getTotalUserTime() {
         final Collection<TimeRecord> hist = records.values();
         long time = 0L;
 
@@ -107,7 +105,7 @@ public class ThreadTimer extends Thread {
         return time;
     }
 
-    public double getTotalUserTimeInSec() {
+    double getTotalUserTimeInSec() {
         return (double) getTotalUserTime() / BILLION;
     }
 

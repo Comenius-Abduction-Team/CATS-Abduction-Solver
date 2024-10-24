@@ -13,6 +13,7 @@ import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
+import sk.uniba.fmph.dai.cats.timer.TimeManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

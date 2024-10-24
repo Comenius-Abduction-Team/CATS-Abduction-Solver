@@ -144,8 +144,6 @@ public class Main {
             ArgumentParser argumentParser = new ArgumentParser();
             argumentParser.parse(args);
 
-            timer.start();
-
             Loader loader = new ConsoleLoader();
             loader.initialize(Configuration.REASONER);
 

@@ -10,6 +10,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.logger.FileManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
+import sk.uniba.fmph.dai.cats.timer.TimeManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
