@@ -9,11 +9,11 @@ import java.io.IOException;
 public class ToothacheTest extends AlgorithmTestBase {
 
     public ToothacheTest() throws OWLOntologyCreationException, IOException {
-        super();
+        super("ToothacheTest");
     }
 
     @Override
-    void setUpInput() {
+    protected void setUpInput() {
         ONTOLOGY_FILE = "files/toothache.rdf";
 
         OBSERVATION =
@@ -25,7 +25,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     }
 
     @Override
-    void setUpAbducibles() {
+    protected void setUpAbducibles() {
         OWLClass cold = dataFactory.getOWLClass(":DrankColdDrink", prefixManager);
         OWLClass sensitive = dataFactory.getOWLClass(":SensitiveTeeth", prefixManager);
         OWLClass cavity = dataFactory.getOWLClass(":Cavity", prefixManager);

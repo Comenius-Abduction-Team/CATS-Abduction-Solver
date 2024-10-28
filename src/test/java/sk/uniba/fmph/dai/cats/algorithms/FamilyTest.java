@@ -9,11 +9,11 @@ import java.io.IOException;
 public class FamilyTest extends AlgorithmTestBase {
 
     public FamilyTest() throws OWLOntologyCreationException, IOException {
-        super();
+        super("FamilyTest");
     }
 
     @Override
-    void setUpInput() {
+    protected void setUpInput() {
         ONTOLOGY_FILE = "files/family2.owl";
 
         OBSERVATION =
@@ -25,7 +25,7 @@ public class FamilyTest extends AlgorithmTestBase {
     }
 
     @Override
-    void setUpAbducibles() {
+    protected void setUpAbducibles() {
         OWLClass grandfather = dataFactory.getOWLClass(":Grandfather", prefixManager);
         OWLClass grandmother = dataFactory.getOWLClass(":Grandmother", prefixManager);
 

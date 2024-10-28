@@ -9,11 +9,11 @@ import java.io.IOException;
 public class ExtractingModel91Test extends AlgorithmTestBase {
 
     public ExtractingModel91Test() throws OWLOntologyCreationException, IOException {
-        super();
+        super("ExtractingModel91Test");
     }
 
     @Override
-    void setUpInput() {
+    protected void setUpInput() {
         ONTOLOGY_FILE = "files/testExtractingModel9_1.owl";
 
         OBSERVATION =
@@ -25,7 +25,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     }
 
     @Override
-    void setUpAbducibles() {
+    protected void setUpAbducibles() {
         OWLClass A = dataFactory.getOWLClass(":A", prefixManager);
         OWLClass B = dataFactory.getOWLClass(":B", prefixManager);
         OWLClass D = dataFactory.getOWLClass(":D", prefixManager);

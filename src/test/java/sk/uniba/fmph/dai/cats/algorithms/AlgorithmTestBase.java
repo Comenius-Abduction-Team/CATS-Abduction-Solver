@@ -23,12 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public abstract class AlgorithmTestBase {
 
+    private final boolean CREATE_LOGS = true;
+    private final boolean DEBUG_PRINTING = false;
+    private final boolean PRINT_EXPLANATIONS = false;
+
     /** Path to the file containing the background knowledge ontology. */
-    static String ONTOLOGY_FILE;
+    protected String ONTOLOGY_FILE;
     /** String containing the observation axioms in some OWL syntax. */
-    static String OBSERVATION;
+    protected String OBSERVATION;
     /** Prefix to use for abducible symbols (usually a prefix from the BK ontology). */
-    static String ABDUCIBLE_PREFIX;
+    protected String ABDUCIBLE_PREFIX;
 
     /** The BK ontology extracted from the file. */
     protected OWLOntology backgroundKnowledge;
@@ -63,14 +67,20 @@ public abstract class AlgorithmTestBase {
      * @throws OWLOntologyCreationException internal OWL API error
      * @throws IOException                  in case of wrong file path
      */
-    public AlgorithmTestBase() throws OWLOntologyCreationException, IOException {
+    public AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
+        setOntologyName(name);
         setUpInput();
         setUpHelperObjects();
         setUpAbducibles();
     }
 
+    private void setOntologyName(String name){
+        Configuration.INPUT_ONT_FILE = name;
+        Configuration.INPUT_FILE_NAME = "";
+    }
+
     /** Method that should be overwritten by the test to set its BK, observation and prefix to be used in all test cases. */
-    abstract void setUpInput();
+    protected abstract void setUpInput();
 
     /**
      * Constructs objects necesarry to set up abducibles and run the test cases.
@@ -78,7 +88,7 @@ public abstract class AlgorithmTestBase {
      * @throws OWLOntologyCreationException internal OWL API error
      * @throws IOException                  in case of wrong file path
      */
-    void setUpHelperObjects() throws OWLOntologyCreationException, IOException {
+    private void setUpHelperObjects() throws OWLOntologyCreationException, IOException {
 
         backgroundKnowledge = parseOntologyFromFile(ONTOLOGY_FILE);
         observation = parseAxiomsFromString(OBSERVATION);
@@ -93,16 +103,16 @@ public abstract class AlgorithmTestBase {
     }
 
     /** Method that should be overriden by the specific test to set up abducibles used in the abducible test cases. */
-    abstract void setUpAbducibles();
+    protected abstract void setUpAbducibles();
 
     /**
      * Instantiates an abduction manager before each test case.
      */
     @BeforeEach
     void setUp() {
-        Configuration.DEBUG_PRINT = false;
+        Configuration.DEBUG_PRINT = DEBUG_PRINTING;
         abducer = new CatsAbducer(backgroundKnowledge,observation);
-        abducer.setLogging(false);
+        abducer.setLogging(CREATE_LOGS);
     }
 
     /**
@@ -136,7 +146,8 @@ public abstract class AlgorithmTestBase {
 
     public void testExplanationsFound(int expectedCount){
         Collection<IExplanation> explanations = abducer.getExplanations();
-        //System.out.println(explanations);
+        if (PRINT_EXPLANATIONS)
+            System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
     }
 
@@ -146,156 +157,192 @@ public abstract class AlgorithmTestBase {
             System.err.println(abducer.getOutputMessage());
     }
 
+    private void setMxp(){
+        abducer.setAlgorithm(Algorithm.MXP);
+    }
+    
+    private void setMhs(){
+        abducer.setAlgorithm(Algorithm.MHS);
+    }
+
+    private void setMhsMxp(){
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+    }
+
+    private void setHst(){
+        abducer.setAlgorithm(Algorithm.HST);
+    }
+
+    private void setHstMxp(){
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+    }
+
+    private void setRct(){
+        abducer.setAlgorithm(Algorithm.RCT);
+    }
+
+    private void setRctMxp(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+    }
+    
+    private void setNoNeg(){
+        Configuration.INPUT_FILE_NAME += "NoNeg";
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    private void setSymbolAbd(){
+        Configuration.INPUT_FILE_NAME += "SymbolAbd";
+        abducer.setAbducibles(symbolAbd);
+    }
+    
+    private void setSymbolAbdNoNeg(){
+        setSymbolAbd();
+        setNoNeg();
+    }
+
     // ------- MHS -------
     
     void mhs(){
-        abducer.setAlgorithm(Algorithm.MHS);
+        setMhs();
     }
 
     void mhsNoNeg(){
-        abducer.setAlgorithm(Algorithm.MHS);
-        abducer.setExplanationConfigurator(noNeg);
+        setMhs();
+        setNoNeg();
     }
 
     void mhsSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.MHS);
-        abducer.setAbducibles(symbolAbd);
+        setMhs();
+        setSymbolAbd();
     }
 
     void mhsSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.MHS);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setMhs();
+        setSymbolAbdNoNeg();
     }
 
     // ------- MXP -------
 
-    void mxp(){ abducer.setAlgorithm(Algorithm.MXP); }
+    void mxp(){ setMxp(); }
 
     void mxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.MXP);
-        abducer.setExplanationConfigurator(noNeg);
+        setMxp();
+        setNoNeg();
     }
 
     void mxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.MXP);
-        abducer.setAbducibles(symbolAbd);
+        setMxp();
+        setSymbolAbd();
     }
 
     void mxpSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.MXP);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setMxp();
+        setSymbolAbdNoNeg();
     }
 
     // ------- MHS-MXP -------
 
     void mhsMxp(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        setMhsMxp();
     }
 
     void mhsMxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-        abducer.setExplanationConfigurator(noNeg);
+        setMhsMxp();
+        setNoNeg();
     }
 
     void mhsMxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-        abducer.setAbducibles(symbolAbd);
+        setMhsMxp();
+        setSymbolAbd();
     }
 
     void mhsMxpSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setMhsMxp();
+        setSymbolAbdNoNeg();
     }
 
     // ------- HST -------
 
     void hst(){
-        abducer.setAlgorithm(Algorithm.HST);
+        setHst();
     }
 
     void hstNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setExplanationConfigurator(noNeg);
+        setHst();
+        setNoNeg();
     }
 
     void hstSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setAbducibles(symbolAbd);
+        setHst();
+        setSymbolAbd();
     }
 
     void hstSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setHst();
+        setSymbolAbdNoNeg();
     }
 
     // ------- HST-MXP -------
 
     void hstMxp(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
+        setHstMxp();
     }
 
     void hstMxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
-        abducer.setExplanationConfigurator(noNeg);
+        setHstMxp();
+        setNoNeg();
     }
 
     void hstMxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
-        abducer.setAbducibles(symbolAbd);
+        setHstMxp();
+        setSymbolAbd();
     }
 
     void hstMxpSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.HST_MXP);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setHstMxp();
+        setSymbolAbdNoNeg();
     }
 
     // ------- RCT -------
 
     void rct(){
-        abducer.setAlgorithm(Algorithm.RCT);
+        setRct();
     }
 
     void rctNoNeg(){
-        abducer.setAlgorithm(Algorithm.RCT);
-        abducer.setExplanationConfigurator(noNeg);
+        setRct();
+        setNoNeg();
     }
 
     void rctSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.RCT);
-        abducer.setAbducibles(symbolAbd);
+        setRct();
+        setSymbolAbd();
     }
 
     void rctSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.RCT);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setRct();
+        setSymbolAbdNoNeg();
     }
 
     // ------- RCT-MXP -------
 
     void rctMxp(){
-        abducer.setAlgorithm(Algorithm.RCT_MXP);
+        setRctMxp();
     }
 
     void rctMxpNoNeg(){
-        abducer.setAlgorithm(Algorithm.RCT_MXP);
-        abducer.setExplanationConfigurator(noNeg);
+        setRctMxp();
+        setNoNeg();
     }
 
     void rctMxpSymbolAbd(){
-        abducer.setAlgorithm(Algorithm.RCT_MXP);
-        abducer.setAbducibles(symbolAbd);
+        setRctMxp();
+        setSymbolAbd();
     }
 
     void rctMxpSymbolAbdNoNeg(){
-        abducer.setAlgorithm(Algorithm.RCT_MXP);
-        abducer.setAbducibles(symbolAbd);
-        abducer.setExplanationConfigurator(noNeg);
+        setRctMxp();
+        setSymbolAbdNoNeg();
     }
 
     
