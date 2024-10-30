@@ -11,6 +11,7 @@ public class ThreadTimer extends Thread {
     private static final long BILLION = 1000000000;
     private final long interval;
     private final long thisThreadId;
+    private long startTime;
     private final Map<Long, TimeRecord> records = new ConcurrentHashMap<>(8, 0.9f, 1);
 
     /**
@@ -25,6 +26,10 @@ public class ThreadTimer extends Thread {
 
     @Override
     public void run() {
+
+        update();
+        startTime = getTotalUserTime();
+
         while (!isInterrupted()) {
             update();
             try {
@@ -102,7 +107,7 @@ public class ThreadTimer extends Thread {
             time += timeRecord.getUserTime();
         }
 
-        return time;
+        return time - startTime;
     }
 
     double getTotalUserTimeInSec() {

@@ -9,6 +9,7 @@ public class TimeManager {
 
     final ThreadTimer timer;
     private long startTime;
+    private double endTime;
     Map<Integer, Double> levelTimes = new HashMap<>();
 
     public TimeManager(ThreadTimer timer){
@@ -21,7 +22,15 @@ public class TimeManager {
         startTime = System.currentTimeMillis();
     }
 
-    public double getTime(){
+    public void setEndTime(){
+        endTime = timer.getTotalUserTimeInSec();
+    }
+
+    public double getEndTime(){
+        return endTime;
+    }
+
+    public double getCurrentTime(){
         return timer.getTotalUserTimeInSec();
     }
 
@@ -29,12 +38,13 @@ public class TimeManager {
         return startTime;
     }
 
-    public void setTimeForLevel(double time, int depth){
-        levelTimes.put(depth, time);
+    public void setTimeForLevel(double time, int level){
+        levelTimes.put(level, time);
     }
 
-    public double getTimeForLevel(int depth){
-        return levelTimes.get(depth);
+    public double getTimeForLevel(int level){
+        //System.out.println(level + ": " + levelTimes.get(level));
+        return levelTimes.get(level);
     }
 
     public boolean levelHasTime(int depth){
@@ -42,12 +52,14 @@ public class TimeManager {
     }
 
     public boolean isTimeout(){
-        return Configuration.TIMEOUT > 0 && getTime() > Configuration.TIMEOUT;
+        return Configuration.TIMEOUT > 0 && getCurrentTime() > Configuration.TIMEOUT;
     }
 
     public void setTimeForLevelIfNotSet(double time, int depth){
-        if (!levelHasTime(depth))
+        if (!levelHasTime(depth)) {
             setTimeForLevel(time, depth);
+           System.out.println(depth + ": " + time);
+        }
     }
 
 }

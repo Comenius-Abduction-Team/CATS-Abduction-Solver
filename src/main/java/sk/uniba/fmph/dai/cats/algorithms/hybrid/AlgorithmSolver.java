@@ -7,7 +7,8 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.logger.ExplanationLogger;
+import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationLogger;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
@@ -16,7 +17,6 @@ import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 import sk.uniba.fmph.dai.cats.timer.TimeManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -89,10 +89,6 @@ public class AlgorithmSolver {
 
     }
 
-    public Collection<Explanation> getExplanations() {
-        return explanationManager.getFinalExplanations();
-    }
-
     public void solve(){
 
         printInfo();
@@ -125,9 +121,8 @@ public class AlgorithmSolver {
                 message = "An error occured: " + e.getMessage();
                 throw (e);
             } finally {
+                timer.setEndTime();
                 explanationManager.processExplanations(message);
-                if (Configuration.DEBUG_PRINT){}
-                    //System.out.println("NUMBER OF NODES: " + numberOfNodes);
             }
         }
         if (Configuration.PRINT_PROGRESS)
@@ -180,8 +175,14 @@ public class AlgorithmSolver {
                 continue;
             }
 
-            if (increaseDepth(node))
+            if (increaseDepth(node)){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[TREE] finished depth " + currentDepth);
                 currentDepth++;
+                //System.out.println(node);
+                //System.out.println("depth: " + currentDepth);
+            }
+
 
             if (depthLimitReached()) {
                 break;
@@ -243,7 +244,6 @@ public class AlgorithmSolver {
 
                 path.clear();
                 path.addAll(explanation.getAxioms());
-                //path = new HashSet<>(explanation.getAxioms());
 
                 boolean pruneThisChild = treeBuilder.pruneTree(node, explanation);
 
@@ -265,7 +265,7 @@ public class AlgorithmSolver {
                         System.out.println("[MODEL] Model was not reused.");
                     }
 
-                    if(isTimeout()){
+                    if (isTimeout()){
                         logger.makeTimeoutPartialLog(currentDepth);
                         return;
                     }
@@ -294,6 +294,8 @@ public class AlgorithmSolver {
             System.out.println("[TREE] Number of nodes: " + numberOfNodes);
         }
 
+        //System.out.println(numberOfNodes);
+
         path.clear();
 
         if(!timer.levelHasTime(currentDepth)){
@@ -310,7 +312,7 @@ public class AlgorithmSolver {
         explanation.addAxioms(node.path);
         explanation.addAxiom(child);
         explanation.lastAxiom = child;
-        explanation.setAcquireTime(timer.getTime());
+        explanation.setAcquireTime(timer.getCurrentTime());
         explanation.setLevel(currentDepth);
         return explanation;
     }
@@ -325,7 +327,7 @@ public class AlgorithmSolver {
     }
 
     Explanation createExplanationFromAxioms(Set<OWLAxiom> axioms){
-        return new Explanation(axioms, currentDepth, timer.getTime());
+        return new Explanation(axioms, currentDepth, timer.getCurrentTime());
     }
 
     boolean isPathAlreadyStored(){
@@ -389,7 +391,7 @@ public class AlgorithmSolver {
     }
 
     void updateProgress(){
-        progressManager.updateProgress(currentDepth, timer.getTime());
+        progressManager.updateProgress(currentDepth, timer.getCurrentTime());
     }
 
 

@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationManager;
 
 public class ClassicNodeProcessor implements NodeProcessor {
 

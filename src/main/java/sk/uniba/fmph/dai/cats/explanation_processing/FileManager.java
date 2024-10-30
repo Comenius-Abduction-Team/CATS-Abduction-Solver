@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.logger;
+package sk.uniba.fmph.dai.cats.explanation_processing;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
@@ -21,7 +21,7 @@ public class FileManager {
     public static final String LOG_FILE__POSTFIX = ".log";
     private static String FILE_DIRECTORY = "";
 
-    public static void appendToFile(String fileName, long currentTimeMillis, String log) {
+    static void appendToFile(String fileName, long currentTimeMillis, String log) {
         if (!Configuration.LOGGING)
             return;
         FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
