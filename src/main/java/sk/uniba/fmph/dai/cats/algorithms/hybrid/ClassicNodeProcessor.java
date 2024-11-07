@@ -37,12 +37,18 @@ public class ClassicNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean cannotAddExplanation(Explanation explanation) {
-        //TODO toto ma byt ine pri HST... jesus christ
-        if (consistencyChecker.checkConsistencyWithModelExtraction())
-            return false;
+    public boolean cannotAddExplanation(Explanation explanation, boolean extractModel) {
+        if (extractModel){
+            if (consistencyChecker.checkConsistencyWithModelExtraction())
+                return false;
+        } else {
+            if (consistencyChecker.checkConsistency())
+                return false;
+        }
+
         if (Configuration.DEBUG_PRINT)
             System.out.println("[PRUNING] INCONSISTENT WITH ONTOLOGY!");
+
         explanationManager.addPossibleExplanation(explanation);
         return true;
     }

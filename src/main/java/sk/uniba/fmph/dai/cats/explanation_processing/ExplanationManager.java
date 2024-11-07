@@ -132,7 +132,7 @@ public abstract class ExplanationManager {
             finalExplanations.addAll(currentExplanations);
             String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
             String line = String.format("%d; %d; %.2f; { %s }\n", size, currentExplanations.size(),
-                    timer.getTimeForLevel(size-1), currentExplanationsFormat);
+                    timer.getTimeForLevel(size), currentExplanationsFormat);
             result.append(line);
             size++;
         }

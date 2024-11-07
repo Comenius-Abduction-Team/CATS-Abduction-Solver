@@ -50,39 +50,39 @@ public class HstTreeBuilder implements TreeBuilder {
     @Override
     public TreeNode createRoot(){
         if (nodeProcessor.canCreateRoot())
-            return createNode(null, 0, abducibles.size() + 1);
+            return createNode(null, null,0, abducibles.size() + 1);
         return null;
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label){
+    public TreeNode createChildNode(TreeNode parent, OWLAxiom edge){
 
-        return createNode(label, parent.depth + 1, nextChildIndex -1);
+        return createNode(parent.path, edge, parent.depth + 1, nextChildIndex -1);
 
     }
 
-    private HstTreeNode createNode(Explanation label, Integer depth, int index){
+    private HstTreeNode createNode(List<OWLAxiom> parentPath, OWLAxiom edge, Integer depth, int index){
 
         HstTreeNode node = new HstTreeNode();
         node.index = index;
 
-        if (label != null) {
-            node.path = label.getAxioms();
+        if (parentPath != null) {
+            node.setPath(parentPath, edge);
         }
         node.depth = depth;
 
-        if (abducibles.areAllAbduciblesIndexed()){
-
-            node.model = new Model();
-            return node;
-        }
-
-        Model modelToReuse = solver.findAndGetModelToReuse();
-
-        if (modelToReuse == null)
-            return null;
-
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+//        if (abducibles.areAllAbduciblesIndexed()){
+//
+//            node.model = new Model();
+//            return node;
+//        }
+//
+//        Model modelToReuse = solver.findAndGetModelToReuse();
+//
+//        if (modelToReuse == null)
+//            return null;
+//
+//        node.model = solver.removePathAxiomsFromModel(modelToReuse);
 
         return node;
     }
@@ -106,7 +106,7 @@ public class HstTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean pruneTree(TreeNode node, Explanation explanation) {
+    public boolean pruneNode(TreeNode node, Explanation explanation) {
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -128,9 +128,17 @@ public class HstTreeBuilder implements TreeBuilder {
 
 
     @Override
-    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
-        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
-                child.equals(solver.loader.getObservationAxiom());
+    public boolean hasIncorrectPath(TreeNode node) {
+        if (node.path == null || node.labelAxiom == null)
+            return false;
+        return  node.path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, node.labelAxiom)) ||
+                node.labelAxiom.equals(solver.loader.getObservationAxiom());
+    }
+
+    @Override
+    public boolean closeExplanation(Explanation explanation) {
+        boolean extractModel = !abducibles.areAllAbduciblesIndexed();
+        return nodeProcessor.cannotAddExplanation(explanation, extractModel);
     }
 
     //int index = node.min; index < node.index; index++
@@ -187,5 +195,24 @@ public class HstTreeBuilder implements TreeBuilder {
             System.out.println("[HST] child index: " + nextChildIndex);
         nextChildIndex++;
         return child;
+    }
+
+    @Override
+    public void assignModel(TreeNode node){
+
+        if (abducibles.areAllAbduciblesIndexed()){
+
+            node.model = new Model();
+            return;
+
+        }
+
+        Model modelToReuse = solver.findAndGetModelToReuse();
+
+        if (modelToReuse == null)
+            return;
+
+        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+
     }
 }

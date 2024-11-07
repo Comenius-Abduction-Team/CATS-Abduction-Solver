@@ -16,7 +16,6 @@ public class ConsistencyChecker {
     final Loader loader;
     final Set<OWLAxiom> path;
 
-
     public boolean checkingMinimalityWithQXP = false;
     public Set<OWLAxiom> pathDuringCheckingMinimality;
 
@@ -55,7 +54,7 @@ public class ConsistencyChecker {
         }
     }
 
-    public boolean checkConsistency(Set<OWLAxiom> path){
+    private boolean checkConsistency(Set<OWLAxiom> path){
         if (path != null && !path.isEmpty()) {
             if(loader.isMultipleObservationOnInput()){
                 for(OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()){
@@ -63,33 +62,6 @@ public class ConsistencyChecker {
                 }
             } else {
                 path.remove(loader.getNegObservation().getOwlAxiom());
-            }
-            reasonerManager.addAxiomsToOntology(path);
-            if (!reasonerManager.isOntologyConsistent()){
-                reasonerManager.resetOntologyToOriginal();
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isOntologyConsistentWithPath(){
-        if(checkingMinimalityWithQXP) {
-            return isOntologyConsistentWithPath(pathDuringCheckingMinimality);
-        }
-        else {
-            return isOntologyConsistentWithPath(path);
-        }
-    }
-
-    public boolean isOntologyConsistentWithPath(Set<OWLAxiom> path){
-        if (path != null) {
-            if(loader.isMultipleObservationOnInput()){
-                for(OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()){
-                    path.remove(AxiomManager.getComplementOfOWLAxiom(loader, axiom));
-                }
-            } else {
-                path.remove(loader.getNegObservationAxiom());
             }
             reasonerManager.addAxiomsToOntology(path);
             if (!reasonerManager.isOntologyConsistent()){

@@ -10,6 +10,7 @@ import java.util.List;
 public class TreeNode {
 
     public List<OWLAxiom> path = new ArrayList<>();
+    public OWLAxiom labelAxiom;
     public Integer depth = 0;
     public Model model;
     public boolean closed;
@@ -18,8 +19,15 @@ public class TreeNode {
         closed = true;
     }
 
+    public void setPath(List<OWLAxiom> parentPath, OWLAxiom edge){
+        path.addAll(parentPath);
+        path.add(edge);
+        labelAxiom = edge;
+    }
+
     @Override
     public String toString() {
-        return StringFactory.getRepresentation(model.getNegatedData());
+        String data = (model == null) ? "{}" : StringFactory.getRepresentation(model.getNegatedData());
+        return StringFactory.getRepresentation(labelAxiom) + ". " + data;
     }
 }

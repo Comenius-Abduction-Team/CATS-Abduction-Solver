@@ -47,7 +47,7 @@ public class MxpNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean cannotAddExplanation(Explanation explanation) {
+    public boolean cannotAddExplanation(Explanation explanation, boolean extractModel) {
         boolean result = !addNewExplanations();
         if (result && Configuration.DEBUG_PRINT)
             System.out.println("[PRUNING] Pruned by MXP!");
@@ -162,7 +162,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         // while ¬isConsistent(C'1 ∪ C'2 ∪ B) do
         while (!consistencyChecker.isOntologyWithLiteralsConsistent(conflictLiterals)) {
 
-            if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
+            if ((Configuration.DEPTH_LIMIT < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
                     solver.updateProgress();
 

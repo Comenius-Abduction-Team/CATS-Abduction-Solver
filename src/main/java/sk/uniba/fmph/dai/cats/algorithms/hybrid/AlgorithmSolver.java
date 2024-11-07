@@ -202,6 +202,61 @@ public class AlgorithmSolver {
                 continue;
             }
 
+            ///////////////////////////////////////////////////////////////
+
+            //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
+            //ak axiom nie je v abducibles
+            //nepokracujeme vo vetve
+            if(treeBuilder.hasIncorrectPath(node)){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[PRUNING] INCORRECT PATH!");
+                continue;
+            }
+
+            //rovno pridame potencialne vysvetlenie
+            Explanation explanation = createPossibleExplanation(node);
+
+            path.clear();
+            path.addAll(explanation.getAxioms());
+
+            boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
+
+            if (pruneThisChild || node.closed){
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[PRUNING] NODE CLOSED!");
+                path.clear();
+                continue;
+            }
+
+            if (Configuration.REUSE_OF_MODELS)
+                modelManager.findReuseModelForPath(path);
+
+            if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel())
+                explanationManager.setLengthOneExplanations(new ArrayList<>());
+            else {
+
+                if (Configuration.DEBUG_PRINT){
+                    System.out.println("[MODEL] Model was not reused.");
+                }
+
+                if (isTimeout()){
+                    logger.makeTimeoutPartialLog(currentDepth);
+                    return;
+                }
+
+                if (treeBuilder.closeExplanation(explanation)){
+                    path.clear();
+                    continue;
+                }
+            }
+
+            treeBuilder.assignModel(node);
+
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("[MODEL] Assigned model: " + node.model);
+
+            ///////////////////////////////////////////////////////////////
+
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
             if (!canIterateNodeChildren){
@@ -230,54 +285,8 @@ public class AlgorithmSolver {
                     return;
                 }
 
-                //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
-                //ak axiom nie je v abducibles
-                //nepokracujeme vo vetve
-                if(treeBuilder.isIncorrectPath(node.path, child)){
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[PRUNING] INCORRECT PATH!");
-                    continue;
-                }
-
-                //rovno pridame potencialne vysvetlenie
-                Explanation explanation = createPossibleExplanation(node, child);
-
-                path.clear();
-                path.addAll(explanation.getAxioms());
-
-                boolean pruneThisChild = treeBuilder.pruneTree(node, explanation);
-
-                if (pruneThisChild || node.closed){
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[PRUNING] NODE CLOSED!");
-                    path.clear();
-                    continue;
-                }
-
-                if (Configuration.REUSE_OF_MODELS)
-                    modelManager.findReuseModelForPath(path);
-
-                if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel())
-                    explanationManager.setLengthOneExplanations(new ArrayList<>());
-                else {
-
-                    if (Configuration.DEBUG_PRINT){
-                        System.out.println("[MODEL] Model was not reused.");
-                    }
-
-                    if (isTimeout()){
-                        logger.makeTimeoutPartialLog(currentDepth);
-                        return;
-                    }
-
-                    if (nodeProcessor.cannotAddExplanation(explanation)){
-                        path.clear();
-                        continue;
-                    }
-                }
-
                 treeBuilder.addNodeToTree(
-                        treeBuilder.createChildNode(node, explanation)
+                        treeBuilder.createChildNode(node, child)
                 );
 
                 if (Configuration.DEBUG_PRINT){
@@ -294,7 +303,7 @@ public class AlgorithmSolver {
             System.out.println("[TREE] Number of nodes: " + numberOfNodes);
         }
 
-        //System.out.println(numberOfNodes);
+        System.out.println(numberOfNodes);
 
         path.clear();
 
@@ -307,11 +316,10 @@ public class AlgorithmSolver {
 
     }
 
-    private Explanation createPossibleExplanation(TreeNode node, OWLAxiom child){
+    private Explanation createPossibleExplanation(TreeNode node){
         Explanation explanation = new Explanation();
         explanation.addAxioms(node.path);
-        explanation.addAxiom(child);
-        explanation.lastAxiom = child;
+        explanation.lastAxiom = node.labelAxiom;
         explanation.setAcquireTime(timer.getCurrentTime());
         explanation.setLevel(currentDepth);
         return explanation;
@@ -349,7 +357,7 @@ public class AlgorithmSolver {
     }
 
     protected boolean depthLimitReached(){
-        return Configuration.DEPTH > 0 && currentDepth == Configuration.DEPTH;
+        return Configuration.DEPTH_LIMIT > 0 && currentDepth > Configuration.DEPTH_LIMIT;
     }
 
     private void increaseDepthVoid(TreeNode node){

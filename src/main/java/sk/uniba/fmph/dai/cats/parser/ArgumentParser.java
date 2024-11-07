@@ -90,7 +90,7 @@ public class ArgumentParser {
 
                 case "-d:":
                     try {
-                        Configuration.DEPTH = Integer.valueOf(next);
+                        Configuration.DEPTH_LIMIT = Integer.valueOf(next);
                     }
                     catch (NumberFormatException e) {
                         String message = "Wrong tree depth -d " + next + ", choose a whole number value";

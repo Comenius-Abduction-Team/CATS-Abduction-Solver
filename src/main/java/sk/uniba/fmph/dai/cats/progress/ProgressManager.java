@@ -24,7 +24,7 @@ public abstract class ProgressManager {
 
     protected void updateProgressAccordingToCorrectFactor(int depth, double time){
 
-        if (Configuration.DEPTH > 0){
+        if (Configuration.DEPTH_LIMIT > 0){
             updateProgressAccordingToDepthLimit(depth);
         }
         else if (Configuration.TIMEOUT > 0){
@@ -39,7 +39,7 @@ public abstract class ProgressManager {
 
     private void updateProgressAccordingToDepthLimit(int depth){
         double remainingPercentage = 99 - currentPercentage;
-        int maxDepth = Configuration.DEPTH;
+        int maxDepth = Configuration.DEPTH_LIMIT;
         double percentageToFill = remainingPercentage / Math.pow(3, maxDepth - depth - 1);
         increaseProgress(percentageToFill);
     }

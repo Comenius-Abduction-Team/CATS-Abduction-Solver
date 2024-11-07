@@ -8,7 +8,8 @@ public class HstTreeNode extends TreeNode {
 
     @Override
     public String toString() {
-        return index + ". " + StringFactory.getRepresentation(model.getNegatedData()) + ", min: " + min;
+        String data = (model == null) ? "{}" : StringFactory.getRepresentation(model.getNegatedData());
+        return index + ". " + data + ", min: " + min;
     }
 
 }
