@@ -13,8 +13,6 @@ public class ModelManager {
 
     Model modelToReuse;
 
-    int lastUsableModelIndex;
-
     public ModelManager(){
         models = new ArrayList<>();
     }
@@ -39,20 +37,7 @@ public class ModelManager {
         models.add(model);
     }
 
-//    public boolean findReusableModel(Model model){
-//        lastUsableModelIndex = models.indexOf(model);
-//        return lastUsableModelIndex >= 0;
-//    }
-
     public boolean findReusableModel(Model model){
-
-//        List<Model> modelsList = (List<Model>) models;
-//        int index = modelsList.indexOf(model);
-//        if (index < 0){
-//            return false;
-//        }
-//        modelToReuse = modelsList.get(index);
-//        return true;
 
         for (int i = models.size() - 1; i >= 0; i--) {
             Model storedModel = ((List<Model>)models).get(i);
