@@ -36,6 +36,8 @@ public class Configuration {
 
     public static boolean CACHE_ABDUCIBLES = true;
 
+    public static boolean SORTED_MODELS = false;
+
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;

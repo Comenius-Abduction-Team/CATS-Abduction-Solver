@@ -9,6 +9,7 @@ import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationLogger;
+import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
@@ -63,7 +64,10 @@ public class AlgorithmSolver {
 
         this.printer = printer;
 
-        modelManager = new ModelManager();
+        if (Configuration.SORTED_MODELS)
+            modelManager = new InsertSortModelManager();
+        else
+            modelManager = new ModelManager();
 
         consistencyChecker = new ConsistencyChecker(this);
 
