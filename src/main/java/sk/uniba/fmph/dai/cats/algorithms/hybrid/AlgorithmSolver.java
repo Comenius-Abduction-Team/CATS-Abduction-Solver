@@ -175,14 +175,7 @@ public class AlgorithmSolver {
                 continue;
             }
 
-            if (increaseDepth(node)){
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[TREE] finished depth " + currentDepth);
-                currentDepth++;
-                //System.out.println(node);
-                //System.out.println("depth: " + currentDepth);
-            }
-
+            increaseDepthVoid(node);
 
             if (depthLimitReached()) {
                 break;
@@ -346,15 +339,15 @@ public class AlgorithmSolver {
         pathsInCertainDepth.add(new HashSet<>(path));
     }
 
-    protected boolean increaseDepth(TreeNode node){
-        if (node.depth > currentDepth){
-            logger.makePartialLog(currentDepth);
-            if (Configuration.PRINT_PROGRESS)
-                updateProgress();
-            return true;
-        }
-        return false;
-    }
+//    protected boolean increaseDepth(TreeNode node){
+//        if (node.depth > currentDepth){
+//            logger.makePartialLog(currentDepth);
+//            if (Configuration.PRINT_PROGRESS)
+//                updateProgress();
+//            return true;
+//        }
+//        return false;
+//    }
 
     protected boolean depthLimitReached(){
         return Configuration.DEPTH_LIMIT > 0 && currentDepth > Configuration.DEPTH_LIMIT;
@@ -367,17 +360,17 @@ public class AlgorithmSolver {
         }
         else return;
 
-        if (currentDepth == maxDepth){
+        if (node.depth > maxDepth) {
+            maxDepth = node.depth;
             logger.makePartialLog(currentDepth);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
         }
 
-        if (node.depth > maxDepth)
-            maxDepth = node.depth;
-
         currentDepth = node.depth;
 
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("[TREE] entering depth " + node.depth);
     }
 
     public Model findAndGetModelToReuse(){
