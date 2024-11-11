@@ -6,7 +6,7 @@ import sk.uniba.fmph.dai.cats.algorithms.hst.INumberedAbducibles;
 import sk.uniba.fmph.dai.cats.algorithms.hst.NumberedAxiomsUnindexedSet;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 

@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.explanation_processing;
+package sk.uniba.fmph.dai.cats.data_processing;
 
 import org.apache.commons.lang3.StringUtils;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;

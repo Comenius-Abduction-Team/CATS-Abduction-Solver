@@ -1,6 +1,6 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.cats.explanation_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;

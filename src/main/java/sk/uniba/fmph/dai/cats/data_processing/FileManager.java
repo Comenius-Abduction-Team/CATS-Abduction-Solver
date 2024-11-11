@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.explanation_processing;
+package sk.uniba.fmph.dai.cats.data_processing;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
