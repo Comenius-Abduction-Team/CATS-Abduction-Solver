@@ -9,6 +9,8 @@ import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
+import sk.uniba.fmph.dai.cats.data_processing.LevelStats;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
@@ -47,6 +49,9 @@ public class AlgorithmSolver {
     protected TreeBuilder treeBuilder;
     public NodeProcessor nodeProcessor;
 
+    public final TreeStats stats;
+    public LevelStats currentLevelStats;
+
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
                               ProgressManager progressManager, ThreadTimer threadTimer, IPrinter printer) {
 
@@ -72,6 +77,8 @@ public class AlgorithmSolver {
         consistencyChecker = new ConsistencyChecker(this);
 
         setAlgorithm(algorithm);
+
+        stats = new TreeStats();
 
     }
 
@@ -156,6 +163,9 @@ public class AlgorithmSolver {
 
         currentDepth = 0;
 
+        currentLevelStats = stats.getLevelStats(0);
+        currentLevelStats.start = timer.getCurrentTime();
+
         TreeNode root = treeBuilder.createRoot();
         if (root == null) {
             if (Configuration.DEBUG_PRINT)
@@ -163,6 +173,7 @@ public class AlgorithmSolver {
             return;
         }
         treeBuilder.addNodeToTree(root);
+        currentLevelStats.created = 1;
 
         if(isTimeout()) {
             logger.makeTimeoutPartialLog(currentDepth);
@@ -179,7 +190,7 @@ public class AlgorithmSolver {
                 continue;
             }
 
-            increaseDepthVoid(node);
+            updateDepthIfNeeded(node);
 
             if (depthLimitReached()) {
                 break;
@@ -194,6 +205,7 @@ public class AlgorithmSolver {
                 System.out.println("*********\n" + "[TREE] PROCESSING node: " + node);
 
             if (node.closed) {
+                currentLevelStats.deleted += 1;
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[TREE] Closed node");
                 continue;
@@ -207,6 +219,7 @@ public class AlgorithmSolver {
             if(treeBuilder.hasIncorrectPath(node)){
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[PRUNING] INCORRECT PATH!");
+                currentLevelStats.pruned += 1;
                 continue;
             }
 
@@ -218,9 +231,10 @@ public class AlgorithmSolver {
 
             boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
 
-            if (pruneThisChild || node.closed){
+            if (pruneThisChild){
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[PRUNING] NODE CLOSED!");
+                currentLevelStats.pruned += 1;
                 path.clear();
                 continue;
             }
@@ -228,8 +242,10 @@ public class AlgorithmSolver {
             if (Configuration.REUSE_OF_MODELS)
                 modelManager.findReuseModelForPath(path);
 
-            if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel())
+            if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()){
                 explanationManager.setLengthOneExplanations(new ArrayList<>());
+                //currentLevelStats.reused += 1;
+            }
             else {
 
                 if (Configuration.DEBUG_PRINT){
@@ -285,6 +301,8 @@ public class AlgorithmSolver {
                 treeBuilder.addNodeToTree(
                         treeBuilder.createChildNode(node, child)
                 );
+                stats.getLevelStats(currentDepth + 1).created += 1;
+                //currentLevelStats.created += 1;
 
                 if (Configuration.DEBUG_PRINT){
                     System.out.println("[TREE] Created node");
@@ -293,14 +311,17 @@ public class AlgorithmSolver {
                 path.clear();
 
             }
+
         }
+
+        currentLevelStats.finish = timer.getCurrentTime();
 
         if (Configuration.DEBUG_PRINT) {
             System.out.println("[TREE] Finished iterating the tree.");
             System.out.println("[TREE] Number of nodes: " + numberOfNodes);
         }
 
-        System.out.println(numberOfNodes);
+        System.out.println(stats);
 
         path.clear();
 
@@ -343,21 +364,11 @@ public class AlgorithmSolver {
         pathsInCertainDepth.add(new HashSet<>(path));
     }
 
-//    protected boolean increaseDepth(TreeNode node){
-//        if (node.depth > currentDepth){
-//            logger.makePartialLog(currentDepth);
-//            if (Configuration.PRINT_PROGRESS)
-//                updateProgress();
-//            return true;
-//        }
-//        return false;
-//    }
-
     protected boolean depthLimitReached(){
         return Configuration.DEPTH_LIMIT > 0 && currentDepth > Configuration.DEPTH_LIMIT;
     }
 
-    private void increaseDepthVoid(TreeNode node){
+    private void updateDepthIfNeeded(TreeNode node){
 
         if (node.depth != currentDepth) {
             pathsInCertainDepth.clear();
@@ -366,12 +377,15 @@ public class AlgorithmSolver {
 
         if (node.depth > maxDepth) {
             maxDepth = node.depth;
+            currentLevelStats.finish = timer.getCurrentTime();
             logger.makePartialLog(currentDepth);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
         }
 
         currentDepth = node.depth;
+        currentLevelStats = stats.getLevelStats(currentDepth);
+        currentLevelStats.start = timer.getCurrentTime();
 
         if (Configuration.DEBUG_PRINT)
             System.out.println("[TREE] entering depth " + node.depth);
@@ -383,7 +397,7 @@ public class AlgorithmSolver {
         if (!modelManager.canReuseModel())
             modelFound = modelManager.findReuseModelForPath(path);
 
-        if (!modelFound && !modelManager.canReuseModel())
+        if (!modelFound)
             return null;
 
         return modelManager.getReusableModel();

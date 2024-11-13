@@ -7,13 +7,26 @@ public class TreeStats {
 
     public Map<Integer, LevelStats> levels = new HashMap<>();
 
+    private int currentLevel = -1;
+
+    public LevelStats getCurrentLevelStats(){
+        return levels.get(currentLevel);
+    }
+
     public LevelStats getLevelStats(int level){
+        currentLevel = level;
         if (levels.containsKey(level)){
             return levels.get(level);
         }
-        LevelStats stats = new LevelStats();
-        levels.put(level, stats);
-        return stats;
+        LevelStats levelStats = new LevelStats();
+        levels.put(level, levelStats);
+        return levelStats;
     }
 
+    @Override
+    public String toString() {
+        return "TreeStats{" +
+                "levels=" + levels +
+                '}';
+    }
 }
