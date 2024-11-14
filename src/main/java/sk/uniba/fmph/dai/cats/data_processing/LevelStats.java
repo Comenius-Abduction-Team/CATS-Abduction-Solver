@@ -12,6 +12,7 @@ public class LevelStats {
                 ", reused=" + reused +
                 ", deleted=" + deleted +
                 ", pruned=" + pruned +
+                ", model_extractions=" + modelExtractions +
                 ", start=" + start +
                 ", finish=" + finish +
                 "}\n";

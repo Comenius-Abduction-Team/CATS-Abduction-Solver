@@ -1,7 +1,9 @@
 package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.ModelExtractor;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
 import java.util.*;
 
@@ -13,8 +15,15 @@ public class ModelManager {
 
     Model modelToReuse;
 
-    public ModelManager(){
+    TreeStats stats;
+
+    protected ModelManager(){}
+
+    public ModelManager(AlgorithmSolver solver){
+
         models = new ArrayList<>();
+        stats = solver.stats;
+
     }
 
     public void setExtractor(ModelExtractor extractor) {
@@ -43,6 +52,7 @@ public class ModelManager {
             Model storedModel = ((List<Model>)models).get(i);
             if (storedModel.equals(model)){
                 modelToReuse = storedModel;
+                stats.getCurrentLevelStats().reused += 1;
                 return true;
             }
         }
@@ -66,6 +76,7 @@ public class ModelManager {
     public void storeModelFoundByConsistencyCheck(){
 
         Model model = extractor.extractModel();
+        stats.getCurrentLevelStats().modelExtractions += 1;
 
         if (model.isEmpty())
             return;

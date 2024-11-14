@@ -46,11 +46,13 @@ public class Model implements Comparable<Model>{
 
     @Override
     public int compareTo(Model o) {
+        // when sorting models, they are sorted according to their data length
         int compare = Integer.compare(negatedData.size(), o.negatedData.size());
+        // however, sorted set uses this method's result to also determine equality of two models
+        // thus, two models of the same size could not be in the set, which is very wrong
         if (compare == 0)
             return 1;
         return compare;
-        //return 1 * Integer.compare(negatedData.size(), o.negatedData.size());
     }
 
     @Override

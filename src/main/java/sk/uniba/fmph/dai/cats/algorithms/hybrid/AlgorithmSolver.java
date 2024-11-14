@@ -69,16 +69,16 @@ public class AlgorithmSolver {
 
         this.printer = printer;
 
+        stats = new TreeStats();
+
         if (Configuration.SORTED_MODELS)
-            modelManager = new InsertSortModelManager();
+            modelManager = new InsertSortModelManager(this);
         else
-            modelManager = new ModelManager();
+            modelManager = new ModelManager(this);
 
         consistencyChecker = new ConsistencyChecker(this);
 
         setAlgorithm(algorithm);
-
-        stats = new TreeStats();
 
     }
 
@@ -397,7 +397,7 @@ public class AlgorithmSolver {
         if (!modelManager.canReuseModel())
             modelFound = modelManager.findReuseModelForPath(path);
 
-        if (!modelFound)
+        if (!modelFound && !modelManager.canReuseModel())
             return null;
 
         return modelManager.getReusableModel();
