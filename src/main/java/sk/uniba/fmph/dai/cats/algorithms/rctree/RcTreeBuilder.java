@@ -35,7 +35,7 @@ public class RcTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean pruneNode(TreeNode originalNode, Explanation explanation){
+    public boolean pruneTree(TreeNode originalNode, Explanation explanation){
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -94,16 +94,9 @@ public class RcTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean hasIncorrectPath(TreeNode node) {
-        if (node.path == null || node.labelAxiom == null)
-            return false;
-        return  node.path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, node.labelAxiom)) ||
-                node.labelAxiom.equals(solver.loader.getObservationAxiom());
-    }
-
-    @Override
-    public boolean closeExplanation(Explanation explanation) {
-        return nodeProcessor.cannotAddExplanation(explanation, true);
+    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
+        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
+                child.equals(solver.loader.getObservationAxiom());
     }
 
     private int getAndIncreaseIndex(){
@@ -132,25 +125,36 @@ public class RcTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, OWLAxiom edge) {
-        return createNode((RcTreeNode) parent, edge);
+    public TreeNode createChildNode(TreeNode parent, Explanation label) {
+        return createNode(label, parent.depth + 1, (RcTreeNode) parent);
     }
 
-    private RcTreeNode createNode(RcTreeNode parent, OWLAxiom edge){
+    private RcTreeNode createNode(Explanation path, Integer depth, RcTreeNode parent){
+
+        Model modelToReuse = solver.findAndGetModelToReuse();
+
+        if (modelToReuse == null)
+            return null;
 
         RcTreeNode node = new RcTreeNode(getAndIncreaseIndex());
+        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+        node.path = path.getAxioms();
+        node.depth = depth;
 
-        if (parent.path != null) {
-            node.setPath(parent.path, edge);
-        }
-        node.depth = parent.depth + 1;
+        OWLAxiom label = path.lastAxiom;
+        parent.usedLabels.add(label);
+        node.labelAxiom = label;
 
         parent.children.add(node);
         node.parent = parent;
-        parent.usedLabels.add(edge);
 
         node.childrenToIgnore.addAll(parent.childrenToIgnore.getAxioms());
         node.childrenToIgnore.addAll(parent.usedLabels);
+
+        for (OWLAxiom axiom : node.model.getNegatedData()){
+            if (!node.childrenToIgnore.contains(axiom))
+                node.childrenToProcess.add(axiom);
+        }
 
         return node;
     }
@@ -264,6 +268,7 @@ public class RcTreeBuilder implements TreeBuilder {
         return currentNode.childrenToProcess.remove(0);
 
     }
+<<<<<<< HEAD
 
     @Override
     public void labelNodeWithModel(TreeNode node){
@@ -282,4 +287,6 @@ public class RcTreeBuilder implements TreeBuilder {
                 node_.childrenToProcess.add(axiom);
         }
     }
+=======
+>>>>>>> parent of 6d9d75c (changed the order of operations in the trees to match official algorithms)
 }

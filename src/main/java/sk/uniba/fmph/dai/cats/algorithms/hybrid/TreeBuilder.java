@@ -3,6 +3,8 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
+import java.util.List;
+
 /**
  * The interface Tree builder.
  */
@@ -21,10 +23,11 @@ public interface TreeBuilder {
      * extended by the given axiom (that would label a child edge starting in the node),
      * would be invalid for some reason.
      *
-     * @param node the path
+     * @param path  the path
+     * @param child the child
      * @return the boolean
      */
-    boolean hasIncorrectPath(TreeNode node);
+    boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child);
 
     /**
      * Prune tree.
@@ -32,9 +35,7 @@ public interface TreeBuilder {
      * @param node        the node
      * @param explanation the explanation
      */
-    boolean pruneNode(TreeNode node, Explanation explanation);
-
-    boolean closeExplanation(Explanation explanation);
+    boolean pruneTree(TreeNode node, Explanation explanation);
 
     /**
      * Create root tree node.
@@ -47,10 +48,10 @@ public interface TreeBuilder {
      * Create child node tree node.
      *
      * @param parent parent of the node
-     * @param edge axiom labeling the edge from the parent to the created node
+     * @param label  label of the path from the root to the created node
      * @return the tree node
      */
-    TreeNode createChildNode(TreeNode parent, OWLAxiom edge);
+    TreeNode createChildNode(TreeNode parent, Explanation label);
 
     /**
      * Add node to tree.

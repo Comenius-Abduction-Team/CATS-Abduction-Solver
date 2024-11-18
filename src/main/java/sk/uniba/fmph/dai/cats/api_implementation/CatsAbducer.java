@@ -247,7 +247,7 @@ public class CatsAbducer implements IThreadAbducer {
     }
 
     private void setDepthInConfiguration() {
-        Configuration.DEPTH_LIMIT = depth;
+        Configuration.DEPTH = depth;
     }
 
     private void setTimeoutInConfiguration() {

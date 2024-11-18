@@ -26,7 +26,7 @@ public class Main {
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    private static final String INPUT_FILE = "in/multiple_obs/family.in";
+    private static final String INPUT_FILE = "in/toothache.in";
 
     public static void main(String[] args) throws Exception {
 

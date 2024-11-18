@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 public class StringFactory {
 
     public static String getRepresentation(OWLAxiom owlAxiom) {
-        if (owlAxiom == null)
-            return "null";
         if (owlAxiom instanceof OWLClassAssertionAxiom) {
             return getClassAssertionAxiom(owlAxiom).concat(DLSyntax.LEFT_PARENTHESES).
                     concat(getNamedIndividual(owlAxiom)).concat(DLSyntax.RIGHT_PARENTHESES);
@@ -23,8 +21,6 @@ public class StringFactory {
     }
 
     public static String getRepresentation(Collection<OWLAxiom> axioms){
-        if (axioms == null || axioms.isEmpty())
-            return "{}";
         List<String> result = new ArrayList<>();
         for (OWLAxiom owlAxiom : axioms) {
             result.add(getRepresentation(owlAxiom));

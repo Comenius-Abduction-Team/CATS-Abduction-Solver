@@ -14,7 +14,7 @@ public class Configuration {
     public static String OUTPUT_PATH = "";
     public static String ABDUCIBLES_FILE_NAME = null;
     public static ReasonerType REASONER = ReasonerType.JFACT;     // we work only with JFact for now
-    public static int DEPTH_LIMIT = 0;
+    public static int DEPTH = 0;
     public static long TIMEOUT = 0;
     public static ArrayList<String> ABDUCIBLES_CONCEPTS = new ArrayList<>();
     public static ArrayList<String> ABDUCIBLES_INDIVIDUALS = new ArrayList<>();
@@ -48,7 +48,7 @@ public class Configuration {
     public static boolean LOGGING = true;
 
     public static List<String> getInfo() {
-        String optimizationQXP = "Optimization QXP: " + CHECKING_MINIMALITY_BY_QXP;
+//        String optimizationQXP = "Optimization QXP: " + CHECKING_MINIMALITY_BY_QXP;
 //        String optimizationLongestConf = "Optimization Cached Conflicts - The Longest Conflict: " + CACHED_CONFLICTS_LONGEST_CONFLICT;
 //        String optimizationMedian = "Optimization Cached Conflicts - Median: " + CACHED_CONFLICTS_MEDIAN;
         String roles = "Roles: " + ROLES_IN_EXPLANATIONS_ALLOWED;
@@ -58,7 +58,7 @@ public class Configuration {
         String caching = "Abducible caching: " + CACHE_ABDUCIBLES;
         String relevance = "Strict relevance: " + STRICT_RELEVANCE;
         String depth = "Depth limit: ";
-        if (DEPTH_LIMIT > 0) depth += DEPTH_LIMIT; else depth += "none";
+        if (DEPTH > 0) depth += DEPTH; else depth += "none";
         String timeout = "Timeout: ";
         if (TIMEOUT > 0) timeout += TIMEOUT; else timeout += "none";
 

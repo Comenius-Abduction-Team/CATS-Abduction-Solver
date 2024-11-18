@@ -5,6 +5,8 @@ import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.model.Model;
 
+import java.util.List;
+
 public class RootOnlyTreeBuilder implements TreeBuilder {
 
     final AlgorithmSolver solver;
@@ -19,12 +21,12 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean hasIncorrectPath(TreeNode node) {
+    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
         return true;
     }
 
     @Override
-    public boolean pruneNode(TreeNode node, Explanation explanation) {
+    public boolean pruneTree(TreeNode node, Explanation explanation) {
         return true;
     }
 
@@ -46,7 +48,7 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, OWLAxiom edge) {
+    public TreeNode createChildNode(TreeNode parent, Explanation label) {
         return null;
     }
 

@@ -37,15 +37,13 @@ public class MhsTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean hasIncorrectPath(TreeNode node) {
-        if (node.path == null || node.labelAxiom == null)
-            return false;
-        return  node.path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, node.labelAxiom)) ||
-                node.labelAxiom.equals(solver.loader.getObservationAxiom());
+    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
+        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
+                child.equals(solver.loader.getObservationAxiom());
     }
 
     @Override
-    public boolean pruneNode(TreeNode node, Explanation explanation) {
+    public boolean pruneTree(TreeNode node, Explanation explanation) {
 
         if (solver.isPathAlreadyStored()){
             if (Configuration.DEBUG_PRINT)
@@ -73,31 +71,34 @@ public class MhsTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean closeExplanation(Explanation explanation) {
-        return nodeProcessor.cannotAddExplanation(explanation, true);
-    }
-
-    @Override
     public TreeNode createRoot(){
         if (nodeProcessor.canCreateRoot())
-            return createNode(null, null, 0);
+            return createNode(null, 0);
         return null;
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, OWLAxiom edge){
+    public TreeNode createChildNode(TreeNode parent, Explanation label){
 
-        return createNode(parent.path, edge, parent.depth + 1);
+        return createNode(label, parent.depth + 1);
     }
 
-    private TreeNode createNode(List<OWLAxiom> parentPath, OWLAxiom edge, Integer depth){
+    private TreeNode createNode(Explanation label, Integer depth){
+
 
         TreeNode node = new TreeNode();
 
-        if (parentPath != null) {
-            node.setPath(parentPath, edge);
+        if (label != null) {
+            node.path = label.getAxioms();
         }
         node.depth = depth;
+
+        Model modelToReuse = solver.findAndGetModelToReuse();
+
+        if (modelToReuse == null)
+            return null;
+
+        node.model = solver.removePathAxiomsFromModel(modelToReuse);
 
         return node;
     }
@@ -118,19 +119,16 @@ public class MhsTreeBuilder implements TreeBuilder {
     }
 
 
-    @Override
     public boolean startIteratingNodeChildren(TreeNode node){
         parentNode = node;
         iteratedChildren = new ArrayList<>(parentNode.model.getNegatedData());
         return true;
     }
 
-    @Override
     public boolean noChildrenLeft(){
         return iteratedChildren.isEmpty();
     }
 
-    @Override
     public OWLAxiom getNextChild(){
         OWLAxiom child = iteratedChildren.get(0);
         iteratedChildren.remove(0);

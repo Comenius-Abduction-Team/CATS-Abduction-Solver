@@ -12,6 +12,8 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
 
     final int id;
 
+    OWLAxiom labelAxiom;
+
     RcTreeNode parent;
 
     final AxiomSet childrenToIgnore = new AxiomSet();
@@ -28,8 +30,6 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
     boolean isSubsetOf(RcTreeNode other){
         if (this == other)
             return false;
-        if (other.model == null)
-            return false;
         if (model == other.model)
             return false;
         return other.model.getNegatedData().containsAll(model.getNegatedData());
@@ -43,8 +43,9 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
 
     @Override
     public String toString() {
-
-        String data = (model == null) ? "{}" : StringFactory.getRepresentation(model.getNegatedData());
-        return id + "." + StringFactory.getRepresentation(labelAxiom) + ":" + data;
+        if (labelAxiom == null)
+            return id + "." + StringFactory.getRepresentation(model.getNegatedData());
+        return id + "." + StringFactory.getRepresentation(labelAxiom) + ":" +
+                StringFactory.getRepresentation(model.getNegatedData());
     }
 }
