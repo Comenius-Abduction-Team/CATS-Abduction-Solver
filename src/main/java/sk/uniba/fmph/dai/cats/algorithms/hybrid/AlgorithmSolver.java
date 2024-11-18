@@ -244,7 +244,7 @@ public class AlgorithmSolver {
 
             if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()){
                 explanationManager.setLengthOneExplanations(new ArrayList<>());
-                //currentLevelStats.reused += 1;
+                currentLevelStats.reused += 1;
             }
             else {
 
@@ -278,8 +278,6 @@ public class AlgorithmSolver {
                 continue;
             }
 
-            numberOfNodes++;
-
             while (!treeBuilder.noChildrenLeft()){
 
                 OWLAxiom child = treeBuilder.getNextChild();
@@ -302,7 +300,6 @@ public class AlgorithmSolver {
                         treeBuilder.createChildNode(node, child)
                 );
                 stats.getLevelStats(currentDepth + 1).created += 1;
-                //currentLevelStats.created += 1;
 
                 if (Configuration.DEBUG_PRINT){
                     System.out.println("[TREE] Created node");
