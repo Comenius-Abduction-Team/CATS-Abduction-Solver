@@ -19,7 +19,7 @@ public class ModelExtractor {
     private final Loader loader;
     private final Abducibles abducibles;
     private final Set<OWLAxiom> abducibleAxioms;
-    //private HashMap<Integer,OWLAxiom> abducibleMap;
+
     private final List<OWLAxiom> assertionAxioms;
     private final List<OWLAxiom> negAssertionAxioms;
     
@@ -40,15 +40,7 @@ public class ModelExtractor {
         this.ontologyManager = OWLManager.createOWLOntologyManager();
     }
 
-//    public void initialiseAbducibles(IAbducibleAxioms abducibleAxioms){
-////        abducibles = new HashMap<>();
-////        for (OWLAxiom axiom : solver.abducibleAxioms.getAxioms()){
-////            abducibles.put(axiom.hashCode(), axiom);
-////        }
-//        this.abducibleAxioms = abducibleAxioms.getAxioms();
-//    }
-
-    public Model extractModel() {  // mrozek
+    public Model extractModel() {
 
         Model model = new Model();
         ArrayList<OWLNamedIndividual> individualArray;
@@ -80,10 +72,7 @@ public class ModelExtractor {
         }
 
         return model;
-
     }
-
-
 
     public void assignTypesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, Model model){
         //complex concepts from original ontology

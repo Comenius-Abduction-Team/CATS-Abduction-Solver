@@ -54,6 +54,57 @@ public class MxpNodeProcessor implements NodeProcessor {
         return result;
     }
 
+    private boolean addNewExplanations(){
+        List<Explanation> newExplanations = findExplanations();
+        explanationManager.setLengthOneExplanations(new ArrayList<>());
+        for (Explanation explanation : newExplanations){
+            if (explanation.getAxioms().size() == 1){
+                explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
+            }
+            explanation.addAxioms(path);
+            if (ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
+                Explanation newExplanation = explanation;
+                if(Configuration.CHECKING_MINIMALITY_BY_QXP){
+                    newExplanation = getMinimalExplanationByCallingQXP(explanation);
+                }
+                explanationManager.addPossibleExplanation(newExplanation);
+                if(Configuration.CACHED_CONFLICTS_MEDIAN){
+                    setDivider.addPairsOfLiteralsToTable(newExplanation);
+                }
+            }
+        }
+        if (newExplanations.size() == explanationManager.getLengthOneExplanationsSize()){
+            return false;
+        }
+        return !newExplanations.isEmpty();
+    }
+
+    private List<Explanation> findExplanations(){
+
+        //explanationManager.setLengthOneExplanations(new ArrayList<>());
+
+        Set<OWLAxiom> copy = new HashSet<>();
+
+        List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
+
+        for (OWLAxiom a : solver.abducibleAxioms.getAxioms()){
+            if (path.contains(a))
+                continue;
+            if (lengthOne.contains(a)) {
+                //System.out.println("NIECO TO ROBIIIIIIIIIIIIIII||||!!!!!!! AAAAAAAAHAHHAA");
+                continue;
+            }
+            copy.add(a);
+        }
+
+        if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
+            setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
+        }
+        Conflict conflict = findConflicts(copy);
+
+        return conflict.getExplanations();
+    }
+
     protected void addToExplanations(Explanation explanation){
         if(Configuration.CHECKING_MINIMALITY_BY_QXP){
             Explanation newExplanation = getMinimalExplanationByCallingQXP(explanation);
@@ -247,52 +298,5 @@ public class MxpNodeProcessor implements NodeProcessor {
         conflicts.addAll(D2.getAxioms());
 
         return solver.createExplanationFromAxioms(conflicts);
-    }
-
-    protected boolean addNewExplanations(){
-        List<Explanation> newExplanations = findExplanations();
-        explanationManager.setLengthOneExplanations(new ArrayList<>());
-        for (Explanation explanation : newExplanations){
-            if (explanation.getAxioms().size() == 1){
-                explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
-            }
-            explanation.addAxioms(path);
-            if (ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-                Explanation newExplanation = explanation;
-                if(Configuration.CHECKING_MINIMALITY_BY_QXP){
-                    newExplanation = getMinimalExplanationByCallingQXP(explanation);
-                }
-                explanationManager.addPossibleExplanation(newExplanation);
-                if(Configuration.CACHED_CONFLICTS_MEDIAN){
-                    setDivider.addPairsOfLiteralsToTable(newExplanation);
-                }
-            }
-        }
-        if (newExplanations.size() == explanationManager.getLengthOneExplanationsSize()){
-            return false;
-        }
-        return !newExplanations.isEmpty();
-    }
-
-    protected List<Explanation> findExplanations(){
-
-        Set<OWLAxiom> copy = new HashSet<>();
-
-        List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
-
-        for (OWLAxiom a : solver.abducibleAxioms.getAxioms()){
-            if (path.contains(a))
-                continue;
-            if (lengthOne.contains(a))
-                continue;
-            copy.add(a);
-        }
-
-        if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
-            setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
-        }
-        Conflict conflict = findConflicts(copy);
-
-        return conflict.getExplanations();
     }
 }
