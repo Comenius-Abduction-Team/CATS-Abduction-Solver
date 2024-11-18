@@ -95,6 +95,6 @@ public interface TreeBuilder {
      */
     OWLAxiom getNextChild();
 
-    void assignModel(TreeNode node);
+    void labelNodeWithModel(TreeNode node);
 
 }

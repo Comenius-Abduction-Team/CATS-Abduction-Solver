@@ -263,7 +263,7 @@ public class AlgorithmSolver {
                 }
             }
 
-            treeBuilder.assignModel(node);
+            treeBuilder.labelNodeWithModel(node);
 
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[MODEL] Assigned model: " + node.model);

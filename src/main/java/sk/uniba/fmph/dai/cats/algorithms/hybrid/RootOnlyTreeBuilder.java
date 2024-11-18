@@ -79,7 +79,7 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public void assignModel(TreeNode node){
+    public void labelNodeWithModel(TreeNode node){
 
         Model model = solver.findAndGetModelToReuse();
 

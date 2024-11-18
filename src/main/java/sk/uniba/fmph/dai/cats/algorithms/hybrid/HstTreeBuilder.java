@@ -198,7 +198,7 @@ public class HstTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public void assignModel(TreeNode node){
+    public void labelNodeWithModel(TreeNode node){
 
         if (abducibles.areAllAbduciblesIndexed()){
 
