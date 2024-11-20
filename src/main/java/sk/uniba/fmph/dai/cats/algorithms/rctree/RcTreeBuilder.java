@@ -3,9 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.rctree;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 
@@ -15,6 +17,7 @@ public class RcTreeBuilder implements TreeBuilder {
 
     final AlgorithmSolver solver;
     final NodeProcessor nodeProcessor;
+    final TreeStats stats;
 
     final Queue<RcTreeNode> queue  = new PriorityQueue<>();
 
@@ -27,6 +30,7 @@ public class RcTreeBuilder implements TreeBuilder {
     public RcTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.nodeProcessor = solver.nodeProcessor;
+        this.stats = solver.stats;
     }
 
     @Override
@@ -51,46 +55,6 @@ public class RcTreeBuilder implements TreeBuilder {
         }
 
         return false;
-    }
-
-    void deleteNode(RcTreeNode child, RcTreeNode parent){
-
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[RC-TREE] Pruning child: " + child);
-
-        parent.children.remove(child);
-
-        Queue<RcTreeNode> localQueue = new ArrayDeque<>();
-        localQueue.add(child);
-
-        while (!localQueue.isEmpty()){
-            RcTreeNode node = localQueue.poll();
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[RC-TREE] Closing node: " + node);
-            queue.remove(node);
-            node.closeNode();
-            localQueue.addAll(node.children);
-
-        }
-
-    }
-
-    void updateIgnoredChildren(RcTreeNode node, Set<OWLAxiom> difference){
-        Set<OWLAxiom> removedIgnored = node.childrenToIgnore.removeAllAndReturn(difference);
-
-        if (!removedIgnored.isEmpty()){
-
-//            if (Configuration.DEBUG_PRINT)
-//                System.out.println("[RC-TREE] " + node + " is subset of " + polledNode);
-
-            // create for all n'' and n''' all the edges that are not avoided anymore
-            // (due to the updates to their Θs), and process the new nodes in a breadth-first order
-            node.childrenToProcess.addAll(removedIgnored);
-            node.closed = false;
-            if (!queue.contains(node))
-                queue.add(node);
-        }
-
     }
 
     @Override
@@ -148,6 +112,7 @@ public class RcTreeBuilder implements TreeBuilder {
         parent.children.add(node);
         node.parent = parent;
 
+        node.childrenToIgnore.add(label);
         node.childrenToIgnore.addAll(parent.childrenToIgnore.getAxioms());
         node.childrenToIgnore.addAll(parent.usedLabels);
 
@@ -209,7 +174,8 @@ public class RcTreeBuilder implements TreeBuilder {
                 difference.removeAll(Ci.getNegatedData());
 
                 // Relabel n' with Ci
-                //TODO mozeme nahradit cely model alebo treba iba neg.data?
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[RC-TREE] Relabelling " + polledNode + " with " + Ci);
                 polledNode.model = Ci;
 
                 // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
@@ -237,6 +203,34 @@ public class RcTreeBuilder implements TreeBuilder {
 
     }
 
+    void deleteNode(RcTreeNode child, RcTreeNode parent){
+
+        parent.children.remove(child);
+
+        Queue<RcTreeNode> localQueue = new ArrayDeque<>();
+        localQueue.add(child);
+
+        while (!localQueue.isEmpty()){
+            RcTreeNode node = localQueue.poll();
+
+            if (node.closed)
+                continue;
+
+            queue.remove(node);
+            node.closeNode();
+            localQueue.addAll(node.children);
+            node.children.clear();
+            node.childrenToProcess.clear();
+
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("[RC-TREE] Deleting node: " + node);
+
+            stats.getLevelStatsNoSetting(node.depth-1).deleted_processed += 1;
+
+        }
+
+    }
+
     private void traverseTreeToUpdateIgnoredChildren(RcTreeNode originalPolledNode, Set<OWLAxiom> difference){
 
         // TREBA PROPAGOVAT ZMENU V CELOM PODSTROME... TAKZE TREBA ZNOVA PRECHADZAT V QUEUECKU VRCHOLY
@@ -258,6 +252,27 @@ public class RcTreeBuilder implements TreeBuilder {
         }
     }
 
+    void updateIgnoredChildren(RcTreeNode node, Set<OWLAxiom> difference){
+        Set<OWLAxiom> removedIgnored = node.childrenToIgnore.removeAllAndReturn(difference);
+
+        if (!removedIgnored.isEmpty()){
+
+            // create for all n'' and n''' all the edges that are not avoided anymore
+            // (due to the updates to their Θs), and process the new nodes in a breadth-first order
+            boolean added = node.childrenToProcess.addAll(removedIgnored);
+            if (Configuration.DEBUG_PRINT && added)
+                System.out.println("[RC-TREE] Added " + StringFactory.getRepresentation(removedIgnored) + " to "
+                        + node + "'s children to be processed.");
+            node.closed = false;
+            if (!queue.contains(node) && !node.childrenToProcess.isEmpty()) {
+                if (Configuration.DEBUG_PRINT)
+                    System.out.println("[RC-TREE] Added " + node + " to the queue.");
+                queue.add(node);
+            }
+        }
+
+    }
+
     @Override
     public boolean noChildrenLeft(){
         return currentNode.childrenToProcess.isEmpty();
@@ -268,7 +283,6 @@ public class RcTreeBuilder implements TreeBuilder {
         return currentNode.childrenToProcess.remove(0);
 
     }
-<<<<<<< HEAD
 
     @Override
     public void labelNodeWithModel(TreeNode node){
@@ -287,6 +301,5 @@ public class RcTreeBuilder implements TreeBuilder {
                 node_.childrenToProcess.add(axiom);
         }
     }
-=======
->>>>>>> parent of 6d9d75c (changed the order of operations in the trees to match official algorithms)
+
 }

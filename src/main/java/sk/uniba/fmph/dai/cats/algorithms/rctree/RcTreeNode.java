@@ -30,7 +30,7 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
     boolean isSubsetOf(RcTreeNode other){
         if (this == other)
             return false;
-        if (model == other.model)
+        if (model.getNegatedData().size() >= other.model.getNegatedData().size())
             return false;
         return other.model.getNegatedData().containsAll(model.getNegatedData());
     }
