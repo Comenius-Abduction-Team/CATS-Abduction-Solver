@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public abstract class AlgorithmTestBase {
 
-    private final boolean CREATE_LOGS = true;
+    private final boolean CREATE_LOGS = false;
     private final boolean DEBUG_PRINTING = false;
     private final boolean PRINT_EXPLANATIONS = false;
 
@@ -153,8 +153,10 @@ public abstract class AlgorithmTestBase {
 
     public void solve(){
         abducer.solveAbduction();
-        if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty())
+        if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty()) {
             System.err.println(abducer.getOutputMessage());
+            System.err.println(abducer.getFullLog());
+        }
     }
 
     private void setMxp(){
