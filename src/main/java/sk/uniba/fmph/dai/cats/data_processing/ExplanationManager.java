@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public abstract class ExplanationManager {
 
     protected List<Explanation> possibleExplanations = new ArrayList<>();
-    protected List<OWLAxiom> lengthOneExplanations = new ArrayList<>();
+    protected Set<OWLAxiom> lengthOneExplanations = new HashSet<>();
     protected List<Explanation> finalExplanations;
     protected AlgorithmSolver solver;
     private Loader loader;
@@ -60,10 +60,10 @@ public abstract class ExplanationManager {
     }
     
     public void setLengthOneExplanations(Collection<OWLAxiom> lengthOneExplanations) {
-        this.lengthOneExplanations = new ArrayList<>(lengthOneExplanations);
+        this.lengthOneExplanations = new HashSet<>(lengthOneExplanations);
     }
     
-    public List<OWLAxiom> getLengthOneExplanations() {
+    public Set<OWLAxiom> getLengthOneExplanations() {
         return lengthOneExplanations;
     }
     
@@ -132,7 +132,7 @@ public abstract class ExplanationManager {
             finalExplanations.addAll(currentExplanations);
             String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
             String line = String.format("%d; %d; %.2f; { %s }\n", size, currentExplanations.size(),
-                    timer.getTimeForLevel(size-1), currentExplanationsFormat);
+                    timer.getTimeForLevel(size), currentExplanationsFormat);
             result.append(line);
             size++;
         }
