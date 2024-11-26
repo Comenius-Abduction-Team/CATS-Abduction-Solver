@@ -43,7 +43,6 @@ public class TimeManager {
     }
 
     public double getTimeForLevel(int level){
-        //System.out.println(level + ": " + levelTimes.get(level));
         return levelTimes.get(level);
     }
 
@@ -58,7 +57,6 @@ public class TimeManager {
     public void setTimeForLevelIfNotSet(double time, int depth){
         if (!levelHasTime(depth)) {
             setTimeForLevel(time, depth);
-           System.out.println(depth + ": " + time);
         }
     }
 
