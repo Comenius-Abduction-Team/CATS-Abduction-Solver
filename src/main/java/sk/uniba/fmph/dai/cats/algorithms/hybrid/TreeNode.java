@@ -9,10 +9,12 @@ import java.util.List;
 
 public class TreeNode {
 
+    public static final int DEFAULT_DEPTH = 1;
+
     public List<OWLAxiom> path = new ArrayList<>();
-    public Integer depth = 0;
+    public Integer depth = DEFAULT_DEPTH;
     public Model model;
-    public boolean closed;
+    public boolean closed, processed;
 
     public void closeNode() {
         closed = true;
@@ -22,4 +24,5 @@ public class TreeNode {
     public String toString() {
         return StringFactory.getRepresentation(model.getNegatedData());
     }
+
 }

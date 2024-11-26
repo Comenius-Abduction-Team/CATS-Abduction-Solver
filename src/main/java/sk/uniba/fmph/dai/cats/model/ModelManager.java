@@ -52,7 +52,6 @@ public class ModelManager {
             Model storedModel = ((List<Model>)models).get(i);
             if (storedModel.equals(model)){
                 modelToReuse = storedModel;
-                stats.getCurrentLevelStats().reused += 1;
                 return true;
             }
         }
