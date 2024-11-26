@@ -15,6 +15,7 @@ import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
+import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 import sk.uniba.fmph.dai.cats.timer.TimeManager;
@@ -44,7 +45,6 @@ public class AlgorithmSolver {
     // INTEGERS
     protected int currentDepth = 0;
     int maxDepth = -1;
-    protected int numberOfNodes = 0;
 
     protected TreeBuilder treeBuilder;
     public NodeProcessor nodeProcessor;
@@ -162,8 +162,7 @@ public class AlgorithmSolver {
     protected void startSolving() {
 
         currentDepth = 0;
-
-        currentLevelStats = stats.getLevelStats(0);
+        currentLevelStats = stats.getLevelStats(currentDepth);
         currentLevelStats.start = timer.getCurrentTime();
 
         TreeNode root = treeBuilder.createRoot();
@@ -173,12 +172,16 @@ public class AlgorithmSolver {
             return;
         }
         treeBuilder.addNodeToTree(root);
-        currentLevelStats.created = 1;
+        currentLevelStats.created_nodes = 1;
 
         if(isTimeout()) {
             logger.makeTimeoutPartialLog(currentDepth);
             return;
         }
+
+//        currentLevelStats.start = timer.getCurrentTime();
+//        currentLevelStats.finish = timer.getCurrentTime();
+//        currentDepth = 1
 
         while (!treeBuilder.isTreeClosed()) {
 
@@ -204,13 +207,6 @@ public class AlgorithmSolver {
             if (Configuration.DEBUG_PRINT)
                 System.out.println("*********\n" + "[TREE] PROCESSING node: " + node);
 
-            if (node.closed) {
-                currentLevelStats.deleted += 1;
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[TREE] Closed node");
-                continue;
-            }
-
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
             if (!canIterateNodeChildren){
@@ -218,6 +214,12 @@ public class AlgorithmSolver {
                     System.out.println("[TREE] NO CHILDREN TO ITERATE!");
                 continue;
             }
+
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("[TREE] Iterating child edges");
+
+            node.processed = true;
+            stats.getCurrentLevelStats().processed_nodes += 1;
 
             while (!treeBuilder.noChildrenLeft()){
 
@@ -232,6 +234,8 @@ public class AlgorithmSolver {
                 if (Configuration.DEBUG_PRINT)
                     System.out.println("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
 
+                stats.getCurrentLevelStats().created_edges += 1;
+
                 if(isTimeout()){
                     logger.makeTimeoutPartialLog(currentDepth);
                     return;
@@ -240,7 +244,7 @@ public class AlgorithmSolver {
                 //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
                 //ak axiom nie je v abducibles
                 //nepokracujeme vo vetve
-                if(treeBuilder.isIncorrectPath(node.path, child)){
+                if(isIncorrectPath(node, child)){
                     if (Configuration.DEBUG_PRINT)
                         System.out.println("[PRUNING] INCORRECT PATH!");
                     continue;
@@ -252,11 +256,12 @@ public class AlgorithmSolver {
                 path.clear();
                 path.addAll(explanation.getAxioms());
 
-                boolean pruneThisChild = treeBuilder.pruneTree(node, explanation);
+                boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
 
-                if (pruneThisChild || node.closed){
+                if (pruneThisChild){
                     if (Configuration.DEBUG_PRINT)
                         System.out.println("[PRUNING] NODE CLOSED!");
+                    stats.getLevelStats(currentDepth).pruned_edges += 1;
                     path.clear();
                     continue;
                 }
@@ -264,29 +269,40 @@ public class AlgorithmSolver {
                 if (Configuration.REUSE_OF_MODELS)
                     modelManager.findReuseModelForPath(path);
 
-                if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel())
+                if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
+                    stats.getLevelStats(currentDepth).reused += 1;
+                }
                 else {
 
                     if (Configuration.DEBUG_PRINT){
                         System.out.println("[MODEL] Model was not reused.");
                     }
 
+//                    boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
+//
+//                    if (pruneThisChild){
+//                        if (Configuration.DEBUG_PRINT)
+//                            System.out.println("[PRUNING] NODE CLOSED!");
+//                        stats.getLevelStats(currentDepth).pruned += 1;
+//                        path.clear();
+//                        continue;
+//                    }
+
                     if (isTimeout()){
                         logger.makeTimeoutPartialLog(currentDepth);
                         return;
                     }
 
-                    if (nodeProcessor.cannotAddExplanation(explanation)){
+                    if (treeBuilder.closeExplanation(explanation)){
+                        //System.out.println(currentDepth);
                         path.clear();
                         continue;
                     }
                 }
 
-                treeBuilder.addNodeToTree(
-                        treeBuilder.createChildNode(node, explanation)
-                );
-                stats.getLevelStats(currentDepth + 1).created += 1;
+                treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
+                stats.getLevelStats(currentDepth).created_nodes += 1;
 
                 if (Configuration.DEBUG_PRINT){
                     System.out.println("[TREE] Created node");
@@ -302,9 +318,9 @@ public class AlgorithmSolver {
 
         if (Configuration.DEBUG_PRINT) {
             System.out.println("[TREE] Finished iterating the tree.");
-            System.out.println("[TREE] Number of nodes: " + numberOfNodes);
         }
 
+        //System.out.println(stats.getTotalNodeCount());
         System.out.println(stats);
 
         path.clear();
@@ -314,8 +330,13 @@ public class AlgorithmSolver {
             pathsInCertainDepth.clear();
         }
 
-        currentDepth = 0;
+        currentDepth = 1;
 
+    }
+
+    private boolean isIncorrectPath(TreeNode parent, OWLAxiom edgeLabel){
+        return parent.path.contains(AxiomManager.getComplementOfOWLAxiom(loader, edgeLabel)) ||
+                edgeLabel.equals(loader.getObservationAxiom());
     }
 
     private Explanation createPossibleExplanation(TreeNode node, OWLAxiom child){
