@@ -8,6 +8,6 @@ public interface NodeProcessor {
 
     boolean isInvalidExplanation(Explanation explanation);
 
-    boolean cannotAddExplanation(Explanation explanation);
+    boolean findExplanations(Explanation explanation, boolean extractModel);
 
 }
