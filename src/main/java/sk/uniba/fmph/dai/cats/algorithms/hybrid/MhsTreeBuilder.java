@@ -6,7 +6,6 @@ import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.ArrayDeque;
@@ -37,13 +36,7 @@ public class MhsTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
-        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
-                child.equals(solver.loader.getObservationAxiom());
-    }
-
-    @Override
-    public boolean pruneTree(TreeNode node, Explanation explanation) {
+    public boolean pruneNode(TreeNode node, Explanation explanation) {
 
         if (solver.isPathAlreadyStored()){
             if (Configuration.DEBUG_PRINT)
@@ -73,7 +66,7 @@ public class MhsTreeBuilder implements TreeBuilder {
     @Override
     public TreeNode createRoot(){
         if (nodeProcessor.canCreateRoot())
-            return createNode(null, 0);
+            return createNode(null, TreeNode.DEFAULT_DEPTH);
         return null;
     }
 
@@ -101,6 +94,11 @@ public class MhsTreeBuilder implements TreeBuilder {
         node.model = solver.removePathAxiomsFromModel(modelToReuse);
 
         return node;
+    }
+
+    @Override
+    public boolean closeExplanation(Explanation explanation) {
+        return nodeProcessor.findExplanations(explanation, true);
     }
 
     @Override

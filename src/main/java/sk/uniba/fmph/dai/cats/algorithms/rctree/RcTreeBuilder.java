@@ -9,7 +9,6 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 
 import java.util.*;
 
@@ -39,7 +38,7 @@ public class RcTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean pruneTree(TreeNode originalNode, Explanation explanation){
+    public boolean pruneNode(TreeNode originalNode, Explanation explanation){
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -55,12 +54,6 @@ public class RcTreeBuilder implements TreeBuilder {
         }
 
         return false;
-    }
-
-    @Override
-    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
-        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
-                child.equals(solver.loader.getObservationAxiom());
     }
 
     private int getAndIncreaseIndex(){
@@ -122,6 +115,11 @@ public class RcTreeBuilder implements TreeBuilder {
         }
 
         return node;
+    }
+
+    @Override
+    public boolean closeExplanation(Explanation explanation) {
+        return nodeProcessor.findExplanations(explanation, true);
     }
 
     @Override
@@ -225,7 +223,10 @@ public class RcTreeBuilder implements TreeBuilder {
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[RC-TREE] Deleting node: " + node);
 
-            stats.getLevelStatsNoSetting(node.depth-1).deleted_processed += 1;
+            if (node.processed)
+                stats.getLevelStatsNoSetting(node.depth).deleted_processed += 1;
+            else
+                stats.getLevelStatsNoSetting(node.depth).deleted_unprocessed += 1;
 
         }
 

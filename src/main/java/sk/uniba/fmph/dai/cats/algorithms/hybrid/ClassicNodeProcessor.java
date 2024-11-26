@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
 public class ClassicNodeProcessor implements NodeProcessor {
 
@@ -10,10 +11,13 @@ public class ClassicNodeProcessor implements NodeProcessor {
     private final ConsistencyChecker consistencyChecker;
     private final ExplanationManager explanationManager;
 
+    private final TreeStats stats;
+
     ClassicNodeProcessor(AlgorithmSolver solver){
         ruleChecker = solver.ruleChecker;
         consistencyChecker = solver.consistencyChecker;
         explanationManager = solver.explanationManager;
+        stats = solver.stats;
     }
 
     @Override
@@ -37,13 +41,19 @@ public class ClassicNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean cannotAddExplanation(Explanation explanation) {
-        //TODO toto ma byt ine pri HST... jesus christ
-        if (consistencyChecker.checkConsistencyWithModelExtraction())
-            return false;
+    public boolean findExplanations(Explanation explanation, boolean extractModel) {
+        if (extractModel){
+            if (consistencyChecker.checkConsistencyWithModelExtraction())
+                return false;
+        } else {
+            if (consistencyChecker.checkConsistency())
+                return false;
+        }
         if (Configuration.DEBUG_PRINT)
-            System.out.println("[PRUNING] INCONSISTENT WITH ONTOLOGY!");
+            System.out.println("[CLOSING] EXPLANATION FOUND!");
         explanationManager.addPossibleExplanation(explanation);
+        stats.getCurrentLevelStats().explanation_edges += 1;
+
         return true;
     }
 }

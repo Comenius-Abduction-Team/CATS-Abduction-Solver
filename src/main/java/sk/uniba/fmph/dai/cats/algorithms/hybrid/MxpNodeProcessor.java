@@ -41,37 +41,41 @@ public class MxpNodeProcessor implements NodeProcessor {
 
         if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
+            solver.stats.getCurrentLevelStats().explanation_edges += 1;
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean cannotAddExplanation(Explanation explanation) {
-        boolean result = !addNewExplanations();
+    public boolean findExplanations(Explanation explanation, boolean extractModel) {
+        boolean result = !addExplanationsFoundByMxp();
         if (result && Configuration.DEBUG_PRINT)
             System.out.println("[PRUNING] Pruned by MXP!");
         return result;
     }
 
-    private boolean addNewExplanations(){
-        List<Explanation> newExplanations = findExplanations();
-        explanationManager.setLengthOneExplanations(new ArrayList<>());
+    private boolean addExplanationsFoundByMxp(){
+        List<Explanation> newExplanations = findExplanationsWithMxp();
+        explanationManager.getLengthOneExplanations().clear();
         for (Explanation explanation : newExplanations){
             if (explanation.getAxioms().size() == 1){
                 explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
             }
+
             explanation.addAxioms(path);
-            if (ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-                Explanation newExplanation = explanation;
-                if(Configuration.CHECKING_MINIMALITY_BY_QXP){
-                    newExplanation = getMinimalExplanationByCallingQXP(explanation);
-                }
-                explanationManager.addPossibleExplanation(newExplanation);
-                if(Configuration.CACHED_CONFLICTS_MEDIAN){
-                    setDivider.addPairsOfLiteralsToTable(newExplanation);
-                }
+            if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
+                continue;
             }
+
+            if(Configuration.CHECKING_MINIMALITY_BY_QXP){
+                explanation = getMinimalExplanationByCallingQXP(explanation);
+            }
+            explanationManager.addPossibleExplanation(explanation);
+            if(Configuration.CACHED_CONFLICTS_MEDIAN){
+                setDivider.addPairsOfLiteralsToTable(explanation);
+            }
+
         }
         if (newExplanations.size() == explanationManager.getLengthOneExplanationsSize()){
             return false;
@@ -79,28 +83,27 @@ public class MxpNodeProcessor implements NodeProcessor {
         return !newExplanations.isEmpty();
     }
 
-    private List<Explanation> findExplanations(){
+    private List<Explanation> findExplanationsWithMxp(){
 
         //explanationManager.setLengthOneExplanations(new ArrayList<>());
 
-        Set<OWLAxiom> copy = new HashSet<>();
+        Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
-        List<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
+        Set<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
 
         for (OWLAxiom a : solver.abducibleAxioms.getAxioms()){
             if (path.contains(a))
                 continue;
             if (lengthOne.contains(a)) {
-                //System.out.println("NIECO TO ROBIIIIIIIIIIIIIII||||!!!!!!! AAAAAAAAHAHHAA");
                 continue;
             }
-            copy.add(a);
+            abduciblesCopy.add(a);
         }
 
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
         }
-        Conflict conflict = findConflicts(copy);
+        Conflict conflict = findConflicts(abduciblesCopy);
 
         return conflict.getExplanations();
     }

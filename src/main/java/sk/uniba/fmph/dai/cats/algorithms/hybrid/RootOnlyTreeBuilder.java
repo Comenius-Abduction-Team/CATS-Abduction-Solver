@@ -21,12 +21,7 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
-        return true;
-    }
-
-    @Override
-    public boolean pruneTree(TreeNode node, Explanation explanation) {
+    public boolean pruneNode(TreeNode node, Explanation explanation) {
         return true;
     }
 
@@ -50,6 +45,11 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label) {
         return null;
+    }
+
+    @Override
+    public boolean closeExplanation(Explanation explanation) {
+        return true;
     }
 
     @Override
@@ -90,10 +90,5 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
 
         node.model = solver.removePathAxiomsFromModel(model);
 
-    }
-
-    @Override
-    public boolean closeExplanation(Explanation explanation) {
-        return true;
     }
 }

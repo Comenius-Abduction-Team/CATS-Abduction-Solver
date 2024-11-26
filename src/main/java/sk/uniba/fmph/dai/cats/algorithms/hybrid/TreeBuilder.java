@@ -19,23 +19,14 @@ public interface TreeBuilder {
     IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles);
 
     /**
-     * Returns true if the given path (from the root to a node),
-     * extended by the given axiom (that would label a child edge starting in the node),
-     * would be invalid for some reason.
-     *
-     * @param path  the path
-     * @param child the child
-     * @return the boolean
-     */
-    boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child);
-
-    /**
      * Prune tree.
      *
      * @param node        the node
      * @param explanation the explanation
      */
-    boolean pruneTree(TreeNode node, Explanation explanation);
+    boolean pruneNode(TreeNode node, Explanation explanation);
+
+    boolean closeExplanation(Explanation explanation);
 
     /**
      * Create root tree node.

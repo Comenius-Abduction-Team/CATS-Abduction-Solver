@@ -8,10 +8,8 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -50,7 +48,7 @@ public class HstTreeBuilder implements TreeBuilder {
     @Override
     public TreeNode createRoot(){
         if (nodeProcessor.canCreateRoot())
-            return createNode(null, 0, abducibles.size() + 1);
+            return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
         return null;
     }
 
@@ -88,6 +86,12 @@ public class HstTreeBuilder implements TreeBuilder {
     }
 
     @Override
+    public boolean closeExplanation(Explanation explanation) {
+        boolean extractModel = !abducibles.areAllAbduciblesIndexed();
+        return nodeProcessor.findExplanations(explanation, extractModel);
+    }
+
+    @Override
     public void addNodeToTree(TreeNode node){
         queue.add((HstTreeNode) node);
     }
@@ -106,7 +110,7 @@ public class HstTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean pruneTree(TreeNode node, Explanation explanation) {
+    public boolean pruneNode(TreeNode node, Explanation explanation) {
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -124,13 +128,6 @@ public class HstTreeBuilder implements TreeBuilder {
         }
 
         return false;
-    }
-
-
-    @Override
-    public boolean isIncorrectPath(List<OWLAxiom> path, OWLAxiom child) {
-        return  path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, child)) ||
-                child.equals(solver.loader.getObservationAxiom());
     }
 
     //int index = node.min; index < node.index; index++
