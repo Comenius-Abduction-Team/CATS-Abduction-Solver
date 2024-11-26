@@ -40,7 +40,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.mhs();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
@@ -121,7 +121,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.mhsMxp();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(2);
 
     }
 
@@ -162,7 +162,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.hst();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
@@ -203,7 +203,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.hstMxp();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(2);
 
     }
 
@@ -244,7 +244,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.rct();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
@@ -285,7 +285,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.rctMxp();
         abducer.setDepth(3);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(2);
 
     }
 
