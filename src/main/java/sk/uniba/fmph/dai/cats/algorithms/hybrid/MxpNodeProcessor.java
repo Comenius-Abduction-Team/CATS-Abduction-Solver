@@ -39,10 +39,26 @@ public class MxpNodeProcessor implements NodeProcessor {
             return true;
         }
 
+        if (isSupersetOfExistingExplanation(explanation)) {
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("[PRUNING] SUPERSET OF EXPLANATION");
+            return true;
+        }
+
         if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
+            if (Configuration.DEBUG_PRINT)
+                System.out.println("[PRUNING] IS EXPLANATION!");
             solver.stats.getCurrentLevelStats().explanation_edges += 1;
             return true;
+        }
+        return false;
+    }
+
+    private boolean isSupersetOfExistingExplanation(Explanation explanation){
+        for (Explanation existingExplanation : explanationManager.getPossibleExplanations()){
+            if (explanation.containsAll(existingExplanation))
+                return true;
         }
         return false;
     }

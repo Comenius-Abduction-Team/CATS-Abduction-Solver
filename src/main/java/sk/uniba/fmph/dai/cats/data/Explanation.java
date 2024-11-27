@@ -67,6 +67,12 @@ public class Explanation implements IExplanation {
         this.axioms.add(axiom);
     }
 
+    public boolean containsAll(Explanation other){
+        if (size() < other.size())
+            return false;
+        return new HashSet<>(axioms).containsAll(other.axioms);
+    }
+
     @Override
     public String toString() {
         return StringFactory.getRepresentation(axioms);
