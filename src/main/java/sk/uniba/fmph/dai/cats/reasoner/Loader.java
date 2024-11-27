@@ -12,7 +12,9 @@ import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Loader {
 
@@ -59,6 +61,28 @@ public abstract class Loader {
     }
 
     protected abstract void setupOntology() throws OWLOntologyCreationException;
+
+    protected OWLOntology filterOntology(OWLOntology ontology){
+        Set<OWLAxiom> axioms = ontology.getAxioms();
+        Set<OWLAxiom> filteredAxioms = new HashSet<>();
+        for (OWLAxiom axiom : axioms){
+            if (axiom.isOfType(
+                    AxiomType.DATA_PROPERTY_ASSERTION, AxiomType.DATA_PROPERTY_DOMAIN,
+                    AxiomType.DATA_PROPERTY_RANGE, AxiomType.DATATYPE_DEFINITION,
+                    AxiomType.SUB_DATA_PROPERTY, AxiomType.DISJOINT_DATA_PROPERTIES,
+                    AxiomType.EQUIVALENT_DATA_PROPERTIES, AxiomType.NEGATIVE_DATA_PROPERTY_ASSERTION,
+                    AxiomType.FUNCTIONAL_DATA_PROPERTY)
+            ) continue;
+            filteredAxioms.add(axiom);
+        }
+
+        try{
+            return ontologyManager.createOntology(filteredAxioms);
+        } catch (OWLOntologyCreationException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
 
     
     public void changeReasoner(ReasonerType reasonerType) {
