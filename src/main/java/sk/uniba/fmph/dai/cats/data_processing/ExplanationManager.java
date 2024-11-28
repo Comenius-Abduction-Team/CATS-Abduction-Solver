@@ -100,10 +100,10 @@ public abstract class ExplanationManager {
 
         List<Explanation> filteredExplanations = new ArrayList<>();
         for (Explanation explanation : possibleExplanations) {
-            if (isExplanation(explanation)) {
-                if (reasonerManager.isOntologyWithLiteralsConsistent(explanation.getAxioms(), loader.getInitialOntology())) {
-                    filteredExplanations.add(explanation);
-                }
+            if (!containsContradictoryAxioms(explanation) &&
+                    reasonerManager.isOntologyWithLiteralsConsistent(explanation.getAxioms(),
+                                                                    loader.getInitialOntology())) {
+                filteredExplanations.add(explanation);
             }
         }
 
@@ -145,7 +145,7 @@ public abstract class ExplanationManager {
 
     private StringBuilder formatExplanationsWithLevel(List<Explanation> explanations){
         StringBuilder result = new StringBuilder();
-        int level = 0;
+        int level = -1;
         while (!explanations.isEmpty()) {
             List<Explanation> filteredExplanations = filterExplanationsByLevel(explanations, level);
             explanations.removeAll(filteredExplanations);
@@ -207,22 +207,22 @@ public abstract class ExplanationManager {
         return time;
     }
 
-    private boolean isExplanation(Explanation explanation) {
-
-        //ROLY - bude to containsNegation fungovat???
+    private boolean containsContradictoryAxioms(Explanation explanation) {
 
         if (explanation.getAxioms().size() == 1) {
-            return true;
+            return false;
         }
 
-        for (OWLAxiom axiom1 : explanation.getAxioms()) {
+        for (int i = 0; i < explanation.getAxioms().size(); i++) {
+            OWLAxiom axiom1 = explanation.getAxioms().get(i);
             String name1 = StringFactory.extractClassName(axiom1);
             boolean negated1 = containsNegation(name1);
             if (negated1) {
                 name1 = name1.substring(1);
             }
 
-            for (OWLAxiom axiom2 : explanation.getAxioms()) {
+            for (int j = i+1; j < explanation.getAxioms().size(); j++) {
+                OWLAxiom axiom2 = explanation.getAxioms().get(j);
                 if (!axiom1.equals(axiom2) && axiom1.getIndividualsInSignature().equals(axiom2.getIndividualsInSignature())) {
                     String name2 = StringFactory.extractClassName(axiom2);
 
@@ -232,13 +232,13 @@ public abstract class ExplanationManager {
                     }
 
                     if (name1.equals(name2) && ((!negated1 && negated2) || (negated1 && !negated2))) {
-                        return false;
+                        return true;
                     }
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     private boolean containsNegation(String name) {
