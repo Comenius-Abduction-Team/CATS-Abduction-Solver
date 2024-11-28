@@ -77,6 +77,7 @@ public abstract class Loader {
         }
 
         try{
+            ontologyManager = OWLManager.createOWLOntologyManager();
             return ontologyManager.createOntology(filteredAxioms);
         } catch (OWLOntologyCreationException e){
             throw new RuntimeException(e.getMessage());
