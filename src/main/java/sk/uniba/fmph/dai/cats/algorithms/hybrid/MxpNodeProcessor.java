@@ -101,8 +101,6 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     private List<Explanation> findExplanationsWithMxp(){
 
-        //explanationManager.setLengthOneExplanations(new ArrayList<>());
-
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
         Set<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
@@ -119,7 +117,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
         }
-        Conflict conflict = findConflicts(abduciblesCopy);
+        Conflict conflict = findConflicts(abduciblesCopy, true);
 
         return conflict.getExplanations();
     }
@@ -155,21 +153,13 @@ public class MxpNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean canCreateRoot() {
-        runMxpInRoot();
+    public boolean canCreateRoot(boolean extractModel) {
+        Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
+        explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
     }
 
-    void runMxpInRoot(){
-        Conflict conflict = getMergeConflict();
-        explanationManager.setPossibleExplanations(conflict.getExplanations());
-    }
-
-    private Conflict getMergeConflict() {
-        return findConflicts(solver.abducibleAxioms.getAxioms());
-    }
-
-    private Conflict findConflicts(Set<OWLAxiom> axioms) {
+    private Conflict findConflicts(Set<OWLAxiom> axioms, boolean extractModel) {
 
         solver.removeNegatedObservationFromPath();
 
@@ -180,7 +170,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         reasonerManager.addAxiomsToOntology(path);
 
         // if isConsistent(B ∪ C) then return [C, ∅];
-        if (consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, true)) {
+        if (consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, extractModel)) {
             return new Conflict(axioms, new ArrayList<>());
         }
 
@@ -204,7 +194,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         double median = setDivider.getMedian();
 
         //[C'1, Γ1] ← FINDCONFLICTS(B, C1)
-        Conflict conflictC1 = findConflicts(sets.get(0).getAxioms());
+        Conflict conflictC1 = findConflicts(sets.get(0).getAxioms(), extractModel);
         if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN){
@@ -212,7 +202,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         }
 
         //[C'2, Γ2] ← FINDCONFLICTS(B, C2)
-        Conflict conflictC2 = findConflicts(sets.get(1).getAxioms());
+        Conflict conflictC2 = findConflicts(sets.get(1).getAxioms(), extractModel);
         if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN){
@@ -230,7 +220,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         conflictLiterals.addAll(conflictC2.getAxioms());
 
         // while ¬isConsistent(C'1 ∪ C'2 ∪ B) do
-        while (!consistencyChecker.checkOntologyConsistencyWithAddedAxioms(conflictLiterals, true)) {
+        while (!consistencyChecker.checkOntologyConsistencyWithAddedAxioms(conflictLiterals, extractModel)) {
 
             if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
@@ -272,13 +262,12 @@ public class MxpNodeProcessor implements NodeProcessor {
                 break;
             }
 
-            Explanation newExplanation = CS;
             if(Configuration.CHECKING_MINIMALITY_BY_QXP){
-                newExplanation = getMinimalExplanationByCallingQXP(CS);
+                CS = getMinimalExplanationByCallingQXP(CS);
             }
-            explanations.add(newExplanation);
+            explanations.add(CS);
             if(Configuration.CACHED_CONFLICTS_MEDIAN){
-                setDivider.addPairsOfLiteralsToTable(newExplanation);
+                setDivider.addPairsOfLiteralsToTable(CS);
             }
         }
 

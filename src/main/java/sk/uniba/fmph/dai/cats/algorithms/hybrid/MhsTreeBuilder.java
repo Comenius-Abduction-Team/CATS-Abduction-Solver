@@ -65,7 +65,7 @@ public class MhsTreeBuilder implements TreeBuilder {
 
     @Override
     public TreeNode createRoot(){
-        if (nodeProcessor.canCreateRoot())
+        if (nodeProcessor.canCreateRoot(true))
             return createNode(null, TreeNode.DEFAULT_DEPTH);
         return null;
     }

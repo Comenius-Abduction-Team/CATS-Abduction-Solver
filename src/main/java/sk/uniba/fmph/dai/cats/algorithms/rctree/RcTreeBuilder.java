@@ -65,7 +65,7 @@ public class RcTreeBuilder implements TreeBuilder {
     @Override
     public TreeNode createRoot() {
 
-        if (!nodeProcessor.canCreateRoot())
+        if (!nodeProcessor.canCreateRoot(true))
             return null;
 
         Model modelToReuse = solver.findAndGetModelToReuse();
@@ -86,7 +86,7 @@ public class RcTreeBuilder implements TreeBuilder {
         return createNode(label, parent.depth + 1, (RcTreeNode) parent);
     }
 
-    private RcTreeNode createNode(Explanation path, Integer depth, RcTreeNode parent){
+    private RcTreeNode createNode(Explanation path, int depth, RcTreeNode parent){
 
         Model modelToReuse = solver.findAndGetModelToReuse();
 

@@ -47,7 +47,7 @@ public class HstTreeBuilder implements TreeBuilder {
 
     @Override
     public TreeNode createRoot(){
-        if (nodeProcessor.canCreateRoot())
+        if (nodeProcessor.canCreateRoot(true))
             return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
         return null;
     }

@@ -4,7 +4,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public interface NodeProcessor {
 
-    boolean canCreateRoot();
+    boolean canCreateRoot(boolean extractModel);
 
     boolean isInvalidExplanation(Explanation explanation);
 

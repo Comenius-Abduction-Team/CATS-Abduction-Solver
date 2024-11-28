@@ -27,18 +27,10 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
 
     @Override
     public TreeNode createRoot() {
-        if (!solver.nodeProcessor.canCreateRoot())
+        if (!solver.nodeProcessor.canCreateRoot(false))
             return null;
 
-        Model modelToReuse = solver.findAndGetModelToReuse();
-
-        if (modelToReuse == null)
-            return null;
-
-        TreeNode root = new TreeNode();
-        root.model = modelToReuse;
-
-        return root;
+        return new TreeNode();
 
     }
 
@@ -81,14 +73,5 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public void labelNodeWithModel(TreeNode node){
-
-        Model model = solver.findAndGetModelToReuse();
-
-        if (model == null)
-            return;
-
-        node.model = solver.removePathAxiomsFromModel(model);
-
-    }
+    public void labelNodeWithModel(TreeNode node){}
 }

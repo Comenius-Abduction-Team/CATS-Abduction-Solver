@@ -21,8 +21,8 @@ public class ClassicNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean canCreateRoot() {
-        return consistencyChecker.checkOntologyConsistency(true);
+    public boolean canCreateRoot(boolean extractModel) {
+        return consistencyChecker.checkOntologyConsistency(extractModel);
     }
 
     @Override
