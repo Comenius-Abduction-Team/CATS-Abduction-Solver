@@ -62,8 +62,6 @@ public class ModelExtractor {
             }
         }
 
-        deletePathFromOntology();
-
         if(loader.isAxiomBasedAbduciblesOnInput()){
 
             model.getData().retainAll(abducibles.getAxiomBasedAbducibles());
@@ -72,6 +70,7 @@ public class ModelExtractor {
         }
 
         return model;
+
     }
 
     public void assignTypesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, Model model){

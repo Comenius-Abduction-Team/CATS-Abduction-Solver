@@ -33,7 +33,10 @@ public class ConsistencyChecker {
         if (!isConsistent)
             return false;
 
-        modelManager.storeModelFoundByConsistencyCheck();
+        if (extractModel)
+            modelManager.storeModelFoundByConsistencyCheck();
+
+        reasonerManager.resetOntologyToOriginal();
 
         return true;
 
@@ -56,7 +59,7 @@ public class ConsistencyChecker {
         }
     }
 
-    public boolean checkOntologyConsistencyWithPath(Set<OWLAxiom> path, boolean extractModel){
+    private boolean checkOntologyConsistencyWithPath(Set<OWLAxiom> path, boolean extractModel){
         if (path != null && !path.isEmpty()) {
             if(loader.isMultipleObservationOnInput()){
                 for(OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()){
