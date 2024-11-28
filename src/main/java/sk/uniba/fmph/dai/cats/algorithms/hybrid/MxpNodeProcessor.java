@@ -180,7 +180,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         reasonerManager.addAxiomsToOntology(path);
 
         // if isConsistent(B ∪ C) then return [C, ∅];
-        if (consistencyChecker.isOntologyWithLiteralsConsistent(axioms)) {
+        if (consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, true)) {
             return new Conflict(axioms, new ArrayList<>());
         }
 
@@ -230,7 +230,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         conflictLiterals.addAll(conflictC2.getAxioms());
 
         // while ¬isConsistent(C'1 ∪ C'2 ∪ B) do
-        while (!consistencyChecker.isOntologyWithLiteralsConsistent(conflictLiterals)) {
+        while (!consistencyChecker.checkOntologyConsistencyWithAddedAxioms(conflictLiterals, true)) {
 
             if ((Configuration.DEPTH < 1) && Configuration.TIMEOUT > 0)
                 if (Configuration.PRINT_PROGRESS)
@@ -292,7 +292,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         }
 
         // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
-        if (!axioms.isEmpty() && !consistencyChecker.checkConsistencyWithModelExtraction()) {
+        if (!axioms.isEmpty() && !consistencyChecker.checkOntologyConsistencyWithPath(true)) {
             return new Explanation();
         }
 

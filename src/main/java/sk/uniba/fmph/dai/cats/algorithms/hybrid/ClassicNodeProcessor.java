@@ -22,7 +22,7 @@ public class ClassicNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean canCreateRoot() {
-        return consistencyChecker.checkConsistencyWithModelExtraction();
+        return consistencyChecker.checkOntologyConsistency(true);
     }
 
     @Override
@@ -42,13 +42,8 @@ public class ClassicNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
-        if (extractModel){
-            if (consistencyChecker.checkConsistencyWithModelExtraction())
-                return false;
-        } else {
-            if (consistencyChecker.checkConsistency())
-                return false;
-        }
+        if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel))
+            return false;
         if (Configuration.DEBUG_PRINT)
             System.out.println("[CLOSING] EXPLANATION FOUND!");
         explanationManager.addPossibleExplanation(explanation);
