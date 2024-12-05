@@ -19,9 +19,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.boborova3</groupId>
+            <groupId>com.github.jakloo</groupId>
             <artifactId>jfact</artifactId>
-            <version>428024c</version>
+            <version>8d2c377cbe</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
