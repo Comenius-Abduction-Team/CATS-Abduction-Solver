@@ -141,6 +141,9 @@ public class HstTreeBuilder implements TreeBuilder {
         //Let min(v) be MIN + 1
         parentNode.min = globalMin + 1;
 
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("[HST] min changed to: " + parentNode.min);
+
         // If i(v) > min(v) create a new array ranging over min(v), . . . , i(v)−1.
         // Otherwise, let mark(v) = × and create no child nodes for v.
 
