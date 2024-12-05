@@ -9,6 +9,18 @@ public class TreeStats {
 
     private int currentLevel = -1;
 
+    public double filteringStart, filteringEnd;
+
+//    public Map<Level, LevelStats> levels = new HashMap<>();
+//
+//    private Level currentLevel;
+
+//    public LevelStats startNewLevel(int depth){
+//        LevelStats newStats = new LevelStats();
+//        levels.put(new Level(depth), newStats);
+//        return newStats;
+//    }
+
     public LevelStats getCurrentLevelStats(){
         return levels.get(currentLevel);
     }
@@ -40,10 +52,20 @@ public class TreeStats {
         return result;
     }
 
+    public int getTotalPrunedCount(){
+        int result = 0;
+        for (LevelStats level: levels.values()){
+            result += level.pruned_edges;
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         return "TreeStats{" +
                 "levels=" + levels +
+                ", filtering_start=" + filteringStart +
+                ", filtering_end=" + filteringEnd +
                 '}';
     }
 }

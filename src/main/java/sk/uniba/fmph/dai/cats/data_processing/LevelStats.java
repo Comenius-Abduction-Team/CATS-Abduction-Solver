@@ -5,7 +5,7 @@ public class LevelStats {
     public int  processed_nodes, deleted_unprocessed, deleted_processed;
     public int created_edges;
     public int pruned_edges, explanation_edges, created_nodes, reused, modelExtractions, explanations;
-    public double start, finish, firstExplanation, lastExplanation;
+    public double start, finish, firstExplanation = Double.MAX_VALUE, lastExplanation = -1;
 
     @Override
     public String toString() {
@@ -19,7 +19,10 @@ public class LevelStats {
                 ", created_nodes=" + created_nodes +
                 ", reused_model_labels=" + reused +
                 ", extracted_models=" + modelExtractions +
+                ", explanations=" + explanations +
                 ", start_time=" + start +
+                ", first_explanation=" + firstExplanation +
+                ", last_explanation=" + lastExplanation +
                 ", finish_time=" + finish +
 
                 "}\n";

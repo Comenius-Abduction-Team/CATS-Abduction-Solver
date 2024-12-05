@@ -4,6 +4,7 @@ import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
 public class ApiExplanationManager extends ExplanationManager {
 
@@ -25,10 +26,10 @@ public class ApiExplanationManager extends ExplanationManager {
         } catch(InterruptedException ignored){}
     }
 
-    public void processExplanations(String message) {
+    public void processExplanations(String message, TreeStats stats) {
         if (! (message == null))
             abducer.setMessage(message);
-        showExplanations();
+        showExplanations(stats);
         abducer.setExplanations(finalExplanations);
     }
 }

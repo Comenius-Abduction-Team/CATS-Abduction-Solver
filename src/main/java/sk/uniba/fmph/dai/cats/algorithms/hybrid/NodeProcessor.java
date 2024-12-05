@@ -10,4 +10,6 @@ public interface NodeProcessor {
 
     boolean findExplanations(Explanation explanation, boolean extractModel);
 
+    void postProcessExplanations();
+
 }

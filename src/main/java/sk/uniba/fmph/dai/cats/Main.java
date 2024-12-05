@@ -26,7 +26,9 @@ public class Main {
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    private static final String INPUT_FILE = "in/toothache.in";
+    //"in/multiple_obs/family.in"
+    //"in/toothache.in"
+    private static final String INPUT_FILE = "in/multiple_obs/family.in";
 
     public static void main(String[] args) throws Exception {
 
@@ -149,6 +151,7 @@ public class Main {
 
             AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(timer, Configuration.ALGORITHM);
             solver.solve();
+            Application.finish(ExitCode.SUCCESS);
 
         } catch(Throwable e){
             new ConsolePrinter().logError("An error occurred:", e);

@@ -65,6 +65,8 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("[MXP] Calling MXP");
         boolean result = !addExplanationsFoundByMxp();
         if (result && Configuration.DEBUG_PRINT)
             System.out.println("[PRUNING] Pruned by MXP!");
@@ -154,6 +156,8 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
+        if (Configuration.DEBUG_PRINT)
+            System.out.println("[MXP] Calling MXP");
         Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
@@ -306,5 +310,12 @@ public class MxpNodeProcessor implements NodeProcessor {
         conflicts.addAll(D2.getAxioms());
 
         return solver.createExplanationFromAxioms(conflicts);
+    }
+
+    @Override
+    public void postProcessExplanations() {
+        explanationManager.readyExplanationsToProcess();
+        explanationManager.filterToConsistentExplanations();
+        explanationManager.filterToMinimalRelevantExplanations();
     }
 }

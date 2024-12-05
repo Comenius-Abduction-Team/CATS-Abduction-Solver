@@ -19,9 +19,9 @@ public class ConsoleExplanationManager extends ExplanationManager {
     }
 
     @Override
-    public void processExplanations(String message) {
+    public void processExplanations(String message, TreeStats stats) {
 
-        showExplanations();
+        showExplanations(stats);
 
         if (message != null){
             printer.print('\n' + message);

@@ -23,6 +23,7 @@ import sk.uniba.fmph.dai.cats.timer.TimeManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.*;
 
 public class AlgorithmSolver {
 
@@ -119,25 +120,74 @@ public class AlgorithmSolver {
 
         if (!loader.reasonerManager.isOntologyConsistent()) {
             message = "The observation is already entailed!";
-            explanationManager.processExplanations(message);
+            explanationManager.processExplanations(message, stats);
             logger.logMessage(Configuration.getInfo(), message);
+            if (Configuration.PRINT_PROGRESS)
+                progressManager.updateProgress(100, "Abduction finished.");
         }
 
-        else {
-            loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
-            try {
-                startSolving();
-            } catch (Throwable e) {
-                logger.makeErrorAndPartialLog(currentDepth, e);
+
+        loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
+
+//        try {
+//            startSolving();
+//        } catch (Throwable e) {
+//            logger.makeErrorAndPartialLog(currentDepth, e);
+//            message = "An error occured: " + e.getMessage();
+//            throw (e);
+//        } finally {
+//            timer.setEndTime();
+//            explanationManager.processExplanations(message);
+//        }
+
+
+        Future<Void> future = null;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        try {
+
+            Callable<Void> task = this::startSolving;
+            future = executor.submit(task);
+
+            if (Configuration.TIMEOUT > 0)
+                future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
+            else
+                future.get();
+        }  catch (TimeoutException e) {
+
+                future.cancel(true);
+                logger.makeTimeoutPartialLog(currentDepth);
+
+        }   catch (Throwable e){
+
+                if (!(future == null))
+                    future.cancel(true);
                 message = "An error occured: " + e.getMessage();
-                throw (e);
-            } finally {
-                timer.setEndTime();
-                explanationManager.processExplanations(message);
+                logger.makeErrorAndPartialLog(currentDepth, e);
+                printer.logError("An error occurred:", e);
+                e.printStackTrace();
+
+        } finally {
+
+            executor.shutdown();
+            if (stats.getCurrentLevelStats().finish == 0){
+                stats.getCurrentLevelStats().finish = timer.getCurrentTime();
             }
+            if (Configuration.PRINT_PROGRESS)
+                progressManager.updateProgress(100, "Abduction finished.");
+
+//            try {
+//                while (executor.awaitTermination(1, TimeUnit.MILLISECONDS) == false) {}
+//            } catch (InterruptedException ignored){}
+
+            stats.filteringStart = timer.getCurrentTime();
+            nodeProcessor.postProcessExplanations();
+            stats.filteringEnd = timer.getCurrentTime();
+
+            timer.setEndTime();
+            explanationManager.processExplanations(message, stats);
+            System.out.println(stats);
         }
-        if (Configuration.PRINT_PROGRESS)
-            progressManager.updateProgress(100, "Abduction finished.");
 
     }
 
@@ -159,7 +209,7 @@ public class AlgorithmSolver {
         abducibleAxioms = treeBuilder.createAbducibles(abducibles);
     }
 
-    protected void startSolving() {
+    protected Void startSolving() {
 
         currentDepth = 0;
         currentLevelStats = stats.getLevelStats(currentDepth);
@@ -169,14 +219,14 @@ public class AlgorithmSolver {
         if (root == null) {
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[!!!] ROOT COULD NOT BE CREATED!");
-            return;
+            return null;
         }
         treeBuilder.addNodeToTree(root);
         currentLevelStats.created_nodes = 1;
 
         if(isTimeout()) {
             logger.makeTimeoutPartialLog(currentDepth);
-            return;
+            return null;
         }
 
 //        currentLevelStats.start = timer.getCurrentTime();
@@ -238,7 +288,7 @@ public class AlgorithmSolver {
 
                 if(isTimeout()){
                     logger.makeTimeoutPartialLog(currentDepth);
-                    return;
+                    return null;
                 }
 
                 //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
@@ -272,6 +322,8 @@ public class AlgorithmSolver {
                 if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
                     stats.getLevelStats(currentDepth).reused += 1;
+                    if (Configuration.DEBUG_PRINT)
+                        System.out.println("[MODEL] Model was reused.");
                 }
                 else {
 
@@ -291,7 +343,7 @@ public class AlgorithmSolver {
 
                     if (isTimeout()){
                         logger.makeTimeoutPartialLog(currentDepth);
-                        return;
+                        return null;
                     }
 
                     if (treeBuilder.closeExplanation(explanation)){
@@ -321,7 +373,9 @@ public class AlgorithmSolver {
         }
 
         //System.out.println(stats.getTotalNodeCount());
-        System.out.println(stats);
+        //System.out.println(stats);
+        //System.out.println(stats.getTotalPrunedCount());
+
 
         path.clear();
 
@@ -331,6 +385,8 @@ public class AlgorithmSolver {
         }
 
         currentDepth = 1;
+
+        return null;
 
     }
 
@@ -351,7 +407,7 @@ public class AlgorithmSolver {
 
 
     public boolean isTimeout(){
-        return timer.isTimeout();
+        return false;
     }
 
     void removeNegatedObservationFromPath(){
