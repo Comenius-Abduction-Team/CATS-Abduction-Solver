@@ -19,8 +19,10 @@ import java.util.stream.Collectors;
 public abstract class ExplanationManager {
 
     protected List<Explanation> possibleExplanations = new ArrayList<>();
+
+    protected List<Explanation> explanationsToProcess = new ArrayList<>();
     protected Set<OWLAxiom> lengthOneExplanations = new HashSet<>();
-    protected List<Explanation> finalExplanations;
+    protected List<Explanation> finalExplanations = new ArrayList<>();
     protected AlgorithmSolver solver;
     private Loader loader;
     private ReasonerManager reasonerManager;
@@ -28,11 +30,15 @@ public abstract class ExplanationManager {
     protected IPrinter printer;
     TimeManager timer;
 
+    Map<Integer, List<Explanation>> explanationsBySize = new HashMap<>();
+
+    Map<Integer, List<Explanation>> explanationsByLevel = new HashMap<>();
+
     public ExplanationLogger logger;
 
     abstract public void addPossibleExplanation(Explanation explanation);
 
-    abstract public void processExplanations(String message);
+    abstract public void processExplanations(String message, TreeStats stats);
     
     public void setSolver(AlgorithmSolver solver) {
         this.solver = solver;
@@ -71,58 +77,49 @@ public abstract class ExplanationManager {
         return lengthOneExplanations.size();
     }
     
-    public void showExplanations() {
-        List<Explanation> filteredExplanations;
-        if(!Configuration.ALGORITHM.usesMxp()){
-            filteredExplanations = possibleExplanations;
-        } else {
-            filteredExplanations = getConsistentExplanations();
-        }
+    public void showExplanations(TreeStats stats) {
 
-        solver.path.clear();
-        finalExplanations = new ArrayList<>();
+        groupExplanations(possibleExplanations.isEmpty(), stats);
 
-        StringBuilder result = formatExplanationsWithSize(filteredExplanations);
-        printer.print(result.toString());
-        if (Configuration.LOGGING)
-            FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
-
-        logger.logExplanationsTimes(finalExplanations);
-
-        if(Configuration.ALGORITHM.usesMxp()){
-            result = formatExplanationsWithLevel(new ArrayList<>(finalExplanations));
-            FileManager.appendToFile(FileManager.LEVEL_LOG__PREFIX, timer.getStartTime(), result.toString());
-        }
+//        StringBuilder result = formatExplanationsWithSize();
+//        printer.print(result.toString());
+//        if (Configuration.LOGGING)
+//            FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
+//
+//        logger.logExplanationsTimes(finalExplanations);
+//
+//        if(Configuration.ALGORITHM.usesMxp()){
+//            result = formatExplanationsWithLevel(new ArrayList<>(finalExplanations));
+//            FileManager.appendToFile(FileManager.LEVEL_LOG__PREFIX, timer.getStartTime(), result.toString());
+//        }
     }
 
     private List<Explanation> getConsistentExplanations() {
-        reasonerManager.resetOntology(loader.getInitialOntology().axioms());
 
         List<Explanation> filteredExplanations = new ArrayList<>();
-        for (Explanation explanation : possibleExplanations) {
-            if (!containsContradictoryAxioms(explanation) &&
-                    reasonerManager.isOntologyWithLiteralsConsistent(explanation.getAxioms(),
-                                                                    loader.getInitialOntology())) {
+        for (Explanation explanation : explanationsToProcess) {
+            if (!containsContradictoryAxioms(explanation)
+                    && ruleChecker.checkConsistencyUsingNewReasoner(explanation)) {
                 filteredExplanations.add(explanation);
             }
         }
 
-        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
         return filteredExplanations;
     }
 
-    private StringBuilder formatExplanationsWithSize(List<Explanation> explanations) {
+    private StringBuilder formatExplanationsWithSize() {
         StringBuilder result = new StringBuilder();
         int size = 1;
-        while (!explanations.isEmpty()) {
-            List<Explanation> currentExplanations = filterExplanationsBySize(explanations, size);
-            explanations.removeAll(currentExplanations);
+        while (!possibleExplanations.isEmpty()) {
+            List<Explanation> currentExplanations = filterExplanationsBySize(possibleExplanations, size);
+            possibleExplanations.removeAll(currentExplanations);
             if(Configuration.ALGORITHM.usesMxp()){
                 if(!Configuration.CHECKING_MINIMALITY_BY_QXP){
                     filterIfNotMinimal(currentExplanations);
                 }
                 filterIfNotRelevant(currentExplanations);
             }
+            explanationsBySize.put(size, currentExplanations);
             if (currentExplanations.isEmpty()) {
                 size++;
                 continue;
@@ -180,6 +177,7 @@ public abstract class ExplanationManager {
                 notRelevantExplanations.add(e);
             }
         }
+        //System.out.println(notRelevantExplanations);
         explanations.removeAll(notRelevantExplanations);
     }
 
@@ -253,7 +251,73 @@ public abstract class ExplanationManager {
         return filterExplanationsByLevel(possibleExplanations, level);
     }
 
-    public List<Explanation> getFinalExplanations() {
-        return finalExplanations;
+    public void finalisePossibleExplanations(){
+        finalExplanations.addAll(possibleExplanations);
+    }
+
+    public void readyExplanationsToProcess(){
+        explanationsToProcess.addAll(possibleExplanations);
+    }
+
+    public void filterToConsistentExplanations(){
+        explanationsToProcess = getConsistentExplanations();
+    }
+
+    public void filterToMinimalRelevantExplanations(){
+        int size = 1;
+        while (!explanationsToProcess.isEmpty()) {
+            List<Explanation> currentExplanations = filterExplanationsBySize(explanationsToProcess, size);
+            explanationsToProcess.removeAll(currentExplanations);
+
+            if (!Configuration.CHECKING_MINIMALITY_BY_QXP) {
+                filterIfNotMinimal(currentExplanations);
+            }
+            filterIfNotRelevant(currentExplanations);
+
+            explanationsBySize.put(size, currentExplanations);
+            finalExplanations.addAll(currentExplanations);
+            size++;
+        }
+    }
+
+    public void groupExplanations(boolean bySize, TreeStats stats){
+        for (Explanation e : finalExplanations){
+
+            int level = e.getLevel();
+
+            LevelStats levelStats = stats.getLevelStats(level);
+            levelStats.explanations++;
+
+            double time = e.getAcquireTime();
+
+            if (time < levelStats.firstExplanation) {
+                levelStats.firstExplanation = time;
+                System.out.println(time + " < " + levelStats.firstExplanation);
+            }
+            else System.out.println(time + " > " + levelStats.firstExplanation);
+
+            if (time > levelStats.lastExplanation)
+                levelStats.lastExplanation = time;
+
+            putExplanationIntoMap(e,level,explanationsByLevel);
+
+            if (bySize){
+                putExplanationIntoMap(e,e.size(),explanationsBySize);
+            }
+
+        }
+    }
+
+    private void putExplanationIntoMap(Explanation explanation, int key, Map<Integer,List<Explanation>> map){
+        List<Explanation> listToInsert;
+        List<Explanation> existingList = map.get(key);
+        if (existingList == null){
+            listToInsert = new ArrayList<>();
+            map.put(key, listToInsert);
+        }
+        else {
+            listToInsert = existingList;
+        }
+        listToInsert.add(explanation);
     }
 }
