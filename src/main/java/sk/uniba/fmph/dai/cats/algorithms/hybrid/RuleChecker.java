@@ -57,7 +57,7 @@ public class RuleChecker {
     public boolean isRelevant(Explanation explanation) {
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
 
-        OWLOntology ontology = null;
+        OWLOntology ontology;
 
         try {
             ontology = ontologyManager.createOntology(explanation.getAxioms());
@@ -85,5 +85,23 @@ public class RuleChecker {
             ontologyManager.addAxiom(ontology, loader.getNegObservation().getOwlAxiom());
             return reasoner.isConsistent();
         }
+    }
+
+    public boolean checkConsistencyUsingNewReasoner(Explanation explanation) {
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+
+        OWLOntology ontology;
+
+        try {
+            ontology = ontologyManager.createOntology(loader.getInitialOntology().axioms());
+        } catch(OWLOntologyCreationException e){
+            throw new RuntimeException("Could not create ontology while checking relevancy: " + e.getMessage());
+        }
+
+        ontologyManager.addAxioms(ontology, explanation.getAxioms());
+
+        OWLReasoner reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
+        return reasoner.isConsistent();
+
     }
 }
