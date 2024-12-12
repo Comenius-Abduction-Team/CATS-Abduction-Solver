@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 import com.google.common.collect.Iterables;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -34,22 +35,19 @@ public class MxpNodeProcessor implements NodeProcessor {
     public boolean isInvalidExplanation(Explanation explanation) {
 
         if(Configuration.CONTINUOUS_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] IRRELEVANT EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
             return true;
         }
 
         if (isSupersetOfExistingExplanation(explanation)) {
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] SUPERSET OF EXPLANATION");
+            StaticPrinter.debugPrint("[PRUNING] SUPERSET OF EXPLANATION");
             return true;
         }
 
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
         //if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] IS EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] IS EXPLANATION!");
             solver.stats.getCurrentLevelStats().explanation_edges += 1;
             return true;
         }
@@ -66,11 +64,10 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[MXP] Calling MXP");
+        StaticPrinter.debugPrint("[MXP] Calling MXP");
         boolean result = !addExplanationsFoundByMxp();
-        if (result && Configuration.DEBUG_PRINT)
-            System.out.println("[PRUNING] Pruned by MXP!");
+        if (result)
+            StaticPrinter.debugPrint("[PRUNING] Pruned by MXP!");
         return result;
     }
 
@@ -157,8 +154,7 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[MXP] Calling MXP");
+        StaticPrinter.debugPrint("[MXP] Calling MXP");
         Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;

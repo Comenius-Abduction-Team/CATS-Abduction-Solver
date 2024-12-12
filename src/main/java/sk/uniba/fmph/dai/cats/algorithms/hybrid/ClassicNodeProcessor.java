@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
@@ -28,13 +29,11 @@ public class ClassicNodeProcessor implements NodeProcessor {
     @Override
     public boolean isInvalidExplanation(Explanation explanation) {
         if (!ruleChecker.isRelevant(explanation)) {
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] IRRELEVANT EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
             return true;
         }
         if (!ruleChecker.isConsistent(explanation)) {
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] INCONSISTENT EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] INCONSISTENT EXPLANATION!");
             return true;
         }
         return false;
@@ -44,8 +43,7 @@ public class ClassicNodeProcessor implements NodeProcessor {
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
             return false;
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[CLOSING] EXPLANATION FOUND!");
+        StaticPrinter.debugPrint("[CLOSING] EXPLANATION FOUND!");
         explanationManager.addPossibleExplanation(explanation);
         stats.getCurrentLevelStats().explanation_edges += 1;
 

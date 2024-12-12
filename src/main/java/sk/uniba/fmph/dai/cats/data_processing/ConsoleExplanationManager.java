@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
-import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public class ConsoleExplanationManager extends ExplanationManager {
@@ -13,9 +13,7 @@ public class ConsoleExplanationManager extends ExplanationManager {
     @Override
     public void addPossibleExplanation(Explanation explanation) {
         possibleExplanations.add(explanation);
-        //System.out.println(explanation);
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
+        StaticPrinter.debugPrint("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
     }
 
     @Override

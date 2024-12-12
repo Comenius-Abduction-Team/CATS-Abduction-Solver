@@ -28,7 +28,8 @@ public class Main {
 
     //"in/multiple_obs/family.in"
     //"in/toothache.in"
-    private static final String INPUT_FILE = "in/multiple_obs/family.in";
+    //"in/ore_ont_8666_obs04_ont01_1729028695588_mxp_.in"
+    private static final String INPUT_FILE = "in/toothache.in";
 
     public static void main(String[] args) throws Exception {
 

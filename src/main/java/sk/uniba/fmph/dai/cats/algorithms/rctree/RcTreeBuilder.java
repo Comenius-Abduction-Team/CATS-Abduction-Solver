@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.rctree;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hybrid.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -44,8 +45,7 @@ public class RcTreeBuilder implements TreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] NON-MINIMAL EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
 
@@ -161,8 +161,7 @@ public class RcTreeBuilder implements TreeBuilder {
             // nodes n' labeled with some Cj from CS such that Ci C Cj
             if (currentNode.isSubsetOf(polledNode)){
 
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[RC-TREE] " + currentNode + " is subset of " + polledNode);
+                StaticPrinter.debugPrint("[RC-TREE] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;
                 Model Cj = polledNode.model;
@@ -172,8 +171,7 @@ public class RcTreeBuilder implements TreeBuilder {
                 difference.removeAll(Ci.getNegatedData());
 
                 // Relabel n' with Ci
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[RC-TREE] Relabelling " + polledNode + " with " + Ci);
+                StaticPrinter.debugPrint("[RC-TREE] Relabelling " + polledNode + " with " + Ci);
                 polledNode.model = Ci;
 
                 // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
@@ -220,8 +218,7 @@ public class RcTreeBuilder implements TreeBuilder {
             node.children.clear();
             node.childrenToProcess.clear();
 
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[RC-TREE] Deleting node: " + node);
+            StaticPrinter.debugPrint("[RC-TREE] Deleting node: " + node);
 
             if (node.processed)
                 stats.getLevelStatsNoSetting(node.depth).deleted_processed += 1;
@@ -266,8 +263,7 @@ public class RcTreeBuilder implements TreeBuilder {
                         + node + "'s children to be processed.");
             node.closed = false;
             if (!queue.contains(node) && !node.childrenToProcess.isEmpty()) {
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[RC-TREE] Added " + node + " to the queue.");
+                StaticPrinter.debugPrint("[RC-TREE] Added " + node + " to the queue.");
                 queue.add(node);
             }
         }

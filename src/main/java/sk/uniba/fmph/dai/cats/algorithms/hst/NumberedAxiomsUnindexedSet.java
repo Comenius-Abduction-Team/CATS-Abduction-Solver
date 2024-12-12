@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.Collection;
@@ -50,9 +50,7 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
         indexToAxiom[index-1] = axiom;
         unindexed.remove(axiom);
         unindexedSize--;
-        if (Configuration.DEBUG_PRINT){
-            System.out.println("[HST] New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
-        }
+        StaticPrinter.debugPrint("[HST] New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
     }
 
     @Override

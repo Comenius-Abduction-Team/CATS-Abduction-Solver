@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
@@ -17,8 +18,7 @@ public class ApiExplanationManager extends ExplanationManager {
 
     public void addPossibleExplanation(Explanation explanation) {
         possibleExplanations.add(explanation);
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[EXPLANATION] possible explanation added: " +
+        StaticPrinter.debugPrint("[EXPLANATION] possible explanation added: " +
                     StringFactory.getRepresentation(explanation.getAxioms()));
         try {
             if (abducer.isMultithread())

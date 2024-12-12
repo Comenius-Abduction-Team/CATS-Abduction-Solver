@@ -5,6 +5,7 @@ import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeNode;
 import sk.uniba.fmph.dai.cats.algorithms.hst.INumberedAbducibles;
 import sk.uniba.fmph.dai.cats.algorithms.hst.NumberedAxiomsUnindexedSet;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
@@ -116,18 +117,11 @@ public class HstTreeBuilder implements TreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            //node.closeNode();
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] NON-MINIMAL EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
 
-        if (nodeProcessor.isInvalidExplanation(explanation)){
-            //node.closeNode();
-            return true;
-        }
-
-        return false;
+        return nodeProcessor.isInvalidExplanation(explanation);
     }
 
     //int index = node.min; index < node.index; index++
@@ -141,15 +135,13 @@ public class HstTreeBuilder implements TreeBuilder {
         //Let min(v) be MIN + 1
         parentNode.min = globalMin + 1;
 
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[HST] min changed to: " + parentNode.min);
+        StaticPrinter.debugPrint("[HST] min changed to: " + parentNode.min);
 
         // If i(v) > min(v) create a new array ranging over min(v), . . . , i(v)−1.
         // Otherwise, let mark(v) = × and create no child nodes for v.
 
         if (parentNode.index <= parentNode.min){
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[HST] CLOSING: " + parentNode.index + " <= " + parentNode.min);
+            StaticPrinter.debugPrint("[HST] CLOSING: " + parentNode.index + " <= " + parentNode.min);
             return false;
         }
 
@@ -183,8 +175,7 @@ public class HstTreeBuilder implements TreeBuilder {
     @Override
     public OWLAxiom getNextChild(){
         OWLAxiom child = abducibles.getAxiomByIndex(nextChildIndex);
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[HST] child index: " + nextChildIndex);
+        StaticPrinter.debugPrint("[HST] child index: " + nextChildIndex);
         nextChildIndex++;
         return child;
     }

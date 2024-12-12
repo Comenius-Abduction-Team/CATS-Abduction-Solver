@@ -4,7 +4,7 @@ import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.api_implementation.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data_processing.ConsoleExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.progress.ConsoleProgressManager;
@@ -24,9 +24,9 @@ public class AlgorithmSolverFactory {
 
         ExplanationManager explanationManager = new ConsoleExplanationManager();
         ProgressManager progressManager = new ConsoleProgressManager();
-        IPrinter printer = new ConsolePrinter();
+        StaticPrinter.setPrinter(new ConsolePrinter());
 
-        return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer, printer);
+        return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer);
 
     }
 
@@ -38,9 +38,9 @@ public class AlgorithmSolverFactory {
 
         ExplanationManager explanationManager = new ApiExplanationManager(abducer);
         ProgressManager progressManager = new ApiProgressManager(abducer);
-        IPrinter printer = new ApiPrinter(abducer);
+        StaticPrinter.setPrinter(new ApiPrinter(abducer));
 
-        return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer, printer);
+        return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer);
 
     }
 

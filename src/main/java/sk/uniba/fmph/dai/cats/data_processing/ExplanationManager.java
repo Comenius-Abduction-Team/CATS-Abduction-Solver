@@ -80,6 +80,7 @@ public abstract class ExplanationManager {
     public void showExplanations(TreeStats stats) {
 
         groupExplanations(possibleExplanations.isEmpty(), stats);
+        System.out.println("EXPLANATIONS: " + finalExplanations);
 
 //        StringBuilder result = formatExplanationsWithSize();
 //        printer.print(result.toString());
@@ -292,9 +293,7 @@ public abstract class ExplanationManager {
 
             if (time < levelStats.firstExplanation) {
                 levelStats.firstExplanation = time;
-                System.out.println(time + " < " + levelStats.firstExplanation);
             }
-            else System.out.println(time + " > " + levelStats.firstExplanation);
 
             if (time > levelStats.lastExplanation)
                 levelStats.lastExplanation = time;

@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RcTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -34,7 +34,6 @@ public class AlgorithmSolver {
     protected final ProgressManager progressManager;
     public RuleChecker ruleChecker;
     protected SetDivider setDivider;
-    protected IPrinter printer;
     public final TimeManager timer;
     protected final ConsistencyChecker consistencyChecker;
 
@@ -54,7 +53,7 @@ public class AlgorithmSolver {
     public LevelStats currentLevelStats;
 
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
-                              ProgressManager progressManager, ThreadTimer threadTimer, IPrinter printer) {
+                              ProgressManager progressManager, ThreadTimer threadTimer) {
 
         this.loader = loader;
         ruleChecker = new RuleChecker(loader);
@@ -67,8 +66,6 @@ public class AlgorithmSolver {
         logger = new ExplanationLogger(this);
 
         this.progressManager = progressManager;
-
-        this.printer = printer;
 
         stats = new TreeStats();
 
@@ -129,18 +126,6 @@ public class AlgorithmSolver {
 
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
 
-//        try {
-//            startSolving();
-//        } catch (Throwable e) {
-//            logger.makeErrorAndPartialLog(currentDepth, e);
-//            message = "An error occured: " + e.getMessage();
-//            throw (e);
-//        } finally {
-//            timer.setEndTime();
-//            explanationManager.processExplanations(message);
-//        }
-
-
         Future<Void> future = null;
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -164,7 +149,7 @@ public class AlgorithmSolver {
                     future.cancel(true);
                 message = "An error occured: " + e.getMessage();
                 logger.makeErrorAndPartialLog(currentDepth, e);
-                printer.logError("An error occurred:", e);
+                StaticPrinter.logError("An error occurred:", e);
                 e.printStackTrace();
 
         } finally {
@@ -175,10 +160,6 @@ public class AlgorithmSolver {
             }
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
-
-//            try {
-//                while (executor.awaitTermination(1, TimeUnit.MILLISECONDS) == false) {}
-//            } catch (InterruptedException ignored){}
 
             stats.filteringStart = timer.getCurrentTime();
             nodeProcessor.postProcessExplanations();
@@ -193,9 +174,9 @@ public class AlgorithmSolver {
 
     protected void printInfo(){
 
-        printer.print("\n");
-        printer.print(String.join("\n", Configuration.getInfo()));
-        printer.print("\n");
+        StaticPrinter.print("\n");
+        StaticPrinter.print(String.join("\n", Configuration.getInfo()));
+        StaticPrinter.print("\n");
 
     }
 
@@ -217,8 +198,7 @@ public class AlgorithmSolver {
 
         TreeNode root = treeBuilder.createRoot();
         if (root == null) {
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[!!!] ROOT COULD NOT BE CREATED!");
+            StaticPrinter.debugPrint("[!!!] ROOT COULD NOT BE CREATED!");
             return null;
         }
         treeBuilder.addNodeToTree(root);
@@ -229,17 +209,12 @@ public class AlgorithmSolver {
             return null;
         }
 
-//        currentLevelStats.start = timer.getCurrentTime();
-//        currentLevelStats.finish = timer.getCurrentTime();
-//        currentDepth = 1
-
         while (!treeBuilder.isTreeClosed()) {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
 
             if (node == null){
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[!!!] Null node!");
+                StaticPrinter.debugPrint("[!!!] Null node!");
                 continue;
             }
 
@@ -254,19 +229,16 @@ public class AlgorithmSolver {
                 break;
             }
 
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("*********\n" + "[TREE] PROCESSING node: " + node);
+            StaticPrinter.debugPrint("*********\n" + "[TREE] PROCESSING node: " + node);
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
             if (!canIterateNodeChildren){
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[TREE] NO CHILDREN TO ITERATE!");
+                StaticPrinter.debugPrint("[TREE] NO CHILDREN TO ITERATE!");
                 continue;
             }
 
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[TREE] Iterating child edges");
+            StaticPrinter.debugPrint("[TREE] Iterating child edges");
 
             node.processed = true;
             stats.getCurrentLevelStats().processed_nodes += 1;
@@ -276,13 +248,11 @@ public class AlgorithmSolver {
                 OWLAxiom child = treeBuilder.getNextChild();
 
                 if (child == null) {
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[!!!] NULL CHILD");
+                    StaticPrinter.debugPrint("[!!!] NULL CHILD");
                     continue;
                 }
 
-                if (Configuration.DEBUG_PRINT)
-                    System.out.println("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
+                StaticPrinter.debugPrint("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
 
                 stats.getCurrentLevelStats().created_edges += 1;
 
@@ -291,16 +261,11 @@ public class AlgorithmSolver {
                     return null;
                 }
 
-                //ak je axiom negaciou axiomu na ceste k vrcholu, alebo
-                //ak axiom nie je v abducibles
-                //nepokracujeme vo vetve
                 if(isIncorrectPath(node, child)){
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[PRUNING] INCORRECT PATH!");
+                    StaticPrinter.debugPrint("[PRUNING] INCORRECT PATH!");
                     continue;
                 }
 
-                //rovno pridame potencialne vysvetlenie
                 Explanation explanation = createPossibleExplanation(node, child);
 
                 path.clear();
@@ -309,8 +274,7 @@ public class AlgorithmSolver {
                 boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
 
                 if (pruneThisChild){
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[PRUNING] NODE CLOSED!");
+                    StaticPrinter.debugPrint("[PRUNING] NODE CLOSED!");
                     stats.getLevelStats(currentDepth).pruned_edges += 1;
                     path.clear();
                     continue;
@@ -322,24 +286,13 @@ public class AlgorithmSolver {
                 if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
                     stats.getLevelStats(currentDepth).reused += 1;
-                    if (Configuration.DEBUG_PRINT)
-                        System.out.println("[MODEL] Model was reused.");
+                    StaticPrinter.debugPrint("[MODEL] Model was reused.");
                 }
                 else {
 
-                    if (Configuration.DEBUG_PRINT){
-                        System.out.println("[MODEL] Model was not reused.");
-                    }
+                    StaticPrinter.debugPrint("[MODEL] Model was not reused.");
 
 //                    boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
-//
-//                    if (pruneThisChild){
-//                        if (Configuration.DEBUG_PRINT)
-//                            System.out.println("[PRUNING] NODE CLOSED!");
-//                        stats.getLevelStats(currentDepth).pruned += 1;
-//                        path.clear();
-//                        continue;
-//                    }
 
                     if (isTimeout()){
                         logger.makeTimeoutPartialLog(currentDepth);
@@ -347,7 +300,6 @@ public class AlgorithmSolver {
                     }
 
                     if (treeBuilder.closeExplanation(explanation)){
-                        //System.out.println(currentDepth);
                         path.clear();
                         continue;
                     }
@@ -356,9 +308,7 @@ public class AlgorithmSolver {
                 treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
                 stats.getLevelStats(currentDepth).created_nodes += 1;
 
-                if (Configuration.DEBUG_PRINT){
-                    System.out.println("[TREE] Created node");
-                }
+                StaticPrinter.debugPrint("[TREE] Created node");
 
                 path.clear();
 
@@ -368,14 +318,7 @@ public class AlgorithmSolver {
 
         currentLevelStats.finish = timer.getCurrentTime();
 
-        if (Configuration.DEBUG_PRINT) {
-            System.out.println("[TREE] Finished iterating the tree.");
-        }
-
-        //System.out.println(stats.getTotalNodeCount());
-        //System.out.println(stats);
-        //System.out.println(stats.getTotalPrunedCount());
-
+        StaticPrinter.debugPrint("[TREE] Finished iterating the tree.");
 
         path.clear();
 
@@ -449,8 +392,7 @@ public class AlgorithmSolver {
         currentLevelStats = stats.getLevelStats(currentDepth);
         currentLevelStats.start = timer.getCurrentTime();
 
-        if (Configuration.DEBUG_PRINT)
-            System.out.println("[TREE] entering depth " + node.depth);
+        StaticPrinter.debugPrint("[TREE] entering depth " + node.depth);
     }
 
     public Model findAndGetModelToReuse(){
@@ -474,6 +416,5 @@ public class AlgorithmSolver {
     void updateProgress(){
         progressManager.updateProgress(currentDepth, timer.getCurrentTime());
     }
-
 
 }

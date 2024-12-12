@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -39,8 +40,7 @@ public class MhsTreeBuilder implements TreeBuilder {
     public boolean pruneNode(TreeNode node, Explanation explanation) {
 
         if (solver.isPathAlreadyStored()){
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] PATH ALREADY STORED!");
+            StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
             return true;
         }
 
@@ -50,8 +50,7 @@ public class MhsTreeBuilder implements TreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            if (Configuration.DEBUG_PRINT)
-                System.out.println("[PRUNING] NON-MINIMAL EXPLANATION!");
+            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
 
