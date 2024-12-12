@@ -27,17 +27,17 @@ public class RuleChecker {
     }
 
     public boolean isConsistent(Explanation explanation) {
-        reasonerManager.resetOntology(loader.getInitialOntology().axioms());
+        reasonerManager.resetOntologyToInitial();
         reasonerManager.addAxiomsToOntology(explanation.getAxioms());
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
+        reasonerManager.resetOntologyToOriginal();
         return isConsistent;
     }
 
     public boolean isExplanation(Explanation explanation) {
         reasonerManager.addAxiomsToOntology(explanation.getAxioms());
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
+        reasonerManager.resetOntologyToOriginal();
         return !isConsistent;
     }
 

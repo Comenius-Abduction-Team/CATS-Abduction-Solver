@@ -45,7 +45,8 @@ public class MxpNodeProcessor implements NodeProcessor {
             return true;
         }
 
-        if (ruleChecker.isExplanation(explanation)){
+        if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
+        //if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
             if (Configuration.DEBUG_PRINT)
                 System.out.println("[PRUNING] IS EXPLANATION!");
@@ -285,7 +286,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         }
 
         // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
-        if (!axioms.isEmpty() && !consistencyChecker.checkOntologyConsistencyWithPath(true)) {
+        if (!axioms.isEmpty() && !consistencyChecker.checkOntologyConsistencyWithPath(true, false)) {
             return new Explanation();
         }
 

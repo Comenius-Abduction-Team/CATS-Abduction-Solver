@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hybrid;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
@@ -19,22 +20,28 @@ public class ConsistencyChecker {
     public boolean checkingMinimalityWithQXP = false;
     public Set<OWLAxiom> pathDuringCheckingMinimality;
 
+    TreeStats stats;
+
     ConsistencyChecker(AlgorithmSolver solver){
         modelManager = solver.modelManager;
         loader = solver.loader;
         reasonerManager = loader.reasonerManager;
         path = solver.path;
+        stats = solver.stats;
     }
 
     public boolean checkOntologyConsistency(boolean extractModel){
 
         boolean isConsistent = reasonerManager.isOntologyConsistent();
+        stats.getCurrentLevelStats().consistencyChecks += 1;
 
         if (!isConsistent)
             return false;
 
-        if (extractModel)
+        if (extractModel){
             modelManager.storeModelFoundByConsistencyCheck();
+            stats.getCurrentLevelStats().modelExtractions += 1;
+        }
 
         reasonerManager.resetOntologyToOriginal();
 
@@ -44,36 +51,41 @@ public class ConsistencyChecker {
 
     protected boolean checkOntologyConsistencyWithAddedAxioms(Collection<OWLAxiom> axioms, boolean extractModel){
         path.addAll(axioms);
-        boolean isConsistent = checkOntologyConsistencyWithPath(extractModel);
+        boolean isConsistent = checkOntologyConsistencyWithPath(extractModel, false);
         path.removeAll(axioms);
         return isConsistent;
     }
 
-    public boolean checkOntologyConsistencyWithPath(boolean extractModel){
+    public boolean checkOntologyConsistencyWithPath(boolean extractModel, boolean simple){
 
         if(checkingMinimalityWithQXP) {
-            return checkOntologyConsistencyWithPath(pathDuringCheckingMinimality, extractModel);
+            return checkOntologyConsistencyWithPath(pathDuringCheckingMinimality, extractModel, simple);
         }
         else {
-            return checkOntologyConsistencyWithPath(path, extractModel);
+            return checkOntologyConsistencyWithPath(path, extractModel, simple);
         }
     }
 
-    private boolean checkOntologyConsistencyWithPath(Set<OWLAxiom> path, boolean extractModel){
-        if (path != null && !path.isEmpty()) {
-            if(loader.isMultipleObservationOnInput()){
-                for(OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()){
+    private boolean checkOntologyConsistencyWithPath(Set<OWLAxiom> path, boolean extractModel, boolean simple){
+        if (path.isEmpty())
+            return true;
+
+        if (!simple) {
+            if (loader.isMultipleObservationOnInput()) {
+                for (OWLAxiom axiom : loader.getObservation().getAxiomsInMultipleObservations()) {
                     path.remove(AxiomManager.getComplementOfOWLAxiom(loader, axiom));
                 }
             } else {
                 path.remove(loader.getNegObservationAxiom());
             }
-            reasonerManager.addAxiomsToOntology(path);
-            if (!checkOntologyConsistency(extractModel)){
-                reasonerManager.resetOntologyToOriginal();
-                return false;
-            }
         }
+
+        reasonerManager.addAxiomsToOntology(path);
+        if (!checkOntologyConsistency(extractModel)){
+            reasonerManager.resetOntologyToOriginal();
+            return false;
+        }
+
         return true;
     }
 

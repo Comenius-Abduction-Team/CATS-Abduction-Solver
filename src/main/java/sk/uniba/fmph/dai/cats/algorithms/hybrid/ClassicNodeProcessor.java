@@ -42,7 +42,7 @@ public class ClassicNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
-        if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel))
+        if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
             return false;
         if (Configuration.DEBUG_PRINT)
             System.out.println("[CLOSING] EXPLANATION FOUND!");

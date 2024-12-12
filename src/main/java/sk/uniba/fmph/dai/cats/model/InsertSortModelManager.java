@@ -14,7 +14,7 @@ public class InsertSortModelManager extends ModelManager {
     }
 
     @Override
-    public boolean findReusableModel(Model model){
+    protected boolean findReusableModel(Model model){
 
 //        Model foundModel = models.stream().filter(model::equals).findFirst().orElse(null);
 //        if (foundModel == null)

@@ -38,15 +38,15 @@ public class ModelManager {
         return modelToReuse != null;
     }
 
-    public void setModelToReuse(Model model){
+    private void setModelToReuse(Model model){
         modelToReuse = model;
     }
 
-    public void add(Model model){
+    private void add(Model model){
         models.add(model);
     }
 
-    public boolean findReusableModel(Model model){
+    protected boolean findReusableModel(Model model){
 
         for (int i = models.size() - 1; i >= 0; i--) {
             Model storedModel = ((List<Model>)models).get(i);
@@ -75,7 +75,6 @@ public class ModelManager {
     public void storeModelFoundByConsistencyCheck(){
 
         Model model = extractor.extractModel();
-        stats.getCurrentLevelStats().modelExtractions += 1;
 
         if (model.isEmpty())
             return;

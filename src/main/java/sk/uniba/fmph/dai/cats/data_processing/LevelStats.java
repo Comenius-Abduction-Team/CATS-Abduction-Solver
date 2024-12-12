@@ -4,7 +4,7 @@ public class LevelStats {
 
     public int  processed_nodes, deleted_unprocessed, deleted_processed;
     public int created_edges;
-    public int pruned_edges, explanation_edges, created_nodes, reused, modelExtractions, explanations;
+    public int pruned_edges, explanation_edges, created_nodes, reused, modelExtractions, explanations, consistencyChecks;
     public double start, finish, firstExplanation = Double.MAX_VALUE, lastExplanation = -1;
 
     @Override

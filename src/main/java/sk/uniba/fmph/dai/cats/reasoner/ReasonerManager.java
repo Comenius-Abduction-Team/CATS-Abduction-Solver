@@ -52,6 +52,10 @@ public class ReasonerManager {
         resetOntology(loader.getOriginalOntology().axioms());
     }
 
+    public void resetOntologyToInitial(){
+        resetOntology(loader.getInitialOntology().axioms());
+    }
+
     public boolean isOntologyConsistent() {
         loader.initializeReasoner();
         return loader.getReasoner().isConsistent();
