@@ -1,6 +1,5 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
-import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.api_implementation.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;

@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -22,7 +22,7 @@ public class TransformedAbducibles {
     final List<OWLAxiom> assertionAxioms = new ArrayList<>();
     final List<OWLAxiom> negAssertionAxioms = new ArrayList<>();
 
-    Set<OWLAxiom> abducibleAxioms;
+    public Set<OWLAxiom> abducibleAxioms;
 
     TransformedAbducibles(Loader loader){
 

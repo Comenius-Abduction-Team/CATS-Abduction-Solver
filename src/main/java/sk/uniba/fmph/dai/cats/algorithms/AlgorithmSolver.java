@@ -1,7 +1,10 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.SetDivider;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RcTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -33,14 +36,14 @@ public class AlgorithmSolver {
     private final ExplanationLogger logger;
     protected final ProgressManager progressManager;
     public RuleChecker ruleChecker;
-    protected SetDivider setDivider;
+    public SetDivider setDivider;
     public final TimeManager timer;
-    protected final ConsistencyChecker consistencyChecker;
+    public final ConsistencyChecker consistencyChecker;
 
     // COLLECTIONS
     final public Set<OWLAxiom> path = new HashSet<>();
     protected final Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
-    protected IAbducibleAxioms abducibleAxioms;
+    public IAbducibleAxioms abducibleAxioms;
 
     // INTEGERS
     protected int currentDepth = 0;
@@ -353,11 +356,11 @@ public class AlgorithmSolver {
         return false;
     }
 
-    void removeNegatedObservationFromPath(){
+    public void removeNegatedObservationFromPath(){
         path.remove(loader.getNegObservationAxiom());
     }
 
-    Explanation createExplanationFromAxioms(Set<OWLAxiom> axioms){
+    public Explanation createExplanationFromAxioms(Set<OWLAxiom> axioms){
         return new Explanation(axioms, currentDepth, timer.getCurrentTime());
     }
 
@@ -413,7 +416,7 @@ public class AlgorithmSolver {
         return copy;
     }
 
-    void updateProgress(){
+    public void updateProgress(){
         progressManager.updateProgress(currentDepth, timer.getCurrentTime());
     }
 

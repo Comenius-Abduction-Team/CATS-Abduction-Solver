@@ -1,17 +1,15 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.model.Model;
-
-import java.util.List;
 
 public class RootOnlyTreeBuilder implements TreeBuilder {
 
     final AlgorithmSolver solver;
 
-    RootOnlyTreeBuilder(AlgorithmSolver solver){
+    public RootOnlyTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
     }
 

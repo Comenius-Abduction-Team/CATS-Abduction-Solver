@@ -1,9 +1,7 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-
-import java.util.List;
 
 /**
  * The interface Tree builder.

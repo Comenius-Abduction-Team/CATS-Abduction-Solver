@@ -1,7 +1,11 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import com.google.common.collect.Iterables;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
+import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
@@ -21,7 +25,7 @@ public class MxpNodeProcessor implements NodeProcessor {
     private final ExplanationManager explanationManager;
 
     final public Set<OWLAxiom> path;
-    MxpNodeProcessor(AlgorithmSolver solver){
+    public MxpNodeProcessor(AlgorithmSolver solver){
         this.solver = solver;
         setDivider = solver.setDivider;
         ruleChecker = solver.ruleChecker;

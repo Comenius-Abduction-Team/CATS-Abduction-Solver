@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
 import sk.uniba.fmph.dai.cats.data.Explanation;
 

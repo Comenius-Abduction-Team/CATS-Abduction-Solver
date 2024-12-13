@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
 import org.apache.commons.lang3.StringUtils;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 
 import sk.uniba.fmph.dai.cats.timer.TimeManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;

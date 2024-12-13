@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.data;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.IAbducibleAxioms;
+import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.Collection;

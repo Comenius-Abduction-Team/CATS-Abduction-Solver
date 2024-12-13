@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
@@ -49,7 +49,7 @@ public class ConsistencyChecker {
 
     }
 
-    protected boolean checkOntologyConsistencyWithAddedAxioms(Collection<OWLAxiom> axioms, boolean extractModel){
+    public boolean checkOntologyConsistencyWithAddedAxioms(Collection<OWLAxiom> axioms, boolean extractModel){
         path.addAll(axioms);
         boolean isConsistent = checkOntologyConsistencyWithPath(extractModel, false);
         path.removeAll(axioms);

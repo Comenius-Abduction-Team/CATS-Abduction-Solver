@@ -1,10 +1,7 @@
-package sk.uniba.fmph.dai.cats.algorithms.hybrid;
+package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeNode;
-import sk.uniba.fmph.dai.cats.algorithms.hst.INumberedAbducibles;
-import sk.uniba.fmph.dai.cats.algorithms.hst.NumberedAxiomsUnindexedSet;
-import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -28,7 +25,7 @@ public class HstTreeBuilder implements TreeBuilder {
 
     INumberedAbducibles abducibles;
 
-    HstTreeBuilder(AlgorithmSolver solver){
+    public HstTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.nodeProcessor = solver.nodeProcessor;
     }
