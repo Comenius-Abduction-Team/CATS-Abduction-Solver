@@ -25,7 +25,7 @@ public abstract class AlgorithmTestBase {
 
     private final boolean CREATE_LOGS = false;
     private final boolean DEBUG_PRINTING = false;
-    private final boolean PRINT_EXPLANATIONS = false;
+    private final boolean PRINT_EXPLANATIONS = true;
 
     /** Path to the file containing the background knowledge ontology. */
     protected String ONTOLOGY_FILE;
@@ -159,6 +159,9 @@ public abstract class AlgorithmTestBase {
         }
     }
 
+    private void setQxp(){
+        abducer.setAlgorithm(Algorithm.QXP);
+    }
     private void setMxp(){
         abducer.setAlgorithm(Algorithm.MXP);
     }
@@ -200,6 +203,25 @@ public abstract class AlgorithmTestBase {
     private void setSymbolAbdNoNeg(){
         setSymbolAbd();
         setNoNeg();
+    }
+
+    // ------- QXP -------
+
+    void qxp(){ setQxp(); }
+
+    void qxpNoNeg(){
+        setQxp();
+        setNoNeg();
+    }
+
+    void qxpSymbolAbd(){
+        setQxp();
+        setSymbolAbd();
+    }
+
+    void qxpSymbolAbdNoNeg(){
+        setQxp();
+        setSymbolAbdNoNeg();
     }
 
     // ------- MHS -------

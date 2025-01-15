@@ -35,6 +35,50 @@ public class ToothacheTest extends AlgorithmTestBase {
         symbolAbd.add(cavity);
     }
 
+    // ------- QXP -------
+
+    @Test
+    @Override
+    void qxp() {
+
+        super.qxp();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void qxpNoNeg() {
+
+        super.qxpNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbd() {
+
+        super.qxpSymbolAbd();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbdNoNeg() {
+
+        super.qxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    // ------- MHS -------
+
     @Test
     @Override
     void mhs() {
