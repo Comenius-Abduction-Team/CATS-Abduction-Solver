@@ -3,8 +3,8 @@ package sk.uniba.fmph.dai.cats.algorithms;
 public enum Algorithm {
 
     MHS,
-    MXP {
 
+    MXP {
         @Override
         public boolean usesMxp() {
             return true;
@@ -15,6 +15,7 @@ public enum Algorithm {
             return true;
         }
     },
+
     MHS_MXP {
         @Override
         public boolean usesMxp() {
@@ -26,6 +27,7 @@ public enum Algorithm {
             return super.matchesName(name) || "MHS-MXP".equals(name) || "MHSMXP".equals(name);
         }
     },
+
     HST {
         @Override
         public boolean isHst() {
@@ -33,6 +35,7 @@ public enum Algorithm {
         }
 
     },
+
     HST_MXP {
         @Override
         public boolean isHst() {
@@ -49,6 +52,7 @@ public enum Algorithm {
             return super.matchesName(name) || "HST-MXP".equals(name) || "HSTMXP".equals(name);
         }
     },
+
     RCT {
         @Override
         public boolean isRcTree() {
@@ -56,6 +60,7 @@ public enum Algorithm {
         }
 
     },
+
     RCT_MXP {
         @Override
         public boolean isRcTree() {
@@ -70,6 +75,18 @@ public enum Algorithm {
         @Override
         public boolean matchesName(String name) {
             return super.matchesName(name) || "RCT-MXP".equals(name) || "RCTMXP".equals(name);
+        }
+    },
+
+    QXP {
+        @Override
+        public boolean usesQxp() {
+            return true;
+        }
+
+        @Override
+        public boolean isTreeOnly() {
+            return true;
         }
     };
 
@@ -88,10 +105,12 @@ public enum Algorithm {
         return false;
     }
 
+    public boolean usesQxp(){
+        return false;
+    }
+
     public boolean matchesName(String name){
         return this.name().equals(name);
     }
-
-
 
 }

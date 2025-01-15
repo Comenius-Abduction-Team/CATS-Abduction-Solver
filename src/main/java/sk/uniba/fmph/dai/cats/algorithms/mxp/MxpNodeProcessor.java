@@ -3,35 +3,27 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 import com.google.common.collect.Iterables;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
 import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.*;
 
-public class MxpNodeProcessor implements NodeProcessor {
+public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor {
 
-    private final AlgorithmSolver solver;
-    private final SetDivider setDivider;
     private final RuleChecker ruleChecker;
-    private final ConsistencyChecker consistencyChecker;
     private final ReasonerManager reasonerManager;
-    private final ExplanationManager explanationManager;
 
     final public Set<OWLAxiom> path;
+
     public MxpNodeProcessor(AlgorithmSolver solver){
-        this.solver = solver;
-        setDivider = solver.setDivider;
+        super(solver);
         ruleChecker = solver.ruleChecker;
-        consistencyChecker = solver.consistencyChecker;
         reasonerManager = solver.loader.reasonerManager;
-        explanationManager = solver.explanationManager;
         path = solver.path;
     }
 
@@ -150,7 +142,7 @@ public class MxpNodeProcessor implements NodeProcessor {
         Set<OWLAxiom> minimalityPath = new HashSet<>();
 
         consistencyChecker.turnMinimalityCheckingOn(minimalityPath);
-        Explanation newExplanation = getConflict(new HashSet<>(), potentialExplanations, minimalityPath);
+        Explanation newExplanation = getConflict(minimalityPath, new HashSet<>(), potentialExplanations, false);
         consistencyChecker.turnMinimalityCheckingOff();
 
         return newExplanation;
@@ -158,7 +150,7 @@ public class MxpNodeProcessor implements NodeProcessor {
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
-        StaticPrinter.debugPrint("[MXP] Calling MXP");
+        StaticPrinter.debugPrint("[MXP] Initial MXP");
         Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
@@ -235,12 +227,12 @@ public class MxpNodeProcessor implements NodeProcessor {
 
             // X ← GETCONFLICT(B ∪ C'2, C'2, C'1)
             path.addAll(conflictC2.getAxioms());
-            Explanation X = getConflict(conflictC2.getAxioms(), conflictC1.getAxioms(), path);
+            Explanation X = getConflict(path, conflictC2.getAxioms(), conflictC1.getAxioms(), extractModel);
             path.removeAll(conflictC2.getAxioms());
 
             // temp ← GETCONFLICT(B ∪ X, X, C'2)
             path.addAll(X.getAxioms());
-            Explanation CS = getConflict(X.getAxioms(), conflictC2.getAxioms(), path);
+            Explanation CS = getConflict(path, X.getAxioms(), conflictC2.getAxioms(), extractModel);
             // removeAll(X) is inefficient if X is a list and its size is larger than the set itself
             X.getAxioms().forEach(path::remove);
 
@@ -277,46 +269,5 @@ public class MxpNodeProcessor implements NodeProcessor {
         }
 
         return new Conflict(conflictLiterals, explanations);
-    }
-
-    protected Explanation getConflict(Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, Set<OWLAxiom> actualPath) {
-
-        if (solver.isTimeout()) {
-            return new Explanation();
-        }
-
-        // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
-        if (!axioms.isEmpty() && !consistencyChecker.checkOntologyConsistencyWithPath(true, false)) {
-            return new Explanation();
-        }
-
-        // if |C| = 1 then return C;
-        if (literals.size() == 1) {
-            return solver.createExplanationFromAxioms(literals);
-        }
-
-        // Split C into disjoint, non-empty sets
-        List<AxiomSet> sets = setDivider.divideIntoSetsWithoutCondition(literals);
-
-        actualPath.addAll(sets.get(0).getAxioms());
-        Explanation D2 = getConflict(sets.get(0).getAxioms(), sets.get(1).getAxioms(), actualPath);
-        actualPath.removeAll(sets.get(0).getAxioms());
-
-        actualPath.addAll(D2.getAxioms());
-        Explanation D1 = getConflict(D2.getAxioms(), sets.get(0).getAxioms(), actualPath);
-        actualPath.removeAll(D2.getAxioms());
-
-        Set<OWLAxiom> conflicts = new HashSet<>();
-        conflicts.addAll(D1.getAxioms());
-        conflicts.addAll(D2.getAxioms());
-
-        return solver.createExplanationFromAxioms(conflicts);
-    }
-
-    @Override
-    public void postProcessExplanations() {
-        explanationManager.readyExplanationsToProcess();
-        explanationManager.filterToConsistentExplanations();
-        explanationManager.filterToMinimalRelevantExplanations();
     }
 }

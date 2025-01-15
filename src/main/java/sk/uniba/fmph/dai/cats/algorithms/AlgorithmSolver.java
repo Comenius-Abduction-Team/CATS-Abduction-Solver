@@ -3,8 +3,8 @@ package sk.uniba.fmph.dai.cats.algorithms;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
-import sk.uniba.fmph.dai.cats.algorithms.mxp.SetDivider;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RcTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -36,7 +36,6 @@ public class AlgorithmSolver {
     private final ExplanationLogger logger;
     protected final ProgressManager progressManager;
     public RuleChecker ruleChecker;
-    public SetDivider setDivider;
     public final TimeManager timer;
     public final ConsistencyChecker consistencyChecker;
 
@@ -64,7 +63,6 @@ public class AlgorithmSolver {
 
         this.explanationManager = explanationManager;
         explanationManager.setSolver(this);
-        setDivider = new SetDivider(explanationManager);
 
         logger = new ExplanationLogger(this);
 
@@ -87,6 +85,8 @@ public class AlgorithmSolver {
 
         if (algorithm.usesMxp())
             nodeProcessor = new MxpNodeProcessor(this);
+        else if (algorithm.usesQxp())
+            nodeProcessor = new QxpNodeProcessor(this);
         else
             nodeProcessor = new ClassicNodeProcessor(this);
 
@@ -98,7 +98,6 @@ public class AlgorithmSolver {
             treeBuilder = new RootOnlyTreeBuilder(this);
         else
             treeBuilder = new MhsTreeBuilder(this);
-
     }
 
     public void solve(){
@@ -171,6 +170,8 @@ public class AlgorithmSolver {
             timer.setEndTime();
             explanationManager.processExplanations(message, stats);
             System.out.println(stats);
+            System.out.println('\n');
+            System.out.println(explanationManager.finalExplanations);
         }
 
     }
