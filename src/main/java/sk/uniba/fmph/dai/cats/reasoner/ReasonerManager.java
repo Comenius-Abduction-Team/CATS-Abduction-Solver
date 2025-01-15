@@ -10,9 +10,8 @@ public class ReasonerManager {
 
     private final Loader loader;
 
-    public ReasonerManager(Loader loader) {
+    ReasonerManager(Loader loader) {
         this.loader = loader;
-        loader.reasonerManager = this;
     }
 
     public void addAxiomToOntology(OWLAxiom axiom) {

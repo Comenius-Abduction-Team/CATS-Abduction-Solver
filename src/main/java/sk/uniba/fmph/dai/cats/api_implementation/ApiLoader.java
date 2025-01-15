@@ -16,8 +16,8 @@ public class ApiLoader extends Loader {
     private final CatsAbducer Abducer;
 
     public ApiLoader(CatsAbducer Abducer){
+        super();
         this.Abducer = Abducer;
-        printer = new ApiPrinter(Abducer);
     }
 
     @Override

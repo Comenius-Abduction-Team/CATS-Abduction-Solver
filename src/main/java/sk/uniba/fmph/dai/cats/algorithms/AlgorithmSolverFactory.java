@@ -10,20 +10,19 @@ import sk.uniba.fmph.dai.cats.progress.ConsoleProgressManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 public class AlgorithmSolverFactory {
 
     public static AlgorithmSolver createConsoleSolver(ThreadTimer timer, Algorithm algorithm) {
 
+        StaticPrinter.setPrinter(new ConsolePrinter());
+
         Loader loader = new ConsoleLoader();
-        new ReasonerManager(loader);
         loader.initialize(Configuration.REASONER);
 
         ExplanationManager explanationManager = new ConsoleExplanationManager();
         ProgressManager progressManager = new ConsoleProgressManager();
-        StaticPrinter.setPrinter(new ConsolePrinter());
 
         return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer);
 
@@ -31,13 +30,13 @@ public class AlgorithmSolverFactory {
 
     public static AlgorithmSolver createApiSolver(ThreadTimer timer, Algorithm algorithm, CatsAbducer abducer) {
 
+        StaticPrinter.setPrinter(new ApiPrinter(abducer));
+
         Loader loader = new ApiLoader(abducer);
-        new ReasonerManager(loader);
         loader.initialize(Configuration.REASONER);
 
         ExplanationManager explanationManager = new ApiExplanationManager(abducer);
         ProgressManager progressManager = new ApiProgressManager(abducer);
-        StaticPrinter.setPrinter(new ApiPrinter(abducer));
 
         return new AlgorithmSolver(algorithm, loader, explanationManager, progressManager, timer);
 

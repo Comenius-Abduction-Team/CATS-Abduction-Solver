@@ -15,7 +15,6 @@ public class ConsoleLoader extends Loader {
 
     public ConsoleLoader(){
         super();
-        printer = new ConsolePrinter();
     }
 
     @Override

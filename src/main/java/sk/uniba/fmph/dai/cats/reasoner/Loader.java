@@ -4,8 +4,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Abducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.data.Observation;
@@ -35,9 +35,11 @@ public abstract class Loader {
     protected boolean isMultipleObservationOnInput = false;
     protected boolean isAxiomBasedAbduciblesOnInput = false;
 
-    protected IPrinter printer;
-
     public ReasonerManager reasonerManager;
+
+    protected Loader(){
+        reasonerManager = new ReasonerManager(this);
+    }
 
     abstract public void initialize(ReasonerType reasonerType);
 
@@ -48,8 +50,10 @@ public abstract class Loader {
             changeReasoner(reasonerType);
             initializeReasoner();
 
+            StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
+
             if (reasoner.isConsistent()) {
-                printer.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
+                StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
                 reasoner.dispose();
                 throw new RuntimeException(LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
@@ -105,7 +109,6 @@ public abstract class Loader {
 
         setOWLReasonerFactory(new JFactFactory());
         reasoner = (OWLKnowledgeExplorerReasoner) reasonerFactory.createReasoner(ontology);
-        printer.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
     }
 
     

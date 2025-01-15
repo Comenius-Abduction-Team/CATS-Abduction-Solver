@@ -5,16 +5,14 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolverFactory;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsAbducer;
 import sk.uniba.fmph.dai.cats.application.Application;
 import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
-import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
 
 import java.io.File;
@@ -146,9 +144,6 @@ public class Main {
 
             ArgumentParser argumentParser = new ArgumentParser();
             argumentParser.parse(args);
-
-            Loader loader = new ConsoleLoader();
-            loader.initialize(Configuration.REASONER);
 
             AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(timer, Configuration.ALGORITHM);
             solver.solve();
