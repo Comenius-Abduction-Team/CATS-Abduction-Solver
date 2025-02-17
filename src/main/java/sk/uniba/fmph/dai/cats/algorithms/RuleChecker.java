@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
@@ -21,9 +22,12 @@ public class RuleChecker {
     private final Loader loader;
     private final ReasonerManager reasonerManager;
 
-    RuleChecker(Loader loader) {
-        this.loader = loader;
+    private final TreeStats stats;
+
+    RuleChecker(AlgorithmSolver solver) {
+        this.loader = solver.loader;
         this.reasonerManager = loader.reasonerManager;
+        this.stats = solver.stats;
     }
 
     public boolean isConsistent(Explanation explanation) {
@@ -69,9 +73,11 @@ public class RuleChecker {
         //OWLReasoner reasoner = new ReasonerFactory().createNonBufferingReasoner(ontology);
 
         if(loader.isMultipleObservationOnInput()){
+
             for(OWLAxiom obs : loader.getObservation().getAxiomsInMultipleObservations()){
                 OWLAxiom negObs = AxiomManager.getComplementOfOWLAxiom(loader, obs);
                 ontologyManager.addAxiom(ontology, negObs);
+                stats.getCurrentLevelStats().consistencyChecks += 1;
                 if(Configuration.STRICT_RELEVANCE && !reasoner.isConsistent()){ //strictly relevant
                     return false;
                 }
@@ -81,8 +87,10 @@ public class RuleChecker {
                 ontologyManager.removeAxiom(ontology, negObs);
             }
             return true;
+
         } else {
             ontologyManager.addAxiom(ontology, loader.getNegObservation().getOwlAxiom());
+            stats.getCurrentLevelStats().consistencyChecks += 1;
             return reasoner.isConsistent();
         }
     }
@@ -101,6 +109,7 @@ public class RuleChecker {
         ontologyManager.addAxioms(ontology, explanation.getAxioms());
 
         OWLReasoner reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
+        stats.getCurrentLevelStats().consistencyChecks += 1;
         return reasoner.isConsistent();
 
     }

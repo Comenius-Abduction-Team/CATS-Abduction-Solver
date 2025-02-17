@@ -1,9 +1,6 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
-import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
@@ -16,10 +13,9 @@ public class ApiExplanationManager extends ExplanationManager {
         printer = new ApiPrinter(Abducer);
     }
 
+    @Override
     public void addPossibleExplanation(Explanation explanation) {
-        possibleExplanations.add(explanation);
-        StaticPrinter.debugPrint("[EXPLANATION] possible explanation added: " +
-                    StringFactory.getRepresentation(explanation.getAxioms()));
+        super.addPossibleExplanation(explanation);
         try {
             if (abducer.isMultithread())
                 abducer.sendExplanation(explanation);
@@ -29,7 +25,7 @@ public class ApiExplanationManager extends ExplanationManager {
     public void processExplanations(String message, TreeStats stats) {
         if (! (message == null))
             abducer.setMessage(message);
-        showExplanations(stats);
+        showExplanations(message, stats);
         abducer.setExplanations(finalExplanations);
     }
 }

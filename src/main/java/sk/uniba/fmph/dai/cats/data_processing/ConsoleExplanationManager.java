@@ -11,19 +11,9 @@ public class ConsoleExplanationManager extends ExplanationManager {
     }
 
     @Override
-    public void addPossibleExplanation(Explanation explanation) {
-        possibleExplanations.add(explanation);
-        StaticPrinter.debugPrint("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
-    }
-
-    @Override
     public void processExplanations(String message, TreeStats stats) {
 
-        showExplanations(stats);
-
-        if (message != null){
-            printer.print('\n' + message);
-        }
+        showExplanations(message, stats);
     }
 
 }

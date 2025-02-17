@@ -1,16 +1,10 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
-import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.RuleChecker;
-import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.DLSyntax;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
-import sk.uniba.fmph.dai.cats.common.StringFactory;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
+import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 import sk.uniba.fmph.dai.cats.timer.TimeManager;
 
 import java.util.*;
@@ -22,10 +16,9 @@ public abstract class ExplanationManager {
 
     protected List<Explanation> explanationsToProcess = new ArrayList<>();
     protected Set<OWLAxiom> lengthOneExplanations = new HashSet<>();
-    protected List<Explanation> finalExplanations = new ArrayList<>();
+    public List<Explanation> finalExplanations = new ArrayList<>();
     protected AlgorithmSolver solver;
-    private Loader loader;
-    private ReasonerManager reasonerManager;
+
     private RuleChecker ruleChecker;
     protected IPrinter printer;
     TimeManager timer;
@@ -36,14 +29,16 @@ public abstract class ExplanationManager {
 
     public ExplanationLogger logger;
 
-    abstract public void addPossibleExplanation(Explanation explanation);
+    public void addPossibleExplanation(Explanation explanation){
+        possibleExplanations.add(explanation);
+        StaticPrinter.debugPrint("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
+        solver.currentLevelStats.explanations++;
+    }
 
     abstract public void processExplanations(String message, TreeStats stats);
     
     public void setSolver(AlgorithmSolver solver) {
         this.solver = solver;
-        loader = solver.loader;
-        reasonerManager = loader.reasonerManager;
         ruleChecker = solver.ruleChecker;
         timer = solver.timer;
     }
@@ -77,10 +72,22 @@ public abstract class ExplanationManager {
         return lengthOneExplanations.size();
     }
     
-    public void showExplanations(TreeStats stats) {
+    public void showExplanations(String message, TreeStats stats) {
 
-        groupExplanations(possibleExplanations.isEmpty(), stats);
-        System.out.println("EXPLANATIONS: " + finalExplanations);
+        groupExplanations(stats);
+
+        StringBuilder bySize = formatExplanationsBySize();
+
+        bySize.insert(0,"\nTotal explanations: " + finalExplanations.size());
+        bySize.append("Time: ").append(stats.filteringEnd);
+        if (message != null && !message.isEmpty())
+            bySize.append("\n").append(message);
+
+        StaticPrinter.print(bySize.toString());
+
+        FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), bySize.toString());
+
+        //System.out.println("EXPLANATIONS: " + finalExplanations);
 
 //        StringBuilder result = formatExplanationsWithSize();
 //        printer.print(result.toString());
@@ -108,61 +115,34 @@ public abstract class ExplanationManager {
         return filteredExplanations;
     }
 
-    private StringBuilder formatExplanationsWithSize() {
-        StringBuilder result = new StringBuilder();
-        int size = 1;
-        while (!possibleExplanations.isEmpty()) {
-            List<Explanation> currentExplanations = filterExplanationsBySize(possibleExplanations, size);
-            possibleExplanations.removeAll(currentExplanations);
-            if(Configuration.ALGORITHM.usesMxp()){
-                if(!Configuration.CHECKING_MINIMALITY_BY_QXP){
-                    filterIfNotMinimal(currentExplanations);
-                }
-                filterIfNotRelevant(currentExplanations);
-            }
-            explanationsBySize.put(size, currentExplanations);
-            if (currentExplanations.isEmpty()) {
-                size++;
+    private StringBuilder formatExplanationsBySize(){
+        StringBuilder result = new StringBuilder("\n");
+
+        for (Integer size : explanationsBySize.keySet()){
+
+            if (explanationsBySize.get(size).isEmpty())
                 continue;
-            }
 
-            timer.setTimeForLevelIfNotSet(findLevelTime(currentExplanations), size);
-            finalExplanations.addAll(currentExplanations);
-            String currentExplanationsFormat = StringUtils.join(currentExplanations, ", ");
-            String line = String.format("%d; %d; %.2f; { %s }\n", size, currentExplanations.size(),
-                    timer.getTimeForLevel(size), currentExplanationsFormat);
-            result.append(line);
-            size++;
+            result.append(size);
+            result.append("; ");
+
+            List<Explanation> explanations = explanationsBySize.get(size);
+
+            result.append(explanations.size());
+            result.append("; ");
+
+            result.append(StringFactory.getExplanationsRepresentation(explanations));
+            result.append("\n");
+
         }
 
-        String line = String.format("%.2f", timer.getEndTime());
-        result.append(line);
-
-        return result;
-    }
-
-    private StringBuilder formatExplanationsWithLevel(List<Explanation> explanations){
-        StringBuilder result = new StringBuilder();
-        int level = -1;
-        while (!explanations.isEmpty()) {
-            List<Explanation> filteredExplanations = filterExplanationsByLevel(explanations, level);
-            explanations.removeAll(filteredExplanations);
-            timer.setTimeForLevelIfNotSet(findLevelTime(filteredExplanations), level);
-            String currentExplanationsFormat = StringUtils.join(filteredExplanations, ", ");
-            String line = String.format("%d; %d; %.2f; { %s }\n", level, filteredExplanations.size(),
-                    timer.getTimeForLevel(level), currentExplanationsFormat);
-            result.append(line);
-            level++;
-        }
-        String line = String.format("%.2f", timer.getEndTime());
-        result.append(line);
         return result;
     }
 
     private void filterIfNotMinimal(List<Explanation> explanations){
-        List<Explanation> notMinimalExplanations = new LinkedList<>();
-        for (Explanation e: explanations){
-            for (Explanation m: finalExplanations){
+        List<Explanation> notMinimalExplanations = new ArrayList<>();
+        for (Explanation e : explanations){
+            for (Explanation m : finalExplanations){
                 if (new HashSet<>(e.getAxioms()).containsAll(m.getAxioms())){
                     notMinimalExplanations.add(e);
                 }
@@ -171,15 +151,15 @@ public abstract class ExplanationManager {
         explanations.removeAll(notMinimalExplanations);
     }
 
-    private void filterIfNotRelevant(List<Explanation> explanations) {
+    private int filterIfNotRelevant(List<Explanation> explanations) {
         List<Explanation> notRelevantExplanations = new LinkedList<>();
         for(Explanation e : explanations){
             if(!ruleChecker.isRelevant(e)){
                 notRelevantExplanations.add(e);
             }
         }
-        //System.out.println(notRelevantExplanations);
         explanations.removeAll(notRelevantExplanations);
+        return notRelevantExplanations.size();
     }
 
     private List<Explanation> filterExplanationsBySize(List<Explanation> explanations, int size) {
@@ -194,16 +174,6 @@ public abstract class ExplanationManager {
                 .stream()
                 .filter(explanation -> level == explanation.getLevel())
                 .collect(Collectors.toList());
-    }
-
-    private double findLevelTime(List<Explanation> explanations){
-        double time = 0;
-        for (Explanation exp: explanations){
-            if (exp.getAcquireTime() > time){
-                time = exp.getAcquireTime();
-            }
-        }
-        return time;
     }
 
     private boolean containsContradictoryAxioms(Explanation explanation) {
@@ -261,10 +231,21 @@ public abstract class ExplanationManager {
     }
 
     public void filterToConsistentExplanations(){
-        explanationsToProcess = getConsistentExplanations();
+        if (!explanationsToProcess.isEmpty())
+            explanationsToProcess = getConsistentExplanations();
     }
 
     public void filterToMinimalRelevantExplanations(){
+
+        if (explanationsToProcess.size() == 1){
+            int removed = filterIfNotRelevant(explanationsToProcess);
+            if (removed == 1)
+                return;
+            explanationsBySize.put(explanationsToProcess.get(0).size(), explanationsToProcess);
+            finalExplanations.addAll(explanationsToProcess);
+            return;
+        }
+
         int size = 1;
         while (!explanationsToProcess.isEmpty()) {
             List<Explanation> currentExplanations = filterExplanationsBySize(explanationsToProcess, size);
@@ -281,28 +262,25 @@ public abstract class ExplanationManager {
         }
     }
 
-    public void groupExplanations(boolean bySize, TreeStats stats){
+    public void groupExplanations(TreeStats stats){
         for (Explanation e : finalExplanations){
 
             int level = e.getLevel();
 
             LevelStats levelStats = stats.getLevelStats(level);
-            levelStats.explanations++;
+            levelStats.finalExplanations++;
 
             double time = e.getAcquireTime();
 
-            if (time < levelStats.firstExplanation) {
+            if (levelStats.firstExplanation == null || time < levelStats.firstExplanation) {
                 levelStats.firstExplanation = time;
             }
 
-            if (time > levelStats.lastExplanation)
+            if (levelStats.lastExplanation == null || time > levelStats.lastExplanation)
                 levelStats.lastExplanation = time;
 
             putExplanationIntoMap(e,level,explanationsByLevel);
-
-            if (bySize){
-                putExplanationIntoMap(e,e.size(),explanationsBySize);
-            }
+            putExplanationIntoMap(e,e.size(),explanationsBySize);
 
         }
     }
