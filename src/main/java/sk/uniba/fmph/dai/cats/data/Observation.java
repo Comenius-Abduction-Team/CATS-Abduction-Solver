@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Observation {
 
-    private OWLAxiom axiom;
-    private List<OWLAxiom> axiomsInMultipleObservations;
-    private OWLNamedIndividual reductionIndividual;
+    private final OWLAxiom axiom;
+    private final List<OWLAxiom> axiomsInMultipleObservations;
+    private final OWLNamedIndividual reductionIndividual;
 
     public Observation(OWLAxiom axiom) {
         this.axiom = axiom;
@@ -42,11 +42,11 @@ public class Observation {
             return StringFactory.getRepresentation(axiom);
         }
         StringBuilder result = new StringBuilder();
-        result.append("Reduced observation: ");
-        result.append(axiom);
-        result.append("\n Observation consist of multiple observations: ");
+        result.append("\n Reduced observation: ");
+        result.append(StringFactory.getRepresentation(axiom));
+        result.append("\n Observation consist of multiple axioms:");
         for (OWLAxiom a : axiomsInMultipleObservations){
-            result.append(StringFactory.getRepresentation(a));
+            result.append(" ").append(StringFactory.getRepresentation(a));
         }
         result.append("\n");
         return result.toString();

@@ -51,15 +51,16 @@ public class AlgorithmSolver {
     protected TreeBuilder treeBuilder;
     public NodeProcessor nodeProcessor;
 
-    public final TreeStats stats;
+    public final TreeStats stats = new TreeStats();
     public LevelStats currentLevelStats;
 
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
                               ProgressManager progressManager, ThreadTimer threadTimer) {
 
         this.loader = loader;
-        ruleChecker = new RuleChecker(loader);
+
         timer = new TimeManager(threadTimer);
+        ruleChecker = new RuleChecker(this);
 
         this.explanationManager = explanationManager;
         explanationManager.setSolver(this);
@@ -67,8 +68,6 @@ public class AlgorithmSolver {
         logger = new ExplanationLogger(this);
 
         this.progressManager = progressManager;
-
-        stats = new TreeStats();
 
         if (Configuration.SORTED_MODELS)
             modelManager = new InsertSortModelManager(this);
@@ -115,7 +114,7 @@ public class AlgorithmSolver {
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(0, "Initializing abduction.");
 
-        String message = null;
+        String message = "";
 
         if (!loader.reasonerManager.isOntologyConsistent()) {
             message = "The observation is already entailed!";
@@ -123,8 +122,8 @@ public class AlgorithmSolver {
             logger.logMessage(Configuration.getInfo(), message);
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
+            return;
         }
-
 
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
 
@@ -144,12 +143,13 @@ public class AlgorithmSolver {
 
                 future.cancel(true);
                 logger.makeTimeoutPartialLog(currentDepth);
+                message += "Time-out reached!";
 
         }   catch (Throwable e){
 
                 if (!(future == null))
                     future.cancel(true);
-                message = "An error occured: " + e.getMessage();
+                message += "An error occured: " + e.getMessage();
                 logger.makeErrorAndPartialLog(currentDepth, e);
                 StaticPrinter.logError("An error occurred:", e);
                 e.printStackTrace();
@@ -169,19 +169,14 @@ public class AlgorithmSolver {
 
             timer.setEndTime();
             explanationManager.processExplanations(message, stats);
-            System.out.println(stats);
-            System.out.println('\n');
-            System.out.println(explanationManager.finalExplanations);
+            System.out.println("\n" + stats);
         }
 
     }
 
     protected void printInfo(){
-
-        StaticPrinter.print("\n");
+        StaticPrinter.print("");
         StaticPrinter.print(String.join("\n", Configuration.getInfo()));
-        StaticPrinter.print("\n");
-
     }
 
     protected void addNegatedObservation(){

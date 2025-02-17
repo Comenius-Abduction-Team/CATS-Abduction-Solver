@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.*;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,22 @@ public class StringFactory {
             result.add(getRepresentation(owlAxiom));
         }
         return "{" + StringUtils.join(result, ",") + "}";
+    }
+
+    public static String getRepresentation(Explanation explanation){
+        List<String> result = new ArrayList<>();
+        for (OWLAxiom owlAxiom : explanation.getAxioms()) {
+            result.add(getRepresentation(owlAxiom));
+        }
+        return "{" + StringUtils.join(result, ",") + "}";
+    }
+
+    public static String getExplanationsRepresentation(Collection<Explanation> explanations){
+        List<String> result = new ArrayList<>();
+        for (Explanation e : explanations) {
+            result.add(getRepresentation(e));
+        }
+        return "{ " + StringUtils.join(result, ", ") + " }";
     }
 
     private static String getNamedIndividual(OWLAxiom owlAxiom) {

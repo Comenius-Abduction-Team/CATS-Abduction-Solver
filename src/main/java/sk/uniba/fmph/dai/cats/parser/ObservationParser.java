@@ -24,9 +24,9 @@ public abstract class ObservationParser {
         try{
             createOntologyFromObservation();
         } catch (OWLOntologyCreationException | OWLOntologyStorageException e){
-            throw new RuntimeException("Probem while creating ontology observation");
+            throw new RuntimeException("Problem while creating ontology observation");
         }
-        printer.logInfo("Observation: ".concat(Configuration.OBSERVATION));
+        printer.logInfo("Observation: " + loader.getObservation());
     }
 
     protected void processAxiomsFromObservation(OWLOntology observationOntology){
