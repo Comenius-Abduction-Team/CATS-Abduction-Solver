@@ -14,7 +14,7 @@ public class FamilyTest extends AlgorithmTestBase {
 
     @Override
     protected void setUpInput() {
-        ONTOLOGY_FILE = "files/family2.owl";
+        ONTOLOGY_FILE = "ont/family2.owl";
 
         OBSERVATION =
                 "Prefix: prefix1: <http://www.semanticweb.org/chrumka/ontologies/2020/4/untitled-ontology-13#>"

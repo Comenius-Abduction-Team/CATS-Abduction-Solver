@@ -14,7 +14,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Override
     protected void setUpInput() {
-        ONTOLOGY_FILE = "files/testExtractingModel9_1.owl";
+        ONTOLOGY_FILE = "ont/testExtractingModel9_1.owl";
 
         OBSERVATION =
                 "Prefix: o: <http://www.co-ode.org/ontologies/ont.owl#>"

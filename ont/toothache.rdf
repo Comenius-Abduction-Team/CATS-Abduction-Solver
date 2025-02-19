@@ -52,6 +52,14 @@
     <!-- http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#Toothache -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#Toothache"/>
+
+
+
+    <!-- http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#SwollenGums -->
+
+    <!--
+    <owl:Class rdf:about="http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#SwollenGums"/>
+    -->
     
 
 
