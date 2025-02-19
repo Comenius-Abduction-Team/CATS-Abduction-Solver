@@ -280,7 +280,6 @@ public abstract class ExplanationManager {
                 levelStats.lastExplanation = time;
 
             putExplanationIntoMap(e,level,explanationsByLevel);
-            putExplanationIntoMap(e,e.size(),explanationsBySize);
 
         }
     }
