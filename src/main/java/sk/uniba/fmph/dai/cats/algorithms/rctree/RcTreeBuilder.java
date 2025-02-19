@@ -99,7 +99,6 @@ public class RcTreeBuilder implements TreeBuilder {
         node.depth = depth;
 
         OWLAxiom label = path.lastAxiom;
-        parent.usedLabels.add(label);
         node.labelAxiom = label;
 
         parent.children.add(node);
@@ -113,6 +112,8 @@ public class RcTreeBuilder implements TreeBuilder {
             if (!node.childrenToIgnore.contains(axiom))
                 node.childrenToProcess.add(axiom);
         }
+
+        StaticPrinter.debugPrint("[RCT] Created node. Ignored children: " + node.childrenToIgnore);
 
         return node;
     }
@@ -277,8 +278,11 @@ public class RcTreeBuilder implements TreeBuilder {
 
     @Override
     public OWLAxiom getNextChild(){
-        return currentNode.childrenToProcess.remove(0);
-
+        OWLAxiom child = currentNode.childrenToProcess.remove(0);
+        if (child != null){
+            currentNode.childrenToIgnore.add(child);
+        }
+        return child;
     }
 
     @Override
