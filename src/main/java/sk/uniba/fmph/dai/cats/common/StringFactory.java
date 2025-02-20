@@ -114,4 +114,19 @@ public class StringFactory {
     public static String extractClassName(OWLAxiom axiom) {
         return getRepresentation(axiom).split("\\" + DLSyntax.LEFT_PARENTHESES)[0];
     }
+
+    public static String buildCsvRow(boolean addComas, Object... objects) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < objects.length; i++) {
+            builder.append(objects[i].toString());
+            if (i + 1 != objects.length) {
+                builder.append(';');
+                if (addComas)
+                    builder.append(' ');
+            }
+        }
+
+        return builder.toString();
+
+    }
 }

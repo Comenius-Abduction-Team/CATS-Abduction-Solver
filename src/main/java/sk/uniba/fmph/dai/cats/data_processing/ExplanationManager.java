@@ -123,15 +123,11 @@ public abstract class ExplanationManager {
             if (explanationsBySize.get(size).isEmpty())
                 continue;
 
-            result.append(size);
-            result.append("; ");
-
             List<Explanation> explanations = explanationsBySize.get(size);
 
-            result.append(explanations.size());
-            result.append("; ");
-
-            result.append(StringFactory.getExplanationsRepresentation(explanations));
+            result.append(StringFactory.buildCsvRow(
+                    true, size, explanations.size(), StringFactory.getExplanationsRepresentation(explanations)
+            ));
             result.append("\n");
 
         }
