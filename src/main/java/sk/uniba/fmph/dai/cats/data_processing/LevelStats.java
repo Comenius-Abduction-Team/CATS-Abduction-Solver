@@ -1,11 +1,13 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
+import sk.uniba.fmph.dai.cats.common.StringFactory;
+
 public class LevelStats {
 
     public int  processed_nodes, deleted_unprocessed, deleted_processed;
     public int created_edges;
     public int pruned_edges, explanation_edges, created_nodes, reused, modelExtractions, explanations, finalExplanations, consistencyChecks;
-    public double start, finish;
+    public double start = -1, finish = -1;
 
     public Double firstExplanation, lastExplanation;
 
@@ -30,5 +32,14 @@ public class LevelStats {
                 ", finish_time=" + finish +
 
                 "}\n";
+    }
+
+    public String toCsvRow(boolean addCommas){
+        return StringFactory.buildCsvRow(addCommas,
+                processed_nodes, deleted_unprocessed, deleted_processed,
+                created_edges, pruned_edges, explanation_edges, created_nodes,
+                reused, modelExtractions, consistencyChecks,
+                explanations,finalExplanations,
+                start, finish, finish-start, firstExplanation, lastExplanation);
     }
 }

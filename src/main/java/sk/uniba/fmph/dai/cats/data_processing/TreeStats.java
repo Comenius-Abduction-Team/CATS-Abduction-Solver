@@ -1,5 +1,7 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
+import sk.uniba.fmph.dai.cats.common.StringFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,5 +69,27 @@ public class TreeStats {
                 ", filtering_start=" + filteringStart +
                 ", filtering_end=" + filteringEnd +
                 '}';
+    }
+
+    public static String getCsvHeader(boolean addCommas){
+        return StringFactory.buildCsvRow(addCommas,
+                "level",
+                "processed nodes", "deleted unprocessed nodes", "deleted processed nodes",
+                "created edges", "pruned edges", "explanation edges", "created nodes",
+                "reused models", "model extractions", "consistency checks",
+                "explanations", "final explanations",
+                "start time", "first explanation time", "last explanation time", "finish time", "duration");
+    }
+
+    public String buildCsvTable(){
+        StringBuilder builder = new StringBuilder();
+        builder.append(getCsvHeader(false));
+        builder.append('\n');
+        for (int level : levels.keySet()){
+            builder.append(StringFactory.buildCsvRow(false, level, levels.get(level).toCsvRow(false)));
+            builder.append('\n');
+        }
+        builder.append(StringFactory.buildCsvRow(false, 'f', filteringStart, filteringEnd, filteringStart-filteringEnd));
+        return builder.toString();
     }
 }
