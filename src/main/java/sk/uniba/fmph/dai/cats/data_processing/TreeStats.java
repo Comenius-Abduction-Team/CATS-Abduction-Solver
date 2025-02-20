@@ -63,7 +63,7 @@ public class TreeStats {
     @Override
     public String toString() {
         return "TreeStats{" +
-                "levels=" + levels +
+                "levels\n=" + levels +
                 ", filtering_start=" + filteringStart +
                 ", filtering_end=" + filteringEnd +
                 '}';
