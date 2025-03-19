@@ -74,32 +74,25 @@ public abstract class ExplanationManager {
     
     public void showExplanations(String message, TreeStats stats) {
 
-        groupExplanations(stats);
+        groupFinalExplanationsByLevel(stats);
 
         StringBuilder bySize = formatExplanationsBySize();
 
-        bySize.insert(0,"\nTotal explanations: " + finalExplanations.size());
+        bySize.insert(0,"Total explanations: " + finalExplanations.size());
         bySize.append("Time: ").append(stats.filteringEnd);
         if (message != null && !message.isEmpty())
             bySize.append("\n").append(message);
 
         StaticPrinter.print(bySize.toString());
 
-        FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), bySize.toString());
+        System.out.println();
+        System.out.println(stats.buildCsvTable(explanationsByLevel));
 
-        //System.out.println("EXPLANATIONS: " + finalExplanations);
+        logger.log(LogTypes.FINAL, bySize);
+        logger.log(LogTypes.LEVEL, stats.buildCsvTable(explanationsByLevel));
 
-//        StringBuilder result = formatExplanationsWithSize();
-//        printer.print(result.toString());
-//        if (Configuration.LOGGING)
-//            FileManager.appendToFile(FileManager.FINAL_LOG__PREFIX, timer.getStartTime(), result.toString());
-//
-//        logger.logExplanationsTimes(finalExplanations);
-//
-//        if(Configuration.ALGORITHM.usesMxp()){
-//            result = formatExplanationsWithLevel(new ArrayList<>(finalExplanations));
-//            FileManager.appendToFile(FileManager.LEVEL_LOG__PREFIX, timer.getStartTime(), result.toString());
-//        }
+        logger.logExplanationsTimes(finalExplanations);
+
     }
 
     private List<Explanation> getConsistentExplanations() {
@@ -258,7 +251,7 @@ public abstract class ExplanationManager {
         }
     }
 
-    public void groupExplanations(TreeStats stats){
+    public void groupFinalExplanationsByLevel(TreeStats stats){
         for (Explanation e : finalExplanations){
 
             int level = e.getLevel();
@@ -268,15 +261,23 @@ public abstract class ExplanationManager {
 
             double time = e.getAcquireTime();
 
-            if (levelStats.firstExplanation == null || time < levelStats.firstExplanation) {
-                levelStats.firstExplanation = time;
+            if (levelStats.firstExplanationTime == null || time < levelStats.firstExplanationTime) {
+                levelStats.firstExplanationTime = time;
             }
 
-            if (levelStats.lastExplanation == null || time > levelStats.lastExplanation)
-                levelStats.lastExplanation = time;
+            if (levelStats.lastExplanationTime == null || time > levelStats.lastExplanationTime)
+                levelStats.lastExplanationTime = time;
 
             putExplanationIntoMap(e,level,explanationsByLevel);
 
+        }
+    }
+
+    public void groupFinalExplanationsBySize(){
+        for (Explanation e : finalExplanations){
+            int size = e.size();
+            List<Explanation> explanations = explanationsBySize.computeIfAbsent(size, _k -> new ArrayList<>());
+            explanations.add(e);
         }
     }
 

@@ -52,5 +52,6 @@ public class ClassicNodeProcessor implements NodeProcessor {
     @Override
     public void postProcessExplanations() {
         explanationManager.finalisePossibleExplanations();
+        explanationManager.groupFinalExplanationsBySize();
     }
 }
