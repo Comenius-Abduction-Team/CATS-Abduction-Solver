@@ -9,7 +9,11 @@ public class LevelStats {
     public int pruned_edges, explanation_edges, created_nodes, reused, modelExtractions, explanations, finalExplanations, consistencyChecks;
     public double start = -1, finish = -1;
 
-    public Double firstExplanation, lastExplanation;
+    public Double firstExplanationTime, lastExplanationTime;
+
+    public boolean timeout=false, error=false;
+
+    public String errorMessage;
 
     @Override
     public String toString() {
@@ -27,9 +31,12 @@ public class LevelStats {
                 ", explanations=" + explanations +
                 ", finalExplanations=" + finalExplanations +
                 ", start_time=" + start +
-                ", first_explanation=" + firstExplanation +
-                ", last_explanation=" + lastExplanation +
+                ", first_explanation=" + firstExplanationTime +
+                ", last_explanation=" + lastExplanationTime +
                 ", finish_time=" + finish +
+                ", timeout=" + timeout +
+                ", error=" + error +
+                ", error_message=" + errorMessage +
 
                 "}\n";
     }
@@ -39,7 +46,17 @@ public class LevelStats {
                 processed_nodes, deleted_unprocessed, deleted_processed,
                 created_edges, pruned_edges, explanation_edges, created_nodes,
                 reused, modelExtractions, consistencyChecks,
-                explanations,finalExplanations,
-                start, finish, finish-start, firstExplanation, lastExplanation);
+                explanations, explanations-finalExplanations, finalExplanations,
+                start, finish, finish-start, firstExplanationTime, lastExplanationTime);
+    }
+
+    public void buildCsvRow(StringBuilder builder, boolean addCommas){
+        StringFactory.buildCsvRow(builder, addCommas,
+                processed_nodes, deleted_unprocessed, deleted_processed,
+                created_edges, pruned_edges, explanation_edges, created_nodes,
+                reused, modelExtractions, consistencyChecks,
+                explanations, explanations-finalExplanations, finalExplanations,
+                start, finish, finish-start, firstExplanationTime, lastExplanationTime,
+                (timeout ? "timeout" : null), (error ? "error" : null), errorMessage);
     }
 }

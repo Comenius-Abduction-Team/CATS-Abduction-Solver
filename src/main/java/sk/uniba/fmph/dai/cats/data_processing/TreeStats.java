@@ -1,8 +1,10 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
 import sk.uniba.fmph.dai.cats.common.StringFactory;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TreeStats {
@@ -77,19 +79,59 @@ public class TreeStats {
                 "processed nodes", "deleted unprocessed nodes", "deleted processed nodes",
                 "created edges", "pruned edges", "explanation edges", "created nodes",
                 "reused models", "model extractions", "consistency checks",
-                "explanations", "final explanations",
-                "start time", "first explanation time", "last explanation time", "finish time", "duration");
+                "explanations", "filtered explanations", "final explanations",
+                "start time", "finish time", "duration", "first explanation time", "last explanation time",
+                "explanations");
     }
 
-    public String buildCsvTable(){
+    public String buildCsvTable(Map<Integer, List<Explanation>> explanationsByLevel){
+
         StringBuilder builder = new StringBuilder();
         builder.append(getCsvHeader(false));
         builder.append('\n');
+
         for (int level : levels.keySet()){
-            builder.append(StringFactory.buildCsvRow(false, level, levels.get(level).toCsvRow(false)));
-            builder.append('\n');
+            buildCsvRow(builder, level, explanationsByLevel.get(level));
         }
-        builder.append(StringFactory.buildCsvRow(false, 'f', filteringStart, filteringEnd, filteringStart-filteringEnd));
+
+        LevelStats filteringStats = new LevelStats();
+        filteringStats.start = filteringStart;
+        filteringStats.finish = filteringEnd;
+
+        builder.append("f;");
+        filteringStats.buildCsvRow(builder, false);
+
+        return builder.toString();
+    }
+
+    public void buildCsvRow(StringBuilder builder, int level, List<Explanation> explanations){
+
+        builder.append(level);
+        builder.append(';');
+        levels.get(level).buildCsvRow(builder, false);
+        builder.append(';');
+        builder.append(StringFactory.getExplanationsRepresentation(explanations));
+        builder.append('\n');
+
+    }
+
+    public String buildCsvTablePartialRow(Map<Integer, List<Explanation>> explanationsByLevel){
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(getCsvHeader(false));
+        builder.append('\n');
+
+        for (int level : levels.keySet()){
+            buildCsvRow(builder, level, explanationsByLevel.get(level));
+        }
+
+        LevelStats filteringStats = new LevelStats();
+        filteringStats.start = filteringStart;
+        filteringStats.finish = filteringEnd;
+
+        builder.append("f;");
+        filteringStats.buildCsvRow(builder, false);
+
         return builder.toString();
     }
 }

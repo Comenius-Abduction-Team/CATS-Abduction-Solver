@@ -16,7 +16,6 @@ public class StringFactory {
         if (owlAxiom instanceof OWLClassAssertionAxiom) {
             return getClassAssertionAxiom(owlAxiom).concat(DLSyntax.LEFT_PARENTHESES).
                     concat(getNamedIndividual(owlAxiom)).concat(DLSyntax.RIGHT_PARENTHESES);
-//            return getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(getClassAssertionAxiom(owlAxiom));
         }
         return getObjectPropertyAssertionAxiom(owlAxiom);
     }
@@ -39,8 +38,12 @@ public class StringFactory {
 
     public static String getExplanationsRepresentation(Collection<Explanation> explanations){
         List<String> result = new ArrayList<>();
-        for (Explanation e : explanations) {
-            result.add(getRepresentation(e));
+        if (explanations != null) {
+            for (Explanation e : explanations) {
+                if (e == null)
+                    continue;
+                result.add(getRepresentation(e));
+            }
         }
         return "{ " + StringUtils.join(result, ", ") + " }";
     }
@@ -117,10 +120,26 @@ public class StringFactory {
 
     public static String buildCsvRow(boolean addComas, Object... objects) {
         StringBuilder builder = new StringBuilder();
+        buildCsvRow(builder, addComas, objects);
+        return builder.toString();
+
+//        for (int i = 0; i < objects.length; i++) {
+//            if (objects[i] != null)
+//                builder.append(objects[i].toString());
+//            if (i + 1 != objects.length) {
+//                builder.append(';');
+//                if (addComas)
+//                    builder.append(' ');
+//            }
+//        }
+//
+//        return builder.toString();
+
+    }
+
+    public static void buildCsvRow(StringBuilder builder, boolean addComas, Object... objects) {
         for (int i = 0; i < objects.length; i++) {
-            if (objects[i] == null)
-                builder.append("-1");
-            else
+            if (objects[i] != null)
                 builder.append(objects[i].toString());
             if (i + 1 != objects.length) {
                 builder.append(';');
@@ -128,8 +147,5 @@ public class StringFactory {
                     builder.append(' ');
             }
         }
-
-        return builder.toString();
-
     }
 }
