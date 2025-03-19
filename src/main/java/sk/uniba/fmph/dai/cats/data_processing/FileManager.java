@@ -2,14 +2,31 @@ package sk.uniba.fmph.dai.cats.data_processing;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
+import sk.uniba.fmph.dai.cats.common.LogTypes;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileManager {
+
+    public static final Map<LogTypes, String> LOG_PREFIXES;
+
+    static {
+        Map<LogTypes, String> map = new HashMap<>();
+        map.put(LogTypes.INFO, "info");
+        map.put(LogTypes.FINAL, "final");
+        map.put(LogTypes.LEVEL, "level");
+        map.put(LogTypes.PARTIAL, "partial_level");
+        map.put(LogTypes.TIMES, "explanation_times");
+        map.put(LogTypes.ERROR, "error");
+        LOG_PREFIXES = Collections.unmodifiableMap(map);
+    }
 
     public static final String INFO_LOG__PREFIX = "info";
     public static final String ERROR_LOG__PREFIX = "error";
@@ -21,22 +38,24 @@ public class FileManager {
     public static final String LOG_FILE__POSTFIX = ".log";
     private static String FILE_DIRECTORY = "";
 
-    static void appendToFile(String fileName, long currentTimeMillis, String log) {
+    static void appendToFile(LogTypes type, String time, String log) {
         if (!Configuration.LOGGING)
             return;
         FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
 
-        createFileIfNotExists(fileName, currentTimeMillis);
+        String fileName = LOG_PREFIXES.get(type);
+
+        createFileIfNotExists(fileName, time);
         try {
-            String file_path = getFilePath(fileName, currentTimeMillis);
+            String file_path = getFilePath(fileName, time);
             Files.write(Paths.get(file_path), log.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
 
-    private static void createFileIfNotExists(String fileName, long currentTimeMillis) {
-        File file = new File(getFilePath(fileName, currentTimeMillis));
+    private static void createFileIfNotExists(String fileName, String time) {
+        File file = new File(getFilePath(fileName, time));
         try {
             file.createNewFile();
         } catch (IOException exception) {
@@ -44,7 +63,7 @@ public class FileManager {
         }
     }
 
-    private static String getFilePath(String fileName, long currentTimeMillis) {
+    private static String getFilePath(String fileName, String time) {
         String directoryPath;
 
         if (Configuration.OUTPUT_PATH.isEmpty()) {
@@ -60,7 +79,7 @@ public class FileManager {
             directory.mkdirs();
         }
 
-        return directoryPath.concat(File.separator).concat(currentTimeMillis + "__").concat(Configuration.INPUT_FILE_NAME + "__").concat(fileName).concat(LOG_FILE__POSTFIX);
+        return directoryPath.concat(File.separator).concat(time + "_").concat(Configuration.INPUT_FILE_NAME + "_").concat(fileName).concat(LOG_FILE__POSTFIX);
     }
 
     private static String getDefaultOutputPath() {
