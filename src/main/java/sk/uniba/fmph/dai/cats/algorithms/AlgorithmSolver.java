@@ -142,14 +142,19 @@ public class AlgorithmSolver {
         }  catch (TimeoutException e) {
 
                 future.cancel(true);
+                message += "Time-out reached! ";
+                currentLevelStats.timeout = true;
                 logger.makeTimeoutPartialLog(currentDepth);
-                message += "Time-out reached!";
+
 
         }   catch (Throwable e){
 
                 if (!(future == null))
                     future.cancel(true);
-                message += "An error occured: " + e.getMessage();
+                currentLevelStats.error = true;
+                String errorString = e.getClass().getName() + " : " + e.getMessage();
+                currentLevelStats.errorMessage = errorString;
+                message += "An error occured: " + errorString;
                 logger.makeErrorAndPartialLog(currentDepth, e);
                 StaticPrinter.logError("An error occurred:", e);
                 e.printStackTrace();
