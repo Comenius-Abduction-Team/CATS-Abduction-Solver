@@ -33,18 +33,16 @@ public class HstTreeBuilder implements TreeBuilder {
     @Override
     public IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles) {
 
-        Set<OWLAxiom> abducibleAxioms = abducibles.abducibleAxioms;
-
-        this.abducibles = new NumberedAxiomsUnindexedSet(abducibleAxioms);
+        this.abducibles = new NumberedAxiomsUnindexedSet(abducibles);
 
         //Initially, MIN is set to |COMP|
-        globalMin = abducibleAxioms.size();
-
+        globalMin = this.abducibles.size();
         return this.abducibles;
     }
 
     @Override
     public TreeNode createRoot(){
+        solver.currentLevel.hstGlobalMin = globalMin;
         if (nodeProcessor.canCreateRoot(true))
             return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
         return null;
@@ -128,6 +126,7 @@ public class HstTreeBuilder implements TreeBuilder {
 
         if (globalMin > 0)
             indexAxiomsFromModel(parentNode, abducibles);
+        solver.currentLevel.hstGlobalMin = globalMin;
 
         //Let min(v) be MIN + 1
         parentNode.min = globalMin + 1;

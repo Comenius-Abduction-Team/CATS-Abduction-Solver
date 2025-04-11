@@ -18,7 +18,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
+import sk.uniba.fmph.dai.cats.timer.MetricsThread;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class CatsAbducer implements IThreadAbducer {
     boolean multithread = false;
 
     AlgorithmSolver solver;
-    ThreadTimer timer;
+    MetricsThread timer;
 
     public CatsAbducer() {
 
@@ -197,7 +197,7 @@ public class CatsAbducer implements IThreadAbducer {
 
     private void setupSolver() {
 
-        timer = new ThreadTimer(100);
+        timer = new MetricsThread(10);
 
         setSolverConfiguration();
 

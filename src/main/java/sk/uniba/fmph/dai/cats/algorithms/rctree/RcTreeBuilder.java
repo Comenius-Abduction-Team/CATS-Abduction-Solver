@@ -2,16 +2,15 @@ package sk.uniba.fmph.dai.cats.algorithms.rctree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.*;
-import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RcTreeBuilder implements TreeBuilder {
 
@@ -35,7 +34,7 @@ public class RcTreeBuilder implements TreeBuilder {
 
     @Override
     public IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles) {
-        return new AxiomSet(abducibles.getAbducibleAxioms());
+        return new AxiomSetAbducibles(abducibles);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class RcTreeBuilder implements TreeBuilder {
         return false;
     }
 
-    private int getAndIncreaseIndex(){
+    private int getAndIncreaseId(){
         int oldIndex = index;
         index++;
         return oldIndex;
@@ -73,7 +72,7 @@ public class RcTreeBuilder implements TreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        root = new RcTreeNode(getAndIncreaseIndex());
+        root = new RcTreeNode(getAndIncreaseId());
         root.model = modelToReuse;
 
         root.childrenToProcess.addAll(root.model.getNegatedData());
@@ -93,18 +92,18 @@ public class RcTreeBuilder implements TreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        RcTreeNode node = new RcTreeNode(getAndIncreaseIndex());
+        RcTreeNode node = new RcTreeNode(getAndIncreaseId());
         node.model = solver.removePathAxiomsFromModel(modelToReuse);
         node.path = path.getAxioms();
         node.depth = depth;
 
         OWLAxiom label = path.lastAxiom;
         node.labelAxiom = label;
+        parent.usedLabels.add(label);
 
         parent.children.add(node);
         node.parent = parent;
 
-        node.childrenToIgnore.add(label);
         node.childrenToIgnore.addAll(parent.childrenToIgnore.getAxioms());
         node.childrenToIgnore.addAll(parent.usedLabels);
 
@@ -113,7 +112,7 @@ public class RcTreeBuilder implements TreeBuilder {
                 node.childrenToProcess.add(axiom);
         }
 
-        StaticPrinter.debugPrint("[RCT] Created node. Ignored children: " + node.childrenToIgnore);
+        StaticPrinter.debugPrint("[RCT] Created node " + node.id + ". Ignored children: " + node.childrenToIgnore);
 
         return node;
     }
@@ -135,7 +134,9 @@ public class RcTreeBuilder implements TreeBuilder {
 
     @Override
     public TreeNode getNextNodeFromTree() {
-        return queue.poll();
+        RcTreeNode node = queue.poll();
+        //System.out.println(queue.stream().map(n -> n.depth).collect(Collectors.toSet()));
+        return node;
     }
 
     @Override
@@ -162,7 +163,7 @@ public class RcTreeBuilder implements TreeBuilder {
             // nodes n' labeled with some Cj from CS such that Ci C Cj
             if (currentNode.isSubsetOf(polledNode)){
 
-                StaticPrinter.debugPrint("[RC-TREE] " + currentNode + " is subset of " + polledNode);
+                StaticPrinter.debugPrint("[RCT] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;
                 Model Cj = polledNode.model;
@@ -172,7 +173,7 @@ public class RcTreeBuilder implements TreeBuilder {
                 difference.removeAll(Ci.getNegatedData());
 
                 // Relabel n' with Ci
-                StaticPrinter.debugPrint("[RC-TREE] Relabelling " + polledNode + " with " + Ci);
+                StaticPrinter.debugPrint("[RCT] Relabelling " + polledNode + " with " + Ci);
                 polledNode.model = Ci;
 
                 // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
@@ -219,12 +220,13 @@ public class RcTreeBuilder implements TreeBuilder {
             node.children.clear();
             node.childrenToProcess.clear();
 
-            StaticPrinter.debugPrint("[RC-TREE] Deleting node: " + node);
+            StaticPrinter.debugPrint("[RCT] Deleting node: " + node);
 
             if (node.processed)
-                stats.getLevelStatsNoSetting(node.depth).deleted_processed += 1;
-            else
-                stats.getLevelStatsNoSetting(node.depth).deleted_unprocessed += 1;
+                node.assignedLevel.deletedProcessed += 1;
+            else {
+                node.parent.assignedLevel.deletedCreated += 1;
+            }
 
         }
 
@@ -232,7 +234,6 @@ public class RcTreeBuilder implements TreeBuilder {
 
     private void traverseTreeToUpdateIgnoredChildren(RcTreeNode originalPolledNode, Set<OWLAxiom> difference){
 
-        // TREBA PROPAGOVAT ZMENU V CELOM PODSTROME... TAKZE TREBA ZNOVA PRECHADZAT V QUEUECKU VRCHOLY
         Queue<RcTreeNode> nodes = new ArrayDeque<>();
         nodes.add(originalPolledNode);
 
@@ -259,12 +260,12 @@ public class RcTreeBuilder implements TreeBuilder {
             // create for all n'' and n''' all the edges that are not avoided anymore
             // (due to the updates to their Θs), and process the new nodes in a breadth-first order
             boolean added = node.childrenToProcess.addAll(removedIgnored);
-            if (Configuration.DEBUG_PRINT && added)
-                System.out.println("[RC-TREE] Added " + StringFactory.getRepresentation(removedIgnored) + " to "
+            if (added)
+                StaticPrinter.debugPrint("[RCT] Added " + StringFactory.getRepresentation(removedIgnored) + " to "
                         + node + "'s children to be processed.");
             node.closed = false;
             if (!queue.contains(node) && !node.childrenToProcess.isEmpty()) {
-                StaticPrinter.debugPrint("[RC-TREE] Added " + node + " to the queue.");
+                StaticPrinter.debugPrint("[RCT] Added " + node + " to the queue.");
                 queue.add(node);
             }
         }

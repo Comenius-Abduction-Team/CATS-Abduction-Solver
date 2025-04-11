@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.data;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
+import sk.uniba.fmph.dai.cats.data_processing.Level;
 
 import java.util.*;
 
@@ -14,15 +15,21 @@ public class Explanation implements IExplanation {
 
     private double acquireTime;
 
-    private int level = -1;
+    private int depth = -1;
 
-    public Explanation(List<OWLAxiom> axioms) {
+    public Level level;
+
+    /*public Explanation(List<OWLAxiom> axioms) {
         this.axioms = axioms;
-    }
+    }*/
 
-    public Explanation(Collection<OWLAxiom> axioms, int level, double acquireTime) {
+    public Explanation(Collection<OWLAxiom> axioms, Level level, double acquireTime) {
+        if (level == null){
+            System.out.println();
+        }
         this.axioms = new ArrayList<>(axioms);
         this.acquireTime = acquireTime;
+        this.depth = level.depth;
         this.level = level;
     }
 
@@ -51,12 +58,12 @@ public class Explanation implements IExplanation {
 
     public void setAcquireTime(double time) { this.acquireTime = time; }
 
-    public Integer getLevel() {
-        return level;
+    public Integer getDepth() {
+        return depth;
     }
 
-    public void setLevel(Integer level) {
-        this.level = level;
+    public void setDepth(Integer depth) {
+        this.depth = depth;
     }
 
     public void addAxioms(Collection<OWLAxiom> axioms) {

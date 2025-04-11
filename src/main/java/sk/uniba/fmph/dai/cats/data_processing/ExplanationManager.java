@@ -5,7 +5,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.timer.TimeManager;
+import sk.uniba.fmph.dai.cats.timer.MetricsManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,18 +21,16 @@ public abstract class ExplanationManager {
 
     private RuleChecker ruleChecker;
     protected IPrinter printer;
-    TimeManager timer;
+    MetricsManager timer;
 
     Map<Integer, List<Explanation>> explanationsBySize = new HashMap<>();
-
-    Map<Integer, List<Explanation>> explanationsByLevel = new HashMap<>();
 
     public ExplanationLogger logger;
 
     public void addPossibleExplanation(Explanation explanation){
         possibleExplanations.add(explanation);
         StaticPrinter.debugPrint("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
-        solver.currentLevelStats.explanations++;
+        solver.currentLevel.originalExplanations++;
     }
 
     abstract public void processExplanations(String message, TreeStats stats);
@@ -40,7 +38,7 @@ public abstract class ExplanationManager {
     public void setSolver(AlgorithmSolver solver) {
         this.solver = solver;
         ruleChecker = solver.ruleChecker;
-        timer = solver.timer;
+        timer = solver.metrics;
     }
     
     public void setPossibleExplanations(Collection<Explanation> possibleExplanations) {
@@ -74,7 +72,7 @@ public abstract class ExplanationManager {
     
     public void showExplanations(String message, TreeStats stats) {
 
-        groupFinalExplanationsByLevel(stats);
+        groupFinalExplanationsByLevel();
 
         StringBuilder bySize = formatExplanationsBySize();
 
@@ -86,10 +84,10 @@ public abstract class ExplanationManager {
         StaticPrinter.print(bySize.toString());
 
         System.out.println();
-        System.out.println(stats.buildCsvTable(explanationsByLevel));
+        System.out.println(stats.buildCsvTable());
 
         logger.log(LogTypes.FINAL, bySize);
-        logger.log(LogTypes.LEVEL, stats.buildCsvTable(explanationsByLevel));
+        logger.log(LogTypes.LEVEL, stats.buildCsvTable());
 
         logger.logExplanationsTimes(finalExplanations);
 
@@ -161,7 +159,7 @@ public abstract class ExplanationManager {
     private List<Explanation> filterExplanationsByLevel(List<Explanation> filteredExplanations, int level) {
         return filteredExplanations
                 .stream()
-                .filter(explanation -> level == explanation.getLevel())
+                .filter(explanation -> level == explanation.getDepth())
                 .collect(Collectors.toList());
     }
 
@@ -251,25 +249,22 @@ public abstract class ExplanationManager {
         }
     }
 
-    public void groupFinalExplanationsByLevel(TreeStats stats){
+    public void groupFinalExplanationsByLevel(){
         for (Explanation e : finalExplanations){
 
-            int level = e.getLevel();
-
-            LevelStats levelStats = stats.getLevelStats(level);
-            levelStats.finalExplanations++;
+            Level level = e.level;
+            level.finalExplanations++;
 
             double time = e.getAcquireTime();
 
-            if (levelStats.firstExplanationTime == null || time < levelStats.firstExplanationTime) {
-                levelStats.firstExplanationTime = time;
+            if (level.firstExplanationTime == null || time < level.firstExplanationTime) {
+                level.firstExplanationTime = time;
             }
 
-            if (levelStats.lastExplanationTime == null || time > levelStats.lastExplanationTime)
-                levelStats.lastExplanationTime = time;
+            if (level.lastExplanationTime == null || time > level.lastExplanationTime)
+                level.lastExplanationTime = time;
 
-            putExplanationIntoMap(e,level,explanationsByLevel);
-
+            level.addFinalExplanation(e);
         }
     }
 

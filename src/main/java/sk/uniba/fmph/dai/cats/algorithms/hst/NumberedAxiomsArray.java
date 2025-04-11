@@ -4,7 +4,9 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.*;
 
-public class NumberedAxiomsArray implements INumberedAbducibles {
+public class NumberedAxiomsArray
+//        implements INumberedAbducibles
+{
 
     public static final Integer DEFAULT_INDEX = -100;
 
@@ -20,7 +22,7 @@ public class NumberedAxiomsArray implements INumberedAbducibles {
         indexToAxiom = new OWLAxiom[max];
     }
 
-    @Override
+//    @Override
     public Set<OWLAxiom> getAxioms() {
         return Collections.unmodifiableSet(axiomToIndex.keySet());
     }
@@ -71,17 +73,17 @@ public class NumberedAxiomsArray implements INumberedAbducibles {
         return indexToAxiom[index-1];
     }
 
-    @Override
+//    @Override
     public boolean shouldBeIndexed(OWLAxiom axiom) {
         return (DEFAULT_INDEX.equals(getIndex(axiom)));
     }
 
-    @Override
+//    @Override
     public int size() {
         return max;
     }
 
-    @Override
+//    @Override
     public boolean areAllAbduciblesIndexed() {
         for (int i = 0; i < max; i++) {
             if (indexToAxiom[i] == null)

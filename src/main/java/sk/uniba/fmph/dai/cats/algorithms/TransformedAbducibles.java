@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.data.Abducibles;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -19,17 +19,17 @@ import java.util.Set;
  */
 public class TransformedAbducibles {
 
-    final List<OWLAxiom> assertionAxioms = new ArrayList<>();
-    final List<OWLAxiom> negAssertionAxioms = new ArrayList<>();
+    public final List<OWLAxiom> assertionAxioms = new ArrayList<>();
+    public final List<OWLAxiom> negAssertionAxioms = new ArrayList<>();
 
     public Set<OWLAxiom> abducibleAxioms;
 
     TransformedAbducibles(Loader loader){
 
-        Abducibles abducibles = loader.getAbducibles();
+        InputAbducibles inputAbducibles = loader.getAbducibles();
 
         if(loader.isAxiomBasedAbduciblesOnInput()){
-            Set<OWLAxiom> abduciblesWithoutObservation = abducibles.getAxiomBasedAbducibles();
+            Set<OWLAxiom> abduciblesWithoutObservation = inputAbducibles.getAxiomBasedAbducibles();
             if (loader.isMultipleObservationOnInput()){
                 if (Configuration.STRICT_RELEVANCE) {
                     loader.getObservation().getAxiomsInMultipleObservations()
@@ -42,7 +42,7 @@ public class TransformedAbducibles {
             return;
         }
 
-        for(OWLClass owlClass : abducibles.getClasses()){
+        for(OWLClass owlClass : inputAbducibles.getClasses()){
             if (owlClass.isTopEntity() || owlClass.isBottomEntity()) continue;
             List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, owlClass);
             for (int i = 0; i < classAssertionAxiom.size(); i++) {
@@ -55,7 +55,7 @@ public class TransformedAbducibles {
         }
 
         if(Configuration.ROLES_IN_EXPLANATIONS_ALLOWED){
-            for(OWLObjectProperty objectProperty : abducibles.getRoles()){
+            for(OWLObjectProperty objectProperty : inputAbducibles.getRoles()){
                 if (objectProperty.isTopEntity() || objectProperty.isBottomEntity()) continue;
                 List<OWLAxiom> objectPropertyAssertionAxiom = AxiomManager.createObjectPropertyAssertionAxiom(loader, objectProperty);
                 for (int i = 0; i < objectPropertyAssertionAxiom.size(); i++) {
@@ -83,9 +83,5 @@ public class TransformedAbducibles {
         if(Configuration.NEGATION_ALLOWED)
             abducibleAxioms.addAll(negAssertionAxioms);
 
-    }
-
-    public Set<OWLAxiom> getAbducibleAxioms() {
-        return abducibleAxioms;
     }
 }

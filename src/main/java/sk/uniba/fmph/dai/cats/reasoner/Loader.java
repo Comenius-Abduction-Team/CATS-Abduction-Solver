@@ -6,7 +6,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
-import sk.uniba.fmph.dai.cats.data.Abducibles;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
@@ -29,7 +29,7 @@ public abstract class Loader {
     protected Individuals namedIndividuals;
     protected OWLOntology originalOntology;
     protected OWLOntology initialOntology; // initial ontology without negated observation
-    protected Abducibles abducibles;
+    protected InputAbducibles inputAbducibles;
 
     protected OWLDocumentFormat observationOntologyFormat;
     protected boolean isMultipleObservationOnInput = false;
@@ -125,8 +125,8 @@ public abstract class Loader {
         prefixesParser.parse();
     }
 
-    public Abducibles getAbducibles(){
-        return abducibles;
+    public InputAbducibles getAbducibles(){
+        return inputAbducibles;
     }
 
     

@@ -3,7 +3,6 @@ package sk.uniba.fmph.dai.cats.reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.parser.AbduciblesParser;
 import sk.uniba.fmph.dai.cats.parser.ConsoleObservationParser;
@@ -45,7 +44,7 @@ public class ConsoleLoader extends Loader {
     @Override
     protected void loadAbducibles(){
         AbduciblesParser abduciblesParser = new AbduciblesParser(this);
-        abducibles = abduciblesParser.parse();
+        inputAbducibles = abduciblesParser.parse();
     }
 
 }

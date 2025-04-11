@@ -4,6 +4,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
+import sk.uniba.fmph.dai.cats.data_processing.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,8 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
     final List<RcTreeNode> children = new ArrayList<>();
 
     final List<OWLAxiom> usedLabels = new ArrayList<>();
+
+    Level level;
 
     RcTreeNode(int id){
         this.id = id;

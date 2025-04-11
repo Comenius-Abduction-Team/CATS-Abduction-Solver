@@ -4,6 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -148,4 +151,20 @@ public class StringFactory {
             }
         }
     }
+
+    private static String formatTimeByPattern(long time, String pattern){
+        Instant instant = Instant.ofEpochMilli(time);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern)
+                .withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
+    }
+
+    public static String formatTimeWithDate(long time){
+        return formatTimeByPattern(time, "yyyy-MM-dd-HH-mm-ss-SSS");
+    }
+
+    public static String formatTime(long time){
+        return formatTimeByPattern(time, "HH:mm:ss");
+    }
+
 }

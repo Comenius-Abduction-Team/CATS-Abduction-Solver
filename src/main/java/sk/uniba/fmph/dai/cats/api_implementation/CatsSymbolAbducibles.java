@@ -3,7 +3,7 @@ package sk.uniba.fmph.dai.cats.api_implementation;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
 import sk.uniba.fmph.dai.abduction_api.exception.SymbolAbducibleException;
-import sk.uniba.fmph.dai.cats.data.Abducibles;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.Collection;
@@ -94,8 +94,8 @@ public class CatsSymbolAbducibles extends CatsAbducibles implements ISymbolAbduc
     }
 
     @Override
-    public Abducibles exportAbducibles(Loader loader) {
-        return new Abducibles(loader, individuals, classes, roles);
+    public InputAbducibles exportAbducibles(Loader loader) {
+        return new InputAbducibles(loader, individuals, classes, roles);
     }
 
     @Override

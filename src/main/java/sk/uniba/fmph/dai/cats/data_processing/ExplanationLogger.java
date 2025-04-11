@@ -5,7 +5,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 
 import sk.uniba.fmph.dai.cats.common.LogTypes;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.timer.TimeManager;
+import sk.uniba.fmph.dai.cats.timer.MetricsManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
@@ -22,7 +22,7 @@ public class ExplanationLogger {
 
     final ExplanationManager explanationManager;
 
-    final TimeManager timer;
+    final MetricsManager timer;
 
     private String startTimeText;
 
@@ -30,15 +30,12 @@ public class ExplanationLogger {
         this.solver = solver;
         explanationManager = solver.explanationManager;
         explanationManager.logger = this;
-        timer = solver.timer;
+        timer = solver.metrics;
     }
 
     private String getStartTime(){
         if (startTimeText == null){
-            Instant instant = Instant.ofEpochMilli(timer.getStartTime());
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-SSS")
-                    .withZone(ZoneId.systemDefault());
-            startTimeText = formatter.format(instant);
+            startTimeText = StringFactory.formatTimeWithDate(timer.getStartTime());
         }
         return startTimeText;
     }
@@ -53,11 +50,8 @@ public class ExplanationLogger {
         log(LogTypes.INFO, result);
     }
 
-    public void makeErrorAndPartialLog(int level, Throwable e) {
+    public void makeErrorAndPartialLog(Level level, Throwable e) {
         logError(e);
-
-        double time = timer.getCurrentTime();
-        timer.setTimeForLevelIfNotSet(time, level);
         createPartialLevelLog(level);
 
 //        logExplanationsWithSize(level, false, true, time);
@@ -67,17 +61,13 @@ public class ExplanationLogger {
 //        }
     }
 
-    public void makePartialLog(int level) {
-        double time = timer.getCurrentTime();
-        timer.setTimeForLevelIfNotSet(time, level);
+    public void makePartialLog(Level level) {
         createPartialLevelLog(level);
 //        time = timer.getTimeForLevel(level);
 //        logExplanationsWithSize(level, false, false, time);
     }
 
-    public void makeTimeoutPartialLog(int level) {
-        double time = timer.getCurrentTime();
-        timer.setTimeForLevelIfNotSet(time, level);
+    public void makeTimeoutPartialLog(Level level) {
         createPartialLevelLog(level);
 //        time = timer.getTimeForLevel(level);
 //        logExplanationsWithSize(level, true, false, time);
@@ -96,18 +86,17 @@ public class ExplanationLogger {
         //FileManager.appendToFile(FileManager.PARTIAL_LOG__PREFIX, getStartTime(), line);
     }
 
-    private void createPartialLevelLog(int level){
+    private void createPartialLevelLog(Level level){
         if (!Configuration.LOGGING)
             return;
-        List<Explanation> explanations = explanationManager.getExplanationsByLevel(level);
 
         StringBuilder builder = new StringBuilder();
-        if (level == 0){
+        if (level.depth == 0){
             builder.append(TreeStats.getCsvHeader(false));
             builder.append('\n');
         }
 
-        solver.stats.buildCsvRow(builder,level,explanations);
+        solver.stats.buildCsvRow(builder,level);
         log(LogTypes.PARTIAL, builder);
     }
 

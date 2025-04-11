@@ -6,6 +6,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -44,7 +45,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         //if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
             StaticPrinter.debugPrint("[PRUNING] IS EXPLANATION!");
-            solver.stats.getCurrentLevelStats().explanation_edges += 1;
+            solver.stats.getCurrentLevelStats().explanationEdges += 1;
             return true;
         }
         return false;
@@ -61,7 +62,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
     @Override
     public boolean findExplanations(Explanation explanation, boolean extractModel) {
         StaticPrinter.debugPrint("[MXP] Calling MXP");
-        boolean result = !addExplanationsFoundByMxp();
+        boolean result = addExplanationsFoundByMxp();
         if (result)
             StaticPrinter.debugPrint("[PRUNING] Pruned by MXP!");
         return result;
@@ -92,7 +93,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         if (newExplanations.size() == explanationManager.getLengthOneExplanationsSize()){
             return false;
         }
-        return !newExplanations.isEmpty();
+        return newExplanations.isEmpty();
     }
 
     private List<Explanation> findExplanationsWithMxp(){
@@ -150,6 +151,13 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
+
+        if (!consistencyChecker.checkOntologyConsistency(extractModel)) {
+            solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
+            solver.currentLevel.message = "nothing to explain";
+            return false;
+        }
+
         StaticPrinter.debugPrint("[MXP] Initial MXP");
         Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());

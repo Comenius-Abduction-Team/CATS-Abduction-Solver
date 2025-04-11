@@ -4,6 +4,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
 import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -31,6 +32,13 @@ public class QxpNodeProcessor  implements NodeProcessor {
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
+
+        if (!consistencyChecker.checkOntologyConsistency(extractModel)) {
+            solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
+            solver.currentLevel.message = "nothing to explain";
+            return false;
+        }
+
         StaticPrinter.debugPrint("[QXP] Initial QXP");
         solver.removeNegatedObservationFromPath();
         Explanation explanation = getConflict(solver.path, solver.path, solver.abducibleAxioms.getAxioms(), false);
@@ -41,9 +49,9 @@ public class QxpNodeProcessor  implements NodeProcessor {
     //                                              B                          D                     C
     protected Explanation getConflict(Set<OWLAxiom> path, Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, boolean extractModel) {
 
-        if (solver.isTimeout()) {
-            return new Explanation();
-        }
+//        if (solver.isTimeout()) {
+//            return new Explanation();
+//        }
 
         // if D != ∅ ∧ ¬isConsistent(B) then return ∅;
         if (!axioms.isEmpty() && !consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false)) {

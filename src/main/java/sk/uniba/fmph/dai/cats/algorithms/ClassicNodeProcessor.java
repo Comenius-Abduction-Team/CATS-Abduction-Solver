@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
+import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -13,16 +14,24 @@ public class ClassicNodeProcessor implements NodeProcessor {
 
     private final TreeStats stats;
 
+    private final AlgorithmSolver solver;
+
     ClassicNodeProcessor(AlgorithmSolver solver){
         ruleChecker = solver.ruleChecker;
         consistencyChecker = solver.consistencyChecker;
         explanationManager = solver.explanationManager;
         stats = solver.stats;
+        this.solver = solver;
     }
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
-        return consistencyChecker.checkOntologyConsistency(extractModel);
+        boolean isConsistent = consistencyChecker.checkOntologyConsistency(extractModel);
+        if (!isConsistent){
+            solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
+            solver.currentLevel.message = "nothing to explain";
+        }
+        return isConsistent;
     }
 
     @Override
@@ -44,7 +53,8 @@ public class ClassicNodeProcessor implements NodeProcessor {
             return false;
         StaticPrinter.debugPrint("[CLOSING] EXPLANATION FOUND!");
         explanationManager.addPossibleExplanation(explanation);
-        stats.getCurrentLevelStats().explanation_edges += 1;
+        stats.getCurrentLevelStats().prunedEdges += 1;
+        stats.getCurrentLevelStats().explanationEdges += 1;
 
         return true;
     }

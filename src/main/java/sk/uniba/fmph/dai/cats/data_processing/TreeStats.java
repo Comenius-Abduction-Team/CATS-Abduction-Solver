@@ -3,15 +3,15 @@ package sk.uniba.fmph.dai.cats.data_processing;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class TreeStats {
 
-    public Map<Integer, LevelStats> levels = new HashMap<>();
+    public List<Level> levels = new ArrayList<>();
 
-    private int currentLevel = -1;
+    private Level currentLevel;
 
     public double filteringStart, filteringEnd;
 
@@ -25,41 +25,47 @@ public class TreeStats {
 //        return newStats;
 //    }
 
-    public LevelStats getCurrentLevelStats(){
-        return levels.get(currentLevel);
+    public Level getCurrentLevelStats(){
+        return currentLevel;
     }
 
-    public LevelStats getLevelStats(int level){
-        currentLevel = level;
-        if (levels.containsKey(level)){
-            return levels.get(level);
+    public Level getLevelStats(int level){
+        if (levels.size() > level){
+            currentLevel = levels.get(level);
+            return currentLevel;
         }
-        LevelStats levelStats = new LevelStats();
-        levels.put(level, levelStats);
-        return levelStats;
+        currentLevel = new Level(level);
+        levels.add(currentLevel);
+        return currentLevel;
     }
 
-    public LevelStats getLevelStatsNoSetting(int level){
-        if (levels.containsKey(level)){
+    public Level getNewLevelStats(int level){
+        currentLevel = new Level(level);
+        levels.add(currentLevel);
+        return currentLevel;
+    }
+
+    public Level getLevelStatsNoSetting(int level){
+        if (levels.size() > level){
             return levels.get(level);
         }
-        LevelStats levelStats = new LevelStats();
-        levels.put(level, levelStats);
+        Level levelStats = new Level(level);
+        levels.add(levelStats);
         return levelStats;
     }
 
     public int getTotalNodeCount(){
         int result = 0;
-        for (LevelStats level: levels.values()){
-            result += level.created_nodes;
+        for (Level level: levels){
+            result += level.createdNodes;
         }
         return result;
     }
 
     public int getTotalPrunedCount(){
         int result = 0;
-        for (LevelStats level: levels.values()){
-            result += level.pruned_edges;
+        for (Level level: levels){
+            result += level.prunedEdges;
         }
         return result;
     }
@@ -76,25 +82,27 @@ public class TreeStats {
     public static String getCsvHeader(boolean addCommas){
         return StringFactory.buildCsvRow(addCommas,
                 "level",
-                "processed nodes", "deleted unprocessed nodes", "deleted processed nodes",
-                "created edges", "pruned edges", "explanation edges", "created nodes",
-                "reused models", "model extractions", "consistency checks",
+                "processed nodes", "childless nodes", "(RCT) repeated node processing", "(RCT) deleted processed nodes",
+                "created edges", "pruned edges", "explanation edges", "created nodes", "(RCT) deleted created nodes",
+                "reused models", "model extractions", "stored models", "consistency checks",
+                "(HST) largest unassigned index",
                 "explanations", "filtered explanations", "final explanations",
+                "memory",
                 "start time", "finish time", "duration", "first explanation time", "last explanation time",
-                "explanations");
+                "message", "error", "error message", "explanations");
     }
 
-    public String buildCsvTable(Map<Integer, List<Explanation>> explanationsByLevel){
+    public String buildCsvTable(){
 
         StringBuilder builder = new StringBuilder();
         builder.append(getCsvHeader(false));
         builder.append('\n');
 
-        for (int level : levels.keySet()){
-            buildCsvRow(builder, level, explanationsByLevel.get(level));
+        for (Level level : levels){
+            buildCsvRow(builder, level);
         }
 
-        LevelStats filteringStats = new LevelStats();
+        Level filteringStats = new Level(-1);
         filteringStats.start = filteringStart;
         filteringStats.finish = filteringEnd;
 
@@ -104,13 +112,13 @@ public class TreeStats {
         return builder.toString();
     }
 
-    public void buildCsvRow(StringBuilder builder, int level, List<Explanation> explanations){
+    public void buildCsvRow(StringBuilder builder, Level level){
 
-        builder.append(level);
+        builder.append(level.depth);
         builder.append(';');
-        levels.get(level).buildCsvRow(builder, false);
+        level.buildCsvRow(builder, false);
         builder.append(';');
-        builder.append(StringFactory.getExplanationsRepresentation(explanations));
+        builder.append(StringFactory.getExplanationsRepresentation(level.explanations));
         builder.append('\n');
 
     }
@@ -121,11 +129,11 @@ public class TreeStats {
         builder.append(getCsvHeader(false));
         builder.append('\n');
 
-        for (int level : levels.keySet()){
-            buildCsvRow(builder, level, explanationsByLevel.get(level));
+        for (Level level : levels){
+            buildCsvRow(builder, level);
         }
 
-        LevelStats filteringStats = new LevelStats();
+        Level filteringStats = new Level(-1);
         filteringStats.start = filteringStart;
         filteringStats.finish = filteringEnd;
 

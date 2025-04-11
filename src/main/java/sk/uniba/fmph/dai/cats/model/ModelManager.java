@@ -44,6 +44,7 @@ public class ModelManager {
 
     private void add(Model model){
         models.add(model);
+        stats.getCurrentLevelStats().storedModels++;
     }
 
     protected boolean findReusableModel(Model model){

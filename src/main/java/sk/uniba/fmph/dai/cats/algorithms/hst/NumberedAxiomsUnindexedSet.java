@@ -1,40 +1,53 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.TransformedAbducibles;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 
+    private final Set<OWLAxiom> allAbducibles;
+
+    private final List<OWLAxiom> assertionAxioms;
+
+    private final List<OWLAxiom> negatedAssertionAxioms;
     private final Set<OWLAxiom> unindexed = new HashSet<>();
     private int unindexedSize;
+
+    private boolean allAbduciblesIndexed = false;
 
     private final OWLAxiom[] indexToAxiom;
 
     private final int max;
 
-    public NumberedAxiomsUnindexedSet(Collection<OWLAxiom> owlAxioms) {
-        addAll(owlAxioms);
-        max = unindexedSize = owlAxioms.size();
+    public NumberedAxiomsUnindexedSet(TransformedAbducibles transformedAbducibles) {
+        allAbducibles = transformedAbducibles.abducibleAxioms;
+        assertionAxioms = transformedAbducibles.assertionAxioms;
+        negatedAssertionAxioms = transformedAbducibles.negAssertionAxioms;
+        addAll(transformedAbducibles.abducibleAxioms);
+        max = unindexedSize = unindexed.size();
         indexToAxiom = new OWLAxiom[max];
     }
 
     @Override
     public Set<OWLAxiom> getAxioms() {
-        if (unindexedSize == max)
-            return new HashSet<>(unindexed);
-        Set<OWLAxiom> result = new HashSet<>(unindexed);
-        for (int i = 0; i < max; i++) {
-            OWLAxiom axiom = indexToAxiom[i];
-            if (axiom != null){
-                result.add(axiom);
-            }
-        }
-        return result;
+        return allAbducibles;
+//        if (unindexedSize == max)
+//            return new HashSet<>(unindexed);
+//        Set<OWLAxiom> result = new HashSet<>(unindexed);
+//        for (int i = 0; i < max; i++) {
+//            OWLAxiom axiom = indexToAxiom[i];
+//            if (axiom != null){
+//                result.add(axiom);
+//            }
+//        }
+//        return result;
     }
 
     private void addAll(Collection<OWLAxiom> axioms) {
@@ -50,6 +63,8 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
         indexToAxiom[index-1] = axiom;
         unindexed.remove(axiom);
         unindexedSize--;
+        if (unindexedSize == 0)
+            allAbduciblesIndexed = true;
         StaticPrinter.debugPrint("[HST] New numbering: " + StringFactory.getRepresentation(axiom) + " = " + index);
     }
 
@@ -107,6 +122,18 @@ public class NumberedAxiomsUnindexedSet implements INumberedAbducibles {
 
     @Override
     public boolean areAllAbduciblesIndexed() {
-        return unindexedSize == 0;
+        return allAbduciblesIndexed;
     }
+
+    @Override
+    public List<OWLAxiom> getAssertionAxioms() {
+        return assertionAxioms;
+    }
+
+    @Override
+    public List<OWLAxiom> getNegatedAssertionAxioms() {
+        return negatedAssertionAxioms;
+    }
+
+
 }

@@ -12,7 +12,7 @@ import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
-import sk.uniba.fmph.dai.cats.data_processing.LevelStats;
+import sk.uniba.fmph.dai.cats.data_processing.Level;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
@@ -20,10 +20,11 @@ import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
-import sk.uniba.fmph.dai.cats.timer.TimeManager;
+import sk.uniba.fmph.dai.cats.timer.MetricsThread;
+import sk.uniba.fmph.dai.cats.timer.MetricsManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -36,7 +37,7 @@ public class AlgorithmSolver {
     private final ExplanationLogger logger;
     protected final ProgressManager progressManager;
     public RuleChecker ruleChecker;
-    public final TimeManager timer;
+    public final MetricsManager metrics;
     public final ConsistencyChecker consistencyChecker;
 
     // COLLECTIONS
@@ -52,14 +53,16 @@ public class AlgorithmSolver {
     public NodeProcessor nodeProcessor;
 
     public final TreeStats stats = new TreeStats();
-    public LevelStats currentLevelStats;
+    public Level currentLevel;
+
+    public String message = "";
 
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
-                              ProgressManager progressManager, ThreadTimer threadTimer) {
+                              ProgressManager progressManager, MetricsThread metricsThread) {
 
         this.loader = loader;
 
-        timer = new TimeManager(threadTimer);
+        metrics = new MetricsManager(metricsThread);
         ruleChecker = new RuleChecker(this);
 
         this.explanationManager = explanationManager;
@@ -109,21 +112,8 @@ public class AlgorithmSolver {
             progressManager.updateProgress(0, "Initializing abducibles.");
         initializeAbducibles();
 
-        timer.setStartTime();
-
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(0, "Initializing abduction.");
-
-        String message = "";
-
-        if (!loader.reasonerManager.isOntologyConsistent()) {
-            message = "The observation is already entailed!";
-            explanationManager.processExplanations(message, stats);
-            logger.logMessage(Configuration.getInfo(), message);
-            if (Configuration.PRINT_PROGRESS)
-                progressManager.updateProgress(100, "Abduction finished.");
-            return;
-        }
 
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
 
@@ -139,49 +129,60 @@ public class AlgorithmSolver {
                 future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
             else
                 future.get();
-        }  catch (TimeoutException e) {
+        }  catch (Throwable e) {
 
-                future.cancel(true);
-                message += "Time-out reached! ";
-                currentLevelStats.timeout = true;
-                logger.makeTimeoutPartialLog(currentDepth);
-
-
-        }   catch (Throwable e){
-
-                if (!(future == null))
+                if (    (e.getClass() == ExecutionException.class &&
+                        e.getCause().getClass() == TimeoutException.class)
+                ||
+                        e.getClass() == TimeoutException.class
+                ){
                     future.cancel(true);
-                currentLevelStats.error = true;
-                String errorString = e.getClass().getName() + " : " + e.getMessage();
-                currentLevelStats.errorMessage = errorString;
-                message += "An error occured: " + errorString;
-                logger.makeErrorAndPartialLog(currentDepth, e);
-                StaticPrinter.logError("An error occurred:", e);
-                e.printStackTrace();
+                    message += "Time-out reached! ";
+                    currentLevel.message = "time-out";
+                    logger.makeTimeoutPartialLog(currentLevel);
+                }
+                else {
+                    if (!(future == null))
+                        future.cancel(true);
+                    currentLevel.error = true;
+                    String errorString = /*e.getClass().getName() + " : " + */e.getMessage();
+                    currentLevel.errorMessage = errorString;
+                    message += "An error occured: " + errorString;
+                    logger.makeErrorAndPartialLog(currentLevel, e);
+                    StaticPrinter.logError("An error occurred:", e);
+                    e.printStackTrace();
+                }
 
         } finally {
 
             executor.shutdown();
-            if (stats.getCurrentLevelStats().finish == 0){
-                stats.getCurrentLevelStats().finish = timer.getCurrentTime();
-            }
+            if (currentLevel.finish < 0)
+                currentLevel.finish = metrics.getRunningTime();
+            if (currentLevel.memory == 0)
+                currentLevel.memory = metrics.measureAverageMemory();
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
 
-            stats.filteringStart = timer.getCurrentTime();
+            stats.filteringStart = metrics.getRunningTime();
             nodeProcessor.postProcessExplanations();
-            stats.filteringEnd = timer.getCurrentTime();
+            stats.filteringEnd = metrics.getRunningTime();
 
-            timer.setEndTime();
+            metrics.setEndTime();
             explanationManager.processExplanations(message, stats);
-            System.out.println("\n" + stats);
+
+            if (!message.isEmpty())
+                logger.logMessage(Configuration.getInfo(), message);
         }
 
     }
 
     protected void printInfo(){
         StaticPrinter.print("");
+        StaticPrinter.print(
+                "Started solving at: " + StringFactory.formatTime(System.currentTimeMillis())
+        );
         StaticPrinter.print(String.join("\n", Configuration.getInfo()));
+        StaticPrinter.print("");
     }
 
     protected void addNegatedObservation(){
@@ -189,16 +190,18 @@ public class AlgorithmSolver {
     }
 
     protected void initializeAbducibles() {
-        TransformedAbducibles abducibles = new TransformedAbducibles(loader);
-        modelManager.setExtractor(new ModelExtractor(loader, abducibles));
-        abducibleAxioms = treeBuilder.createAbducibles(abducibles);
+        TransformedAbducibles transformedAbduciblesFromInput = new TransformedAbducibles(loader);
+        abducibleAxioms = treeBuilder.createAbducibles(transformedAbduciblesFromInput);
+        modelManager.setExtractor(new ModelExtractor(loader, abducibleAxioms));
     }
 
-    protected Void startSolving() {
+    protected Void startSolving() throws TimeoutException {
+
+        metrics.setStartTime();
 
         currentDepth = 0;
-        currentLevelStats = stats.getLevelStats(currentDepth);
-        currentLevelStats.start = timer.getCurrentTime();
+        currentLevel = stats.getLevelStats(currentDepth);
+        currentLevel.start = metrics.getRunningTime();
 
         TreeNode root = treeBuilder.createRoot();
         if (root == null) {
@@ -206,11 +209,11 @@ public class AlgorithmSolver {
             return null;
         }
         treeBuilder.addNodeToTree(root);
-        currentLevelStats.created_nodes = 1;
+        currentLevel.createdNodes = 1;
 
         if(isTimeout()) {
-            logger.makeTimeoutPartialLog(currentDepth);
-            return null;
+            logger.makeTimeoutPartialLog(currentLevel);
+            throw new TimeoutException();
         }
 
         while (!treeBuilder.isTreeClosed()) {
@@ -225,27 +228,33 @@ public class AlgorithmSolver {
             updateDepthIfNeeded(node);
 
             if (depthLimitReached()) {
+                currentLevel.message = "max depth";
                 break;
             }
 
             if(isTimeout()){
-                logger.makeTimeoutPartialLog(currentDepth);
-                break;
+                logger.makeTimeoutPartialLog(currentLevel);
+                throw new TimeoutException();
             }
 
             StaticPrinter.debugPrint("*********\n" + "[TREE] PROCESSING node: " + node);
+
+            if (!node.processed) {
+                node.processed = true;
+                currentLevel.processedNodes += 1;
+            } else {
+                currentLevel.repeatedProcessing += 1;
+            }
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
             if (!canIterateNodeChildren){
                 StaticPrinter.debugPrint("[TREE] NO CHILDREN TO ITERATE!");
+                currentLevel.childlessNodes += 1;
                 continue;
             }
 
             StaticPrinter.debugPrint("[TREE] Iterating child edges");
-
-            node.processed = true;
-            stats.getCurrentLevelStats().processed_nodes += 1;
 
             while (!treeBuilder.noChildrenLeft()){
 
@@ -258,15 +267,16 @@ public class AlgorithmSolver {
 
                 StaticPrinter.debugPrint("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
 
-                stats.getCurrentLevelStats().created_edges += 1;
+                currentLevel.createdEdges += 1;
 
                 if(isTimeout()){
-                    logger.makeTimeoutPartialLog(currentDepth);
-                    return null;
+                    logger.makeTimeoutPartialLog(currentLevel);
+                    throw new TimeoutException();
                 }
 
                 if(isIncorrectPath(node, child)){
                     StaticPrinter.debugPrint("[PRUNING] INCORRECT PATH!");
+                    currentLevel.prunedEdges += 1;
                     continue;
                 }
 
@@ -279,7 +289,7 @@ public class AlgorithmSolver {
 
                 if (pruneThisChild){
                     StaticPrinter.debugPrint("[PRUNING] NODE CLOSED!");
-                    stats.getLevelStats(currentDepth).pruned_edges += 1;
+                    currentLevel.prunedEdges += 1;
                     path.clear();
                     continue;
                 }
@@ -289,7 +299,7 @@ public class AlgorithmSolver {
 
                 if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
                     explanationManager.setLengthOneExplanations(new ArrayList<>());
-                    stats.getLevelStats(currentDepth).reused += 1;
+                    currentLevel.reusedModels += 1;
                     StaticPrinter.debugPrint("[MODEL] Model was reused.");
                 }
                 else {
@@ -299,8 +309,8 @@ public class AlgorithmSolver {
 //                    boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
 
                     if (isTimeout()){
-                        logger.makeTimeoutPartialLog(currentDepth);
-                        return null;
+                        logger.makeTimeoutPartialLog(currentLevel);
+                        throw new TimeoutException();
                     }
 
                     if (treeBuilder.closeExplanation(explanation)){
@@ -310,7 +320,7 @@ public class AlgorithmSolver {
                 }
 
                 treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
-                stats.getLevelStats(currentDepth).created_nodes += 1;
+                currentLevel.createdNodes += 1;
 
                 StaticPrinter.debugPrint("[TREE] Created node");
 
@@ -320,18 +330,15 @@ public class AlgorithmSolver {
 
         }
 
-        currentLevelStats.finish = timer.getCurrentTime();
+        currentLevel.finish = metrics.getRunningTime();
 
         StaticPrinter.debugPrint("[TREE] Finished iterating the tree.");
 
         path.clear();
+        pathsInCertainDepth.clear();
+        logger.makePartialLog(currentLevel);
 
-        if(!timer.levelHasTime(currentDepth)){
-            logger.makePartialLog(currentDepth);
-            pathsInCertainDepth.clear();
-        }
-
-        currentDepth = 1;
+        //currentDepth = 1;
 
         return null;
 
@@ -343,26 +350,23 @@ public class AlgorithmSolver {
     }
 
     private Explanation createPossibleExplanation(TreeNode node, OWLAxiom child){
-        Explanation explanation = new Explanation();
-        explanation.addAxioms(node.path);
+        Explanation explanation = createExplanationFromAxioms(node.path);
         explanation.addAxiom(child);
         explanation.lastAxiom = child;
-        explanation.setAcquireTime(timer.getCurrentTime());
-        explanation.setLevel(currentDepth);
         return explanation;
     }
 
 
     public boolean isTimeout(){
-        return false;
+        return metrics.isTimeout();
     }
 
     public void removeNegatedObservationFromPath(){
         path.remove(loader.getNegObservationAxiom());
     }
 
-    public Explanation createExplanationFromAxioms(Set<OWLAxiom> axioms){
-        return new Explanation(axioms, currentDepth, timer.getCurrentTime());
+    public Explanation createExplanationFromAxioms(Collection<OWLAxiom> axioms){
+        return new Explanation(axioms, currentLevel, metrics.getRunningTime());
     }
 
     boolean isPathAlreadyStored(){
@@ -379,24 +383,40 @@ public class AlgorithmSolver {
 
     private void updateDepthIfNeeded(TreeNode node){
 
-        if (node.depth != currentDepth) {
-            pathsInCertainDepth.clear();
+        if (node.depth == currentDepth) {
+            node.assignedLevel = currentLevel;
+            return;
         }
-        else return;
+
+        pathsInCertainDepth.clear();
+        currentLevel.finish = metrics.getRunningTime();
+        currentLevel.memory = metrics.measureAverageMemory();
 
         if (node.depth > maxDepth) {
             maxDepth = node.depth;
-            currentLevelStats.finish = timer.getCurrentTime();
-            logger.makePartialLog(currentDepth);
+            logger.makePartialLog(currentLevel);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
         }
 
         currentDepth = node.depth;
-        currentLevelStats = stats.getLevelStats(currentDepth);
-        currentLevelStats.start = timer.getCurrentTime();
+
+        // if (node.assignedLevel == null) {
+            currentLevel = stats.getNewLevelStats(currentDepth);
+            currentLevel.start = metrics.getRunningTime();
+            node.assignedLevel = currentLevel;
+//        }
+//        else {
+//            currentLevel = node.assignedLevel;
+//        }
+
+
 
         StaticPrinter.debugPrint("[TREE] entering depth " + node.depth);
+    }
+
+    private void assignNodeLevel(TreeNode node){
+
     }
 
     public Model findAndGetModelToReuse(){
@@ -418,7 +438,7 @@ public class AlgorithmSolver {
     }
 
     public void updateProgress(){
-        progressManager.updateProgress(currentDepth, timer.getCurrentTime());
+        progressManager.updateProgress(currentDepth, metrics.getRunningTime());
     }
 
 }

@@ -1,0 +1,4 @@
+-f: ont/toothache_alice.rdf
+-o: Prefix: t: <http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#> Class: t:Toothache Individual: t:John Types: t:Toothache Individual: t:Alice Types: t:Toothache
+-alg: hstmxp
+-n: false

@@ -32,7 +32,7 @@ public class MhsTreeBuilder implements TreeBuilder {
 
     @Override
     public IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles) {
-        return new AxiomSet(abducibles.getAbducibleAxioms());
+        return new AxiomSetAbducibles(abducibles);
     }
 
     @Override
