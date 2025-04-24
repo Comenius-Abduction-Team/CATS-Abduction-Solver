@@ -9,12 +9,12 @@ import java.io.IOException;
 public class ExtractingModel91Test extends AlgorithmTestBase {
 
     public ExtractingModel91Test() throws OWLOntologyCreationException, IOException {
-        super();
+        super("ExtractingModel91Test");
     }
 
     @Override
-    void setUpInput() {
-        ONTOLOGY_FILE = "files/testExtractingModel9_1.owl";
+    protected void setUpInput() {
+        ONTOLOGY_FILE = "ont/testExtractingModel9_1.owl";
 
         OBSERVATION =
                 "Prefix: o: <http://www.co-ode.org/ontologies/ont.owl#>"
@@ -25,7 +25,7 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     }
 
     @Override
-    void setUpAbducibles() {
+    protected void setUpAbducibles() {
         OWLClass A = dataFactory.getOWLClass(":A", prefixManager);
         OWLClass B = dataFactory.getOWLClass(":B", prefixManager);
         OWLClass D = dataFactory.getOWLClass(":D", prefixManager);
@@ -36,6 +36,50 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
         symbolAbd.add(D);
         symbolAbd.add(E);
     }
+
+    // ------- QXP -------
+
+    @Test
+    @Override
+    void qxp() {
+
+        super.qxp();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void qxpNoNeg() {
+
+        super.qxpNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbd() {
+
+        super.qxpSymbolAbd();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbdNoNeg() {
+
+        super.qxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    // ------- MHS -------
 
     @Test
     @Override
@@ -49,9 +93,29 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Test
     @Override
+    void mxp() {
+
+        super.mxp();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
     void hst() {
 
         super.hst();
+        solve();
+        testExplanationsFound(7);
+
+    }
+
+    @Test
+    @Override
+    void rct() {
+
+        super.rct();
         solve();
         testExplanationsFound(7);
 
@@ -79,6 +143,16 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Test
     @Override
+    void rctMxp() {
+
+        super.rctMxp();
+        solve();
+        testExplanationsFound(7);
+
+    }
+
+    @Test
+    @Override
     void mhsNoNeg() {
 
         super.mhsNoNeg();
@@ -92,6 +166,26 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     void hstNoNeg() {
 
         super.hstNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void rctNoNeg() {
+
+        super.rctNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void mxpNoNeg() {
+
+        super.mxpNoNeg();
         solve();
         testExplanationsFound(0);
 
@@ -119,6 +213,16 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Test
     @Override
+    void rctMxpNoNeg() {
+
+        super.rctMxpNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
     void mhsSymbolAbd() {
 
         super.mhsSymbolAbd();
@@ -134,6 +238,26 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
         super.hstSymbolAbd();
         solve();
         testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void rctSymbolAbd() {
+
+        super.rctSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void mxpSymbolAbd() {
+
+        super.mxpSymbolAbd();
+        solve();
+        testExplanationsFound(0);
 
     }
 
@@ -159,9 +283,49 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     @Test
     @Override
+    void rctMxpSymbolAbd() {
+
+        super.rctMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
     void mhsSymbolAbdNoNeg() {
 
         super.mhsSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void hstSymbolAbdNoNeg() {
+
+        super.hstSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void rctSymbolAbdNoNeg() {
+
+        super.rctSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void mxpSymbolAbdNoNeg() {
+
+        super.mxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(0);
 
@@ -182,6 +346,16 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
     void hstMxpSymbolAbdNoNeg() {
 
         super.hstMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void rctMxpSymbolAbdNoNeg() {
+
+        super.rctMxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(0);
 

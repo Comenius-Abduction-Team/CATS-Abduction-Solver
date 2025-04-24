@@ -1,8 +1,10 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.cats.common.Configuration;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.parser.ObservationParser;
 
 public class ApiObservationParser extends ObservationParser {

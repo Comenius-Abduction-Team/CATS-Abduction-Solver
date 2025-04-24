@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsExplanationConfigurator;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsSymbolAbducibles;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public abstract class AlgorithmTestBase {
 
+    private final boolean CREATE_LOGS = false;
+    private final boolean DEBUG_PRINTING = false;
+    private final boolean PRINT_EXPLANATIONS = true;
+
     /** Path to the file containing the background knowledge ontology. */
-    static String ONTOLOGY_FILE;
+    protected String ONTOLOGY_FILE;
     /** String containing the observation axioms in some OWL syntax. */
-    static String OBSERVATION;
+    protected String OBSERVATION;
     /** Prefix to use for abducible symbols (usually a prefix from the BK ontology). */
-    static String ABDUCIBLE_PREFIX;
+    protected String ABDUCIBLE_PREFIX;
 
     /** The BK ontology extracted from the file. */
     protected OWLOntology backgroundKnowledge;
@@ -46,7 +51,7 @@ public abstract class AlgorithmTestBase {
     /**
      * The Manager.
      */
-    protected CatsAbducer manager;
+    protected CatsAbducer abducer;
     /**
      * The No neg.
      */
@@ -62,14 +67,20 @@ public abstract class AlgorithmTestBase {
      * @throws OWLOntologyCreationException internal OWL API error
      * @throws IOException                  in case of wrong file path
      */
-    public AlgorithmTestBase() throws OWLOntologyCreationException, IOException {
+    public AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
+        setOntologyName(name);
         setUpInput();
         setUpHelperObjects();
         setUpAbducibles();
     }
 
+    private void setOntologyName(String name){
+        Configuration.INPUT_ONT_FILE = name;
+        Configuration.INPUT_FILE_NAME = "";
+    }
+
     /** Method that should be overwritten by the test to set its BK, observation and prefix to be used in all test cases. */
-    abstract void setUpInput();
+    protected abstract void setUpInput();
 
     /**
      * Constructs objects necesarry to set up abducibles and run the test cases.
@@ -77,7 +88,7 @@ public abstract class AlgorithmTestBase {
      * @throws OWLOntologyCreationException internal OWL API error
      * @throws IOException                  in case of wrong file path
      */
-    void setUpHelperObjects() throws OWLOntologyCreationException, IOException {
+    private void setUpHelperObjects() throws OWLOntologyCreationException, IOException {
 
         backgroundKnowledge = parseOntologyFromFile(ONTOLOGY_FILE);
         observation = parseAxiomsFromString(OBSERVATION);
@@ -92,14 +103,16 @@ public abstract class AlgorithmTestBase {
     }
 
     /** Method that should be overriden by the specific test to set up abducibles used in the abducible test cases. */
-    abstract void setUpAbducibles();
+    protected abstract void setUpAbducibles();
 
     /**
      * Instantiates an abduction manager before each test case.
      */
     @BeforeEach
     void setUp() {
-        manager = new CatsAbducer(backgroundKnowledge,observation);
+        Configuration.DEBUG_PRINT = DEBUG_PRINTING;
+        abducer = new CatsAbducer(backgroundKnowledge,observation);
+        abducer.setLogging(CREATE_LOGS);
     }
 
     /**
@@ -132,110 +145,265 @@ public abstract class AlgorithmTestBase {
     }
 
     public void testExplanationsFound(int expectedCount){
-        Collection<IExplanation> explanations = manager.getExplanations();
-        //System.out.println(explanations);
+        Collection<IExplanation> explanations = abducer.getExplanations();
+        if (PRINT_EXPLANATIONS)
+            System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
     }
 
     public void solve(){
-        manager.solveAbduction();
+        abducer.solveAbduction();
+        if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty()) {
+            System.err.println(abducer.getOutputMessage());
+            System.err.println(abducer.getFullLog());
+        }
     }
 
+    private void setQxp(){
+        abducer.setAlgorithm(Algorithm.QXP);
+    }
+    private void setMxp(){
+        abducer.setAlgorithm(Algorithm.MXP);
+    }
+    
+    private void setMhs(){
+        abducer.setAlgorithm(Algorithm.MHS);
+    }
+
+    private void setMhsMxp(){
+        abducer.setAlgorithm(Algorithm.MHS_MXP);
+    }
+
+    private void setHst(){
+        abducer.setAlgorithm(Algorithm.HST);
+    }
+
+    private void setHstMxp(){
+        abducer.setAlgorithm(Algorithm.HST_MXP);
+    }
+
+    private void setRct(){
+        abducer.setAlgorithm(Algorithm.RCT);
+    }
+
+    private void setRctMxp(){
+        abducer.setAlgorithm(Algorithm.RCT_MXP);
+    }
+    
+    private void setNoNeg(){
+        Configuration.INPUT_FILE_NAME += "NoNeg";
+        abducer.setExplanationConfigurator(noNeg);
+    }
+
+    private void setSymbolAbd(){
+        Configuration.INPUT_FILE_NAME += "SymbolAbd";
+        abducer.setAbducibles(symbolAbd);
+    }
+    
+    private void setSymbolAbdNoNeg(){
+        setSymbolAbd();
+        setNoNeg();
+    }
+
+    // ------- QXP -------
+
+    void qxp(){ setQxp(); }
+
+    void qxpNoNeg(){
+        setQxp();
+        setNoNeg();
+    }
+
+    void qxpSymbolAbd(){
+        setQxp();
+        setSymbolAbd();
+    }
+
+    void qxpSymbolAbdNoNeg(){
+        setQxp();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- MHS -------
+    
     void mhs(){
-        manager.setAlgorithm(Algorithm.MHS);
-    }
-
-    void hst(){
-        manager.setAlgorithm(Algorithm.HST);
-    }
-
-    void mxp(){ manager.setAlgorithm(Algorithm.MXP); }
-
-    void mhsMxp(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-    }
-
-    void hstMxp(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
+        setMhs();
     }
 
     void mhsNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setExplanationConfigurator(noNeg);
-    }
-
-    void hstNoNeg(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setExplanationConfigurator(noNeg);
-    }
-
-    void mxpNoNeg(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setExplanationConfigurator(noNeg);
-    }
-
-    void mhsMxpNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setExplanationConfigurator(noNeg);
-    }
-
-    void hstMxpNoNeg(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setExplanationConfigurator(noNeg);
+        setMhs();
+        setNoNeg();
     }
 
     void mhsSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setAbducibles(symbolAbd);
-    }
-
-    void hstSymbolAbd(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
-    }
-
-    void mxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setAbducibles(symbolAbd);
-    }
-
-    void mhsMxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setAbducibles(symbolAbd);
-    }
-
-    void hstMxpSymbolAbd(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
+        setMhs();
+        setSymbolAbd();
     }
 
     void mhsSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        setMhs();
+        setSymbolAbdNoNeg();
     }
 
-    void hstSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.HST);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+    // ------- MXP -------
+
+    void mxp(){ setMxp(); }
+
+    void mxpNoNeg(){
+        setMxp();
+        setNoNeg();
+    }
+
+    void mxpSymbolAbd(){
+        setMxp();
+        setSymbolAbd();
     }
 
     void mxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        setMxp();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- MHS-MXP -------
+
+    void mhsMxp(){
+        setMhsMxp();
+    }
+
+    void mhsMxpNoNeg(){
+        setMhsMxp();
+        setNoNeg();
+    }
+
+    void mhsMxpSymbolAbd(){
+        setMhsMxp();
+        setSymbolAbd();
     }
 
     void mhsMxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.MHS_MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        setMhsMxp();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- HST -------
+
+    void hst(){
+        setHst();
+    }
+
+    void hstNoNeg(){
+        setHst();
+        setNoNeg();
+    }
+
+    void hstSymbolAbd(){
+        setHst();
+        setSymbolAbd();
+    }
+
+    void hstSymbolAbdNoNeg(){
+        setHst();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- HST-MXP -------
+
+    void hstMxp(){
+        setHstMxp();
+    }
+
+    void hstMxpNoNeg(){
+        setHstMxp();
+        setNoNeg();
+    }
+
+    void hstMxpSymbolAbd(){
+        setHstMxp();
+        setSymbolAbd();
     }
 
     void hstMxpSymbolAbdNoNeg(){
-        manager.setAlgorithm(Algorithm.HST_MXP);
-        manager.setAbducibles(symbolAbd);
-        manager.setExplanationConfigurator(noNeg);
+        setHstMxp();
+        setSymbolAbdNoNeg();
     }
+
+    // ------- RCT -------
+
+    void rct(){
+        setRct();
+    }
+
+    void rctNoNeg(){
+        setRct();
+        setNoNeg();
+    }
+
+    void rctSymbolAbd(){
+        setRct();
+        setSymbolAbd();
+    }
+
+    void rctSymbolAbdNoNeg(){
+        setRct();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- RCT-MXP -------
+
+    void rctMxp(){
+        setRctMxp();
+    }
+
+    void rctMxpNoNeg(){
+        setRctMxp();
+        setNoNeg();
+    }
+
+    void rctMxpSymbolAbd(){
+        setRctMxp();
+        setSymbolAbd();
+    }
+
+    void rctMxpSymbolAbdNoNeg(){
+        setRctMxp();
+        setSymbolAbdNoNeg();
+    }
+
+    
+
+    
+
+    
+
+    
+
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 }

@@ -1,20 +1,22 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
-import sk.uniba.fmph.dai.cats.common.LogMessage;
-import sk.uniba.fmph.dai.cats.common.IPrinter;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
-import sk.uniba.fmph.dai.cats.models.Individuals;
-import sk.uniba.fmph.dai.cats.models.Observation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
+import sk.uniba.fmph.dai.cats.common.StaticPrinter;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
+import sk.uniba.fmph.dai.cats.data.Individuals;
+import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public abstract class Loader implements ILoader {
+public abstract class Loader {
 
     protected OWLOntologyManager ontologyManager;
     protected OWLReasonerFactory reasonerFactory;
@@ -27,13 +29,19 @@ public abstract class Loader implements ILoader {
     protected Individuals namedIndividuals;
     protected OWLOntology originalOntology;
     protected OWLOntology initialOntology; // initial ontology without negated observation
-    protected Abducibles abducibles;
+    protected InputAbducibles inputAbducibles;
 
     protected OWLDocumentFormat observationOntologyFormat;
     protected boolean isMultipleObservationOnInput = false;
     protected boolean isAxiomBasedAbduciblesOnInput = false;
 
-    protected IPrinter printer;
+    public ReasonerManager reasonerManager;
+
+    protected Loader(){
+        reasonerManager = new ReasonerManager(this);
+    }
+
+    abstract public void initialize(ReasonerType reasonerType);
 
     protected void loadReasoner(ReasonerType reasonerType) {
         try {
@@ -42,23 +50,46 @@ public abstract class Loader implements ILoader {
             changeReasoner(reasonerType);
             initializeReasoner();
 
+            StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
+
             if (reasoner.isConsistent()) {
-                printer.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
+                StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
-                //printer.logError(LogMessage.ERROR_ONTOLOGY_CONSISTENCY, null);
                 reasoner.dispose();
                 throw new RuntimeException(LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
             }
 
         } catch (OWLOntologyCreationException exception) {
-            //printer.logError(LogMessage.ERROR_CREATING_ONTOLOGY, exception);
             throw new RuntimeException(LogMessage.ERROR_CREATING_ONTOLOGY);
         }
     }
 
     protected abstract void setupOntology() throws OWLOntologyCreationException;
 
-    @Override
+    protected OWLOntology filterOntology(OWLOntology ontology){
+        Set<OWLAxiom> axioms = ontology.getAxioms();
+        Set<OWLAxiom> filteredAxioms = new HashSet<>();
+        for (OWLAxiom axiom : axioms){
+            if (axiom.isOfType(
+                    AxiomType.DATA_PROPERTY_ASSERTION, AxiomType.DATA_PROPERTY_DOMAIN,
+                    AxiomType.DATA_PROPERTY_RANGE, AxiomType.DATATYPE_DEFINITION,
+                    AxiomType.SUB_DATA_PROPERTY, AxiomType.DISJOINT_DATA_PROPERTIES,
+                    AxiomType.EQUIVALENT_DATA_PROPERTIES, AxiomType.NEGATIVE_DATA_PROPERTY_ASSERTION,
+                    AxiomType.FUNCTIONAL_DATA_PROPERTY)
+            ) continue;
+            filteredAxioms.add(axiom);
+        }
+
+        try{
+            ontologyManager = OWLManager.createOWLOntologyManager();
+            return ontologyManager.createOntology(filteredAxioms);
+        } catch (OWLOntologyCreationException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+    
     public void changeReasoner(ReasonerType reasonerType) {
         // Note: we only use JFact for now
 
@@ -78,10 +109,9 @@ public abstract class Loader implements ILoader {
 
         setOWLReasonerFactory(new JFactFactory());
         reasoner = (OWLKnowledgeExplorerReasoner) reasonerFactory.createReasoner(ontology);
-        printer.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
     }
 
-    @Override
+    
     public void initializeReasoner() {
         reasoner.flush();
     }
@@ -95,56 +125,70 @@ public abstract class Loader implements ILoader {
         prefixesParser.parse();
     }
 
-    public Abducibles getAbducibles(){
-        return abducibles;
+    public InputAbducibles getAbducibles(){
+        return inputAbducibles;
     }
 
-    @Override
+    
     public Observation getObservation() {
         return observation;
     }
 
-    @Override
+    
+    public OWLAxiom getObservationAxiom() {
+        return observation.getOwlAxiom();
+    }
+
+    public OWLIndividual getObservationReductionIndividual(){
+        return observation.getReductionIndividual();
+    }
+
+    
     public void setObservation(OWLAxiom observation) {
         this.observation = new Observation(observation);
     }
 
-    @Override
+    
     public void setObservation(OWLAxiom observation, List<OWLAxiom> axiomsInMultipleObservations, OWLNamedIndividual reductionIndividual){
         this.observation = new Observation(observation, axiomsInMultipleObservations, reductionIndividual);
     }
 
-    @Override
+    
     public Observation getNegObservation() {
         return negObservation;
     }
 
-    @Override
+    
+    public OWLAxiom getNegObservationAxiom() {
+        return negObservation.getOwlAxiom();
+    }
+
+    
     public void setNegObservation(OWLAxiom negObservation) {
         this.negObservation = new Observation(negObservation);
     }
 
-    @Override
+    
     public OWLOntologyManager getOntologyManager() {
         return ontologyManager;
     }
 
-    @Override
+    
     public OWLOntology getOntology() {
         return ontology;
     }
 
-    @Override
+    
     public OWLKnowledgeExplorerReasoner getReasoner() {
         return reasoner;
     }
 
-    @Override
+    
     public void setOWLReasonerFactory(OWLReasonerFactory reasonerFactory) {
         this.reasonerFactory = reasonerFactory;
     }
 
-    @Override
+    
     public String getOntologyIRI() {
         if (ontologyIRI == null) {
             ontologyIRI = ontology.getOntologyID().getOntologyIRI().get().toString();
@@ -152,27 +196,27 @@ public abstract class Loader implements ILoader {
         return ontologyIRI;
     }
 
-    @Override
+    
     public OWLDataFactory getDataFactory() {
         return ontologyManager.getOWLDataFactory();
     }
 
-    @Override
+    
     public Individuals getIndividuals() {
         return namedIndividuals;
     }
 
-    @Override
+    
     public void addNamedIndividual(OWLNamedIndividual namedIndividual) {
         namedIndividuals.addNamedIndividual(namedIndividual);
     }
 
-    @Override
+    
     public OWLOntology getOriginalOntology() {
         return originalOntology;
     }
 
-    @Override
+    
     public OWLOntology getInitialOntology() {
         return initialOntology;
     }

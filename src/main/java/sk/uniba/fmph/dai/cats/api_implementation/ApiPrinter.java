@@ -2,6 +2,8 @@ package sk.uniba.fmph.dai.cats.api_implementation;
 
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 
+import java.util.Arrays;
+
 public class ApiPrinter implements IPrinter {
 
     private final CatsAbducer Abducer;
@@ -19,6 +21,7 @@ public class ApiPrinter implements IPrinter {
     public void logError(String message, Throwable exception) {
         Abducer.appendToLog(message);
         Abducer.appendToLog(exception.getMessage());
+        Abducer.appendToLog(Arrays.toString(exception.getStackTrace()));
         Abducer.setMessage(exception.getMessage());
     }
 

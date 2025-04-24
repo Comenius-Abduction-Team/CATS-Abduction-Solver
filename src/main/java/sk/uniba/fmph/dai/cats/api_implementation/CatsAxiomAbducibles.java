@@ -1,11 +1,11 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.abduction_api.exception.AxiomAbducibleException;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
+import sk.uniba.fmph.dai.abduction_api.exception.AxiomAbducibleException;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
+import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,8 +69,8 @@ public class CatsAxiomAbducibles extends CatsAbducibles implements IAxiomAbducib
     }
 
     @Override
-    public Abducibles exportAbducibles(ILoader loader) {
-        return new Abducibles(loader, axioms);
+    public InputAbducibles exportAbducibles(Loader loader) {
+        return new InputAbducibles(loader, axioms);
     }
 
     @Override

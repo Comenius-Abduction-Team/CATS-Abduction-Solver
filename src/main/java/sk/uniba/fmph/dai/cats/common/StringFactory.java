@@ -2,7 +2,11 @@ package sk.uniba.fmph.dai.cats.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.*;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +19,6 @@ public class StringFactory {
         if (owlAxiom instanceof OWLClassAssertionAxiom) {
             return getClassAssertionAxiom(owlAxiom).concat(DLSyntax.LEFT_PARENTHESES).
                     concat(getNamedIndividual(owlAxiom)).concat(DLSyntax.RIGHT_PARENTHESES);
-//            return getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(getClassAssertionAxiom(owlAxiom));
         }
         return getObjectPropertyAssertionAxiom(owlAxiom);
     }
@@ -26,6 +29,26 @@ public class StringFactory {
             result.add(getRepresentation(owlAxiom));
         }
         return "{" + StringUtils.join(result, ",") + "}";
+    }
+
+    public static String getRepresentation(Explanation explanation){
+        List<String> result = new ArrayList<>();
+        for (OWLAxiom owlAxiom : explanation.getAxioms()) {
+            result.add(getRepresentation(owlAxiom));
+        }
+        return "{" + StringUtils.join(result, ",") + "}";
+    }
+
+    public static String getExplanationsRepresentation(Collection<Explanation> explanations){
+        List<String> result = new ArrayList<>();
+        if (explanations != null) {
+            for (Explanation e : explanations) {
+                if (e == null)
+                    continue;
+                result.add(getRepresentation(e));
+            }
+        }
+        return "{ " + StringUtils.join(result, ", ") + " }";
     }
 
     private static String getNamedIndividual(OWLAxiom owlAxiom) {
@@ -97,4 +120,51 @@ public class StringFactory {
     public static String extractClassName(OWLAxiom axiom) {
         return getRepresentation(axiom).split("\\" + DLSyntax.LEFT_PARENTHESES)[0];
     }
+
+    public static String buildCsvRow(boolean addComas, Object... objects) {
+        StringBuilder builder = new StringBuilder();
+        buildCsvRow(builder, addComas, objects);
+        return builder.toString();
+
+//        for (int i = 0; i < objects.length; i++) {
+//            if (objects[i] != null)
+//                builder.append(objects[i].toString());
+//            if (i + 1 != objects.length) {
+//                builder.append(';');
+//                if (addComas)
+//                    builder.append(' ');
+//            }
+//        }
+//
+//        return builder.toString();
+
+    }
+
+    public static void buildCsvRow(StringBuilder builder, boolean addComas, Object... objects) {
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] != null)
+                builder.append(objects[i].toString());
+            if (i + 1 != objects.length) {
+                builder.append(';');
+                if (addComas)
+                    builder.append(' ');
+            }
+        }
+    }
+
+    private static String formatTimeByPattern(long time, String pattern){
+        Instant instant = Instant.ofEpochMilli(time);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern)
+                .withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
+    }
+
+    public static String formatTimeWithDate(long time){
+        return formatTimeByPattern(time, "yyyy-MM-dd-HH-mm-ss-SSS");
+    }
+
+    public static String formatTime(long time){
+        return formatTimeByPattern(time, "HH:mm:ss");
+    }
+
 }

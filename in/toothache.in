@@ -1,4 +1,2 @@
 -f: files/toothache.rdf
 -o: Prefix: t: <http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#> Class: t:Toothache Individual: t:john Types: t:Toothache
--alg: mhsmxp
--n: false

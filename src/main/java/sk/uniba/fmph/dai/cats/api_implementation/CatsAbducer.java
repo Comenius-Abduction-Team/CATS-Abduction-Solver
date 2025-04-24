@@ -1,5 +1,9 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
+import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
 import sk.uniba.fmph.dai.abduction_api.abducible.IExplanationConfigurator;
@@ -7,22 +11,19 @@ import sk.uniba.fmph.dai.abduction_api.abducible.ISymbolAbducibles;
 import sk.uniba.fmph.dai.abduction_api.exception.CommonException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidObservationException;
 import sk.uniba.fmph.dai.abduction_api.exception.InvalidSolverParameterException;
-import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
-import sk.uniba.fmph.dai.cats.algorithms.hst.HstHybridSolver;
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.HybridSolver;
-import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.models.Explanation;
-import org.semanticweb.owlapi.model.*;
-import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
-import sk.uniba.fmph.dai.abduction_api.abducer.IThreadAbducer;
 import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
-
+import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
+import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
-import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
-import sk.uniba.fmph.dai.cats.timer.ThreadTimer;
+import sk.uniba.fmph.dai.cats.timer.MetricsThread;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CatsAbducer implements IThreadAbducer {
 
@@ -46,10 +47,8 @@ public class CatsAbducer implements IThreadAbducer {
 
     boolean multithread = false;
 
-    HybridSolver solver;
-    ApiLoader loader;
-    ReasonerManager reasonerManager;
-    ThreadTimer timer;
+    AlgorithmSolver solver;
+    MetricsThread timer;
 
     public CatsAbducer() {
 
@@ -198,38 +197,21 @@ public class CatsAbducer implements IThreadAbducer {
 
     private void setupSolver() {
 
-        loader = new ApiLoader(this);
-        ApiPrinter printer = new ApiPrinter(this);
-
-        try {
-            loader.initialize(ReasonerType.JFACT);
-        } catch (Exception e){
-            printer.logError("An error occurred while initialising the internal reasoner: ",e);
-            return;
-        }
-
-        reasonerManager = new ReasonerManager(loader);
-
-        ApiExplanationManager explanationManager = new ApiExplanationManager(loader, reasonerManager, this);
-        ApiProgressManager progressManager = new ApiProgressManager(this);
-
-        timer = new ThreadTimer(100);
-        timer.start();
+        timer = new MetricsThread(10);
 
         setSolverConfiguration();
 
-        if (algorithm.isHst())
-            solver = new HstHybridSolver(timer, explanationManager, progressManager, printer);
-        else
-            solver = new HybridSolver(timer, explanationManager, progressManager, printer);
+        solver = AlgorithmSolverFactory.createApiSolver(timer, algorithm, this);
 
     }
 
     private void solve(){
         try {
-            solver.solve(loader, reasonerManager);
+            solver.solve();
         } catch (Throwable e) {
             new ApiPrinter(this).logError("An error occured while solving: ", e);
+        } finally {
+            timer.interrupt();
         }
     }
 
@@ -253,6 +235,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
         Configuration.LOGGING = logging;
+        Configuration.ALGORITHM = algorithm;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.hst;
 
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.IAbducibleAxioms;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 
 public interface INumberedAbducibles extends IAbducibleAxioms {
 

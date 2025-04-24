@@ -1,11 +1,11 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
-import sk.uniba.fmph.dai.cats.models.Individuals;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import sk.uniba.fmph.dai.cats.parser.IObservationParser;
+import sk.uniba.fmph.dai.abduction_api.abducible.IAxiomAbducibles;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
+import sk.uniba.fmph.dai.cats.data.Individuals;
+import sk.uniba.fmph.dai.cats.parser.ObservationParser;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
@@ -16,12 +16,12 @@ public class ApiLoader extends Loader {
     private final CatsAbducer Abducer;
 
     public ApiLoader(CatsAbducer Abducer){
+        super();
         this.Abducer = Abducer;
-        printer = new ApiPrinter(Abducer);
     }
 
     @Override
-    public void initialize(ReasonerType reasonerType) throws Exception {
+    public void initialize(ReasonerType reasonerType) {
         loadReasoner(reasonerType);
         loadObservation();
         loadAbducibles();
@@ -32,6 +32,7 @@ public class ApiLoader extends Loader {
 
         ontology = this.Abducer.getBackgroundKnowledge();
         ontologyManager = ontology.getOWLOntologyManager();
+        ontology = filterOntology(ontology);
 
         observationOntologyFormat = ontology.getFormat();
         ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
@@ -48,9 +49,9 @@ public class ApiLoader extends Loader {
     }
 
     @Override
-    protected void loadObservation() throws Exception {
+    protected void loadObservation() {
         namedIndividuals = new Individuals();
-        IObservationParser observationParser = new ApiObservationParser(this, Abducer);
+        ObservationParser observationParser = new ApiObservationParser(this, Abducer);
         observationParser.parse();
     }
 
@@ -59,19 +60,19 @@ public class ApiLoader extends Loader {
         CatsAbducibles container = Abducer.getAbducibles();
 
         if (container == null || container.isEmpty()) {
-            abducibles = new Abducibles(this);
+            inputAbducibles = new InputAbducibles(this);
             return;
         }
 
         if (container instanceof IAxiomAbducibles)
             isAxiomBasedAbduciblesOnInput = true;
 
-        abducibles = container.exportAbducibles(this);
+        inputAbducibles = container.exportAbducibles(this);
 
         if (container instanceof CatsSymbolAbducibles) {
             CatsSymbolAbducibles converted = (CatsSymbolAbducibles) container;
             if (converted.getIndividuals().isEmpty()) {
-                abducibles.addIndividuals(ontology.individualsInSignature().collect(Collectors.toList()));
+                inputAbducibles.addIndividuals(ontology.individualsInSignature().collect(Collectors.toList()));
             }
         }
     }

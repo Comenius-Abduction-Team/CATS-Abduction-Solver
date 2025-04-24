@@ -4,7 +4,7 @@ public class ConsolePrinter implements IPrinter {
 
     @Override
     public void logInfo(String message) {
-        System.out.println(message);
+        print(message);
     }
 
     @Override

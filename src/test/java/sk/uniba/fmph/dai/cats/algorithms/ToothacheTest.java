@@ -9,12 +9,12 @@ import java.io.IOException;
 public class ToothacheTest extends AlgorithmTestBase {
 
     public ToothacheTest() throws OWLOntologyCreationException, IOException {
-        super();
+        super("ToothacheTest");
     }
 
     @Override
-    void setUpInput() {
-        ONTOLOGY_FILE = "files/toothache_ontology.rdf";
+    protected void setUpInput() {
+        ONTOLOGY_FILE = "ont/toothache.rdf";
 
         OBSERVATION =
                 "Prefix: o: <http://www.semanticweb.org/janbo/ontologies/2024/4/toothache#>"
@@ -25,7 +25,7 @@ public class ToothacheTest extends AlgorithmTestBase {
     }
 
     @Override
-    void setUpAbducibles() {
+    protected void setUpAbducibles() {
         OWLClass cold = dataFactory.getOWLClass(":DrankColdDrink", prefixManager);
         OWLClass sensitive = dataFactory.getOWLClass(":SensitiveTeeth", prefixManager);
         OWLClass cavity = dataFactory.getOWLClass(":Cavity", prefixManager);
@@ -35,51 +35,55 @@ public class ToothacheTest extends AlgorithmTestBase {
         symbolAbd.add(cavity);
     }
 
+    // ------- QXP -------
+
+    @Test
+    @Override
+    void qxp() {
+
+        super.qxp();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void qxpNoNeg() {
+
+        super.qxpNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbd() {
+
+        super.qxpSymbolAbd();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void qxpSymbolAbdNoNeg() {
+
+        super.qxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    // ------- MHS -------
+
     @Test
     @Override
     void mhs() {
 
         super.mhs();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void hst() {
-
-        super.hst();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void mxp() {
-
-        super.hst();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void mhsMxp() {
-
-        super.mhsMxp();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void hstMxp() {
-
-        super.hstMxp();
         solve();
         testExplanationsFound(3);
 
@@ -97,89 +101,9 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     @Test
     @Override
-    void hstNoNeg() {
-
-        super.hstNoNeg();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void mxpNoNeg() {
-
-        super.hstNoNeg();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void mhsMxpNoNeg() {
-
-        super.mhsMxpNoNeg();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
-    void hstMxpNoNeg() {
-
-        super.hstMxpNoNeg();
-        solve();
-        testExplanationsFound(3);
-
-    }
-
-    @Test
-    @Override
     void mhsSymbolAbd() {
 
         super.mhsSymbolAbd();
-        solve();
-        testExplanationsFound(2);
-
-    }
-
-    @Test
-    @Override
-    void hstSymbolAbd() {
-
-        super.hstSymbolAbd();
-        solve();
-        testExplanationsFound(2);
-
-    }
-
-    @Test
-    @Override
-    void mxpSymbolAbd() {
-
-        super.hstSymbolAbd();
-        solve();
-        testExplanationsFound(2);
-
-    }
-
-    @Test
-    @Override
-    void mhsMxpSymbolAbd() {
-
-        super.mhsMxpSymbolAbd();
-        solve();
-        testExplanationsFound(2);
-
-    }
-
-    @Test
-    @Override
-    void hstMxpSymbolAbd() {
-
-        super.hstMxpSymbolAbd();
         solve();
         testExplanationsFound(2);
 
@@ -197,9 +121,19 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     @Test
     @Override
-    void hstSymbolAbdNoNeg() {
+    void mxp() {
 
-        super.mhsSymbolAbdNoNeg();
+        super.mxp();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void mxpNoNeg() {
+
+        super.mxpNoNeg();
         solve();
         testExplanationsFound(2);
 
@@ -207,9 +141,49 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     @Test
     @Override
+    void mxpSymbolAbd() {
+
+        super.mxpSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
     void mxpSymbolAbdNoNeg() {
 
-        super.mhsSymbolAbdNoNeg();
+        super.mxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void mhsMxp() {
+
+        super.mhsMxp();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void mhsMxpNoNeg() {
+
+        super.mhsMxp();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void mhsMxpSymbolAbd() {
+
+        super.mhsMxpSymbolAbd();
         solve();
         testExplanationsFound(2);
 
@@ -227,9 +201,159 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     @Test
     @Override
+    void hst() {
+
+        super.hst();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hstNoNeg() {
+
+        super.hstNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hstSymbolAbd() {
+
+        super.hstSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hstSymbolAbdNoNeg() {
+
+        super.hstSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hstMxp() {
+
+        super.hstMxp();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hstMxpNoNeg() {
+
+        super.hstMxpNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hstMxpSymbolAbd() {
+
+        super.hstMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
     void hstMxpSymbolAbdNoNeg() {
 
         super.hstMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void rct() {
+
+        super.rct();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void rctNoNeg() {
+
+        super.rctNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void rctSymbolAbd() {
+
+        super.rctSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void rctSymbolAbdNoNeg() {
+
+        super.rctSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void rctMxp() {
+
+        super.rctMxp();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void rctMxpNoNeg() {
+
+        super.rctMxpNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void rctMxpSymbolAbd() {
+
+        super.rctMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void rctMxpSymbolAbdNoNeg() {
+
+        super.rctMxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(2);
 

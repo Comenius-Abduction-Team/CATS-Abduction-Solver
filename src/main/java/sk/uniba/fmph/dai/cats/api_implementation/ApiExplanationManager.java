@@ -1,36 +1,31 @@
 package sk.uniba.fmph.dai.cats.api_implementation;
 
-import sk.uniba.fmph.dai.cats.algorithms.hybrid.ExplanationManager;
-import sk.uniba.fmph.dai.cats.models.Explanation;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import sk.uniba.fmph.dai.cats.reasoner.ILoader;
-import sk.uniba.fmph.dai.cats.reasoner.IReasonerManager;
-
-import java.util.HashSet;
+import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
 public class ApiExplanationManager extends ExplanationManager {
 
-    private final CatsAbducer Abducer;
+    private final CatsAbducer abducer;
 
-    public ApiExplanationManager(ILoader loader, IReasonerManager reasonerManager, CatsAbducer Abducer) {
-        super(loader, reasonerManager);
-        this.Abducer = Abducer;
+    public ApiExplanationManager(CatsAbducer Abducer) {
+        this.abducer = Abducer;
         printer = new ApiPrinter(Abducer);
     }
 
+    @Override
     public void addPossibleExplanation(Explanation explanation) {
-        possibleExplanations.add(explanation);
+        super.addPossibleExplanation(explanation);
         try {
-            if (Abducer.isMultithread())
-                Abducer.sendExplanation(explanation);
+            if (abducer.isMultithread())
+                abducer.sendExplanation(explanation);
         } catch(InterruptedException ignored){}
     }
 
-    public void processExplanations(String message) throws OWLOntologyCreationException, OWLOntologyStorageException {
+    public void processExplanations(String message, TreeStats stats) {
         if (! (message == null))
-            Abducer.setMessage(message);
-        showExplanations();
-        Abducer.setExplanations(finalExplanations);
+            abducer.setMessage(message);
+        showExplanations(message, stats);
+        abducer.setExplanations(finalExplanations);
     }
 }

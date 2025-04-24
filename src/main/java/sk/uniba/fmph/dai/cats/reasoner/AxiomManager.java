@@ -1,8 +1,9 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
+import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
-import org.semanticweb.owlapi.model.*;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -10,12 +11,12 @@ import java.util.stream.Collectors;
 
 public class AxiomManager {
 
-    public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLClass owlClass) {
+    public static List<OWLAxiom> createClassAssertionAxiom(Loader loader, OWLClass owlClass) {
         List<OWLAxiom> owlAxioms = new LinkedList<>();
 
         if (owlClass != null) {
             for (OWLNamedIndividual namedIndividual : loader.getAbducibles().getIndividuals()) {
-                if(!loader.isMultipleObservationOnInput() || loader.getObservation().getReductionIndividual() != namedIndividual){
+                if(!loader.isMultipleObservationOnInput() || loader.getObservationReductionIndividual() != namedIndividual){
                     owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
                     owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
                 }
@@ -24,15 +25,15 @@ public class AxiomManager {
         return owlAxioms;
     }
 
-    public static List<OWLAxiom> createObjectPropertyAssertionAxiom(ILoader loader, OWLObjectProperty objectProperty) {
+    public static List<OWLAxiom> createObjectPropertyAssertionAxiom(Loader loader, OWLObjectProperty objectProperty) {
         List<OWLAxiom> owlAxioms = new LinkedList<>();
 
         if (objectProperty != null) {
             for (OWLNamedIndividual subject : loader.getAbducibles().getIndividuals()) {
-                if(!loader.isMultipleObservationOnInput() || subject != loader.getObservation().getReductionIndividual()){
+                if(!loader.isMultipleObservationOnInput() || subject != loader.getObservationReductionIndividual()){
                     for (OWLNamedIndividual object : loader.getAbducibles().getIndividuals()) {
                         if (Configuration.LOOPING_ALLOWED || !subject.equals(object)) {
-                            if(!loader.isMultipleObservationOnInput() || object != loader.getObservation().getReductionIndividual()){
+                            if(!loader.isMultipleObservationOnInput() || object != loader.getObservationReductionIndividual()){
                                 owlAxioms.add(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
                                 owlAxioms.add(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
                             }
@@ -45,7 +46,7 @@ public class AxiomManager {
     }
 
     /**UPRAVENA FUNKCIA - vrati skutocny komplement**/
-    public static OWLAxiom getComplementOfOWLAxiom(ILoader loader, OWLAxiom owlAxiom) {
+    public static OWLAxiom getComplementOfOWLAxiom(Loader loader, OWLAxiom owlAxiom) {
         OWLAxiom complement = null;
         if(owlAxiom.getAxiomType() == AxiomType.CLASS_ASSERTION){
             OWLClassExpression owlClassExpression = ((OWLClassAssertionAxiom) owlAxiom).getClassExpression();
@@ -61,7 +62,7 @@ public class AxiomManager {
     }
 
     //stara funkcia - vracala komplement v pripade, ak v owlAxiom bola trieda, ale ak tam bol OWLObjectComplementOf, tak to vratilo to iste
-    public static OWLAxiom getComplementOfOWLAxiom2(ILoader loader, OWLAxiom owlAxiom) {
+    public static OWLAxiom getComplementOfOWLAxiom2(Loader loader, OWLAxiom owlAxiom) {
         Set<OWLClass> names = owlAxiom.classesInSignature().collect(Collectors.toSet());
         String name = "";
         OWLAxiom complement = null;

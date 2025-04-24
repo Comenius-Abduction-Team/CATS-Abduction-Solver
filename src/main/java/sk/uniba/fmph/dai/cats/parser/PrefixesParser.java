@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.parser;
 
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import sk.uniba.fmph.dai.cats.common.Prefixes;
-import org.semanticweb.owlapi.model.*;
 
 public class
 

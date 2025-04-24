@@ -1,12 +1,12 @@
 package sk.uniba.fmph.dai.cats.parser;
 
-import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.Prefixes;
-import sk.uniba.fmph.dai.cats.models.Abducibles;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
 import org.semanticweb.owlapi.model.*;
+import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.Prefixes;
+import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public class AbduciblesParser {
         this.loader = loader;
     }
 
-    public Abducibles parse(){
+    public InputAbducibles parse(){
 
         checkFormatOfAbducibles();
 
@@ -48,14 +48,14 @@ public class AbduciblesParser {
         }
 
         if (classes.isEmpty() && roles.isEmpty()){
-            return new Abducibles(loader);
+            return new InputAbducibles(loader);
         }
 
         if(individuals.isEmpty()){
-            return new Abducibles(loader, loader.getOntology().getIndividualsInSignature(), classes, roles);
+            return new InputAbducibles(loader, loader.getOntology().getIndividualsInSignature(), classes, roles);
         }
 
-        return new Abducibles(loader, individuals, classes, roles);
+        return new InputAbducibles(loader, individuals, classes, roles);
     }
 
     private void checkFormatOfAbducibles(){
@@ -75,7 +75,7 @@ public class AbduciblesParser {
         }
     }
 
-    private Abducibles createAbduciblesOnlyFromInputFile() throws OWLOntologyCreationException, OWLOntologyStorageException {
+    private InputAbducibles createAbduciblesOnlyFromInputFile() throws OWLOntologyCreationException, OWLOntologyStorageException {
         StringBuilder abduciblesInString = new StringBuilder();
         for(String axiom : Configuration.AXIOM_BASED_ABDUCIBLES){
             abduciblesInString.append(axiom + " ");
@@ -96,10 +96,10 @@ public class AbduciblesParser {
 //                abducibles.add(axiom);
 //            }
 //        }
-        return new Abducibles(loader, abducibles);
+        return new InputAbducibles(loader, abducibles);
     }
 
-    private Abducibles createAbduciblesFromInputFileAndOntologyFile() throws OWLOntologyCreationException, OWLOntologyStorageException {
+    private InputAbducibles createAbduciblesFromInputFileAndOntologyFile() throws OWLOntologyCreationException, OWLOntologyStorageException {
         StringBuilder abduciblesInString = new StringBuilder();
 
         for(String prefix : Prefixes.prefixes.keySet()){
@@ -160,7 +160,7 @@ public class AbduciblesParser {
 //        }
 //        System.out.println("ABDUCIBLES");
 //        System.out.println(abducibles);
-        return new Abducibles(loader, abducibles);
+        return new InputAbducibles(loader, abducibles);
     }
 
     private Set<OWLAxiom> getSetOfAxiomBasedAbducibles(OWLOntology abduciblesOntology) {
@@ -191,7 +191,7 @@ public class AbduciblesParser {
         return abducibles;
     }
 
-    private Abducibles createAxiomBasedAbducibles(){
+    private InputAbducibles createAxiomBasedAbducibles(){
         /*Set<OWLAxiom> abducibles = new HashSet<>();
         for(String axiom : Configuration.AXIOM_BASED_ABDUCIBLES){
             abducibles.add(createAxiom(axiom));
@@ -200,7 +200,7 @@ public class AbduciblesParser {
         loader.setAxiomBasedAbduciblesOnInput(true);
         return new Abducibles(loader, abducibles);*/
         loader.setAxiomBasedAbduciblesOnInput(true);
-        Abducibles resultAbducibles = null;
+        InputAbducibles resultAbducibles = null;
         try {
             resultAbducibles = createAbduciblesOnlyFromInputFile();
             if(resultAbducibles != null){
@@ -225,7 +225,7 @@ public class AbduciblesParser {
         return shortFormProvider;
     }*/
 
-    private Abducibles createAbduciblesFromOntologyFile() {
+    private InputAbducibles createAbduciblesFromOntologyFile() {
 //        Set<OWLAxiom> abducibles = new HashSet<>();
         OWLOntology abduciblesOntology = null;
         try {
@@ -241,7 +241,7 @@ public class AbduciblesParser {
         Set<OWLAxiom> abducibles = getSetOfAxiomBasedAbducibles(abduciblesOntology);
 
         loader.setAxiomBasedAbduciblesOnInput(true);
-        return new Abducibles(loader, abducibles);
+        return new InputAbducibles(loader, abducibles);
     }
 
     private OWLClass createClass(String abd){

@@ -7,7 +7,6 @@ import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class ArgumentParser {
@@ -41,11 +40,11 @@ public class ArgumentParser {
                     read_roles = false;
                     read_abducibles = false;
                 } else if (read_concepts) {
-                    add_abd(new_line, false, true, false);
+                    addAbducible(new_line, false, true, false);
                 } else if (read_individuals) {
-                    add_abd(new_line, false,false, false);
+                    addAbducible(new_line, false,false, false);
                 } else if (read_roles) {
-                    add_abd(new_line, false,false, true);
+                    addAbducible(new_line, false,false, true);
                 } else if (read_abducibles) {
                     add_axiom_based_abd(line);
                 } else{
@@ -111,28 +110,28 @@ public class ArgumentParser {
                     if (next.equals("{")){
                         read_individuals = true;
                     } else {
-                        add_abd(next, false, false, false);
+                        addAbducible(next, false, false, false);
                     }
                     break;
                 case "-aC:":
                     if (next.equals("{")){
                         read_concepts = true;
                     } else {
-                        add_abd(next, false,true, false);
+                        addAbducible(next, false,true, false);
                     }
                     break;
                 case "-aR:":
                     if (next.equals("{")){
                         read_roles = true;
                     } else {
-                        add_abd(next, false,false, true);
+                        addAbducible(next, false,false, true);
                     }
                     break;
                 case "-abd:":
                     if (next.equals("{")){
                         read_abducibles = true;
                     } else {
-                        add_abd(next, true,false, false);
+                        addAbducible(next, true,false, false);
                     }
                     break;
                 case "-l:":
@@ -186,6 +185,13 @@ public class ArgumentParser {
                         System.err.println("Wrong progress value -p" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
+                case "-debug:":
+                    if (next.equals("true")){
+                        Configuration.DEBUG_PRINT = true;
+                    } else if (!next.equals("false")) {
+                        System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
                     throw new RuntimeException(message);
@@ -200,9 +206,9 @@ public class ArgumentParser {
         }
     }
 
-    public void chooseAlgorithm(String arg){
+    public void chooseAlgorithm(String argument){
         Algorithm chosenAlg = null;
-        String name = arg.toUpperCase();
+        String name = argument.toUpperCase();
         try{
             chosenAlg = Algorithm.valueOf(name);
         } catch(IllegalArgumentException e){
@@ -215,7 +221,7 @@ public class ArgumentParser {
         }
 
         if (chosenAlg == null)
-            throw new RuntimeException("Invalid algorithm name! " + arg);
+            throw new RuntimeException("Invalid algorithm name! " + argument);
 
         Configuration.ALGORITHM = chosenAlg;
     }
@@ -228,7 +234,7 @@ public class ArgumentParser {
         Configuration.PREFIXES.add(prefix);
     }
 
-    private void add_abd(String abd, boolean axiomBasedAbducibles, boolean isConcept, boolean isRole){
+    private void addAbducible(String abd, boolean axiomBasedAbducibles, boolean isConcept, boolean isRole){
         if (axiomBasedAbducibles)
             Configuration.AXIOM_BASED_ABDUCIBLES.add(abd);
         else if (isConcept)
