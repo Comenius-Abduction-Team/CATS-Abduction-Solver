@@ -27,7 +27,7 @@ The abduction problem is then defined in the *runApiTestingMain()* method, which
 ## Input
 CATS receives a structured input file as a parameter. The input file contains one switch per line. Mandatory switches are **-f** and **-o**, other switches are optional.
 
-A line in the input file can be commented out with a *// * at the start of the line (there must be a space after the slashes). 
+A line in the input file can be commented out with a // at the start of the line (there must be a space after the slashes). 
 
 #### Problem definition:
 * **-f: \<string\>**  a relative path to the ontology file, which represents the knowledge base $K$.
@@ -97,20 +97,20 @@ Final logs are created only after the search for explanations is complete (it ei
 *\<time\>__\<input file name\>__final.log*
 
 * the main final log which contains desired explanations of a certain length in each line (except the last)
-  * line form: *\<length n\>;\<number of explanations\>;\<level completion time\>; {\<found explanations of the length n\>}*
+  * line form: *\<length n\>; \<number of explanations\>; \<level completion time\>; {\<found explanations of the length n\>}*
 * last line contains the total running time
 
 **Explanation times log**
 *\<time\>__\<input file name\>__explanation_times.log*
 
 * final log which contains desired explanations and time when they were found
-  * line form: *\<time t\>;\<explanation found in the time t\>*
+  * line form: *\<time t\>; \<explanation found in the time t\>*
 
 **Level log**
 *\<time\>__\<input file name\>__level.log*
 
 * final log which contains desired explanations found in a certain level in each line (except the last)
-  * line form: *\<level l\>;\<number of explanations\>;\<level l completion time\>; {\<explanations found in the level l\>}*
+  * line form: *\<level l\>; \<number of explanations\>; \<level l completion time\>; {\<explanations found in the level l\>}*
 * last line contains the total running time
 
 **Info log**
@@ -139,3 +139,8 @@ Partial logs are created while the solving of the abduction problem is running. 
 
 When solving the abduction problem using MHS-MXP/HST-MXP, all the mentioned logs are produced.
 When using the MHS/HST algorithms, however, only some are produced: **final log**, **explanation times log**, **info log**, **error log** and **partial explanations log**. The reason for this is that other logs would be redundant. For the MHS/HST algorithm, the grouping of explanations according to the length is identical to grouping them according to the levels.
+
+# Acknowledgements
+
+The development of this sofwtare was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
+under the H2020 grant no. 952215 (TAILOR)
