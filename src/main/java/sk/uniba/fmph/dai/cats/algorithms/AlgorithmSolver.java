@@ -23,7 +23,6 @@ import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.timer.MetricsThread;
 import sk.uniba.fmph.dai.cats.timer.MetricsManager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -412,10 +411,6 @@ public class AlgorithmSolver {
 
 
         StaticPrinter.debugPrint("[TREE] entering depth " + node.depth);
-    }
-
-    private void assignNodeLevel(TreeNode node){
-
     }
 
     public Model findAndGetModelToReuse(){
