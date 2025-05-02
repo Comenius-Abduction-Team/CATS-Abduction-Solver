@@ -69,8 +69,8 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
     }
 
     private boolean addExplanationsFoundByMxp(){
-        List<Explanation> newExplanations = findExplanationsWithMxp();
         explanationManager.getLengthOneExplanations().clear();
+        List<Explanation> newExplanations = findExplanationsWithMxp();
         for (Explanation explanation : newExplanations){
             if (explanation.getAxioms().size() == 1){
                 explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
@@ -114,7 +114,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
         }
-        Conflict conflict = findConflicts(abduciblesCopy, true);
+        Conflict conflict = runMxp(abduciblesCopy, true);
 
         return conflict.getExplanations();
     }
@@ -159,12 +159,33 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         }
 
         StaticPrinter.debugPrint("[MXP] Initial MXP");
-        Conflict conflict = findConflicts(solver.abducibleAxioms.getAxioms(), extractModel);
+        Conflict conflict = runMxp(solver.abducibleAxioms.getAxioms(), extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
     }
 
-    private Conflict findConflicts(Set<OWLAxiom> axioms, boolean extractModel) {
+    private Conflict runMxp(Set<OWLAxiom> axioms, boolean extractModel){
+
+        solver.removeNegatedObservationFromPath();
+
+        if (solver.isTimeout()) {
+            return new Conflict();
+        }
+
+        reasonerManager.addAxiomsToOntology(path);
+
+        if (!consistencyChecker.checkOntologyConsistency(extractModel))
+            return new Conflict();
+
+        // if isConsistent(B ∪ C) then return [C, ∅];
+        if (consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, extractModel)) {
+            return new Conflict();
+        }
+
+        return findConflicts(axioms, true, extractModel);
+    }
+
+    private Conflict findConflicts(Set<OWLAxiom> axioms, boolean firstIteration, boolean extractModel) {
 
         solver.removeNegatedObservationFromPath();
 
@@ -175,7 +196,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         reasonerManager.addAxiomsToOntology(path);
 
         // if isConsistent(B ∪ C) then return [C, ∅];
-        if (consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, extractModel)) {
+        if (!firstIteration && consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, extractModel)) {
             return new Conflict(axioms, new ArrayList<>());
         }
 
@@ -199,7 +220,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         double median = setDivider.getMedian();
 
         //[C'1, Γ1] ← FINDCONFLICTS(B, C1)
-        Conflict conflictC1 = findConflicts(sets.get(0).getAxioms(), extractModel);
+        Conflict conflictC1 = findConflicts(sets.get(0).getAxioms(), false, extractModel);
         if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN){
@@ -207,7 +228,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
         }
 
         //[C'2, Γ2] ← FINDCONFLICTS(B, C2)
-        Conflict conflictC2 = findConflicts(sets.get(1).getAxioms(), extractModel);
+        Conflict conflictC2 = findConflicts(sets.get(1).getAxioms(), false, extractModel);
         if (Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.addIndexToIndexesOfExplanations(indexOfExplanation);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN){

@@ -298,7 +298,6 @@ public class AlgorithmSolver {
                     modelManager.findReuseModelForPath(path);
 
                 if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
-                    explanationManager.setLengthOneExplanations(new ArrayList<>());
                     currentLevel.reusedModels += 1;
                     StaticPrinter.debugPrint("[MODEL] Model was reused.");
                 }
