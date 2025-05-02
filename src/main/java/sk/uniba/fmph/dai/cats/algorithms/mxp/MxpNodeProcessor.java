@@ -189,14 +189,6 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
 
     private Conflict findConflicts(Set<OWLAxiom> axioms, boolean firstIteration, boolean extractModel) {
 
-        solver.removeNegatedObservationFromPath();
-
-        if (solver.isTimeout()) {
-            return new Conflict(new HashSet<>(), new ArrayList<>());
-        }
-
-        reasonerManager.addAxiomsToOntology(path);
-
         // if isConsistent(B ∪ C) then return [C, ∅];
         if (!firstIteration && consistencyChecker.checkOntologyConsistencyWithAddedAxioms(axioms, extractModel)) {
             return new Conflict(axioms, new ArrayList<>());
