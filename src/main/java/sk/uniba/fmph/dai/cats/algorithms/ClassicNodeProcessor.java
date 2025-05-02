@@ -48,20 +48,24 @@ public class ClassicNodeProcessor implements NodeProcessor {
     }
 
     @Override
-    public boolean findExplanations(Explanation explanation, boolean canReuseModel, boolean extractModel) {
-
-        if (canReuseModel)
-            return false;
+    public int findExplanations(Explanation explanation, boolean extractModel) {
 
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
-            return false;
+            return 0;
 
-        StaticPrinter.debugPrint("[CLOSING] EXPLANATION FOUND!");
         explanationManager.addPossibleExplanation(explanation);
         stats.getCurrentLevelStats().prunedEdges += 1;
         stats.getCurrentLevelStats().explanationEdges += 1;
 
-        return true;
+        return 1;
+    }
+
+    @Override
+    public boolean shouldCloseNode(int explanationsFound) {
+        boolean result = explanationsFound > 0;
+        if (result)
+            StaticPrinter.debugPrint("[CLOSING] EXPLANATION FOUND!");
+        return result;
     }
 
     @Override

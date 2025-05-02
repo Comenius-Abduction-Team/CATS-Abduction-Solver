@@ -15,7 +15,6 @@ public abstract class ExplanationManager {
     protected List<Explanation> possibleExplanations = new ArrayList<>();
 
     protected List<Explanation> explanationsToProcess = new ArrayList<>();
-    protected Set<OWLAxiom> lengthOneExplanations = new HashSet<>();
     public List<Explanation> finalExplanations = new ArrayList<>();
     protected AlgorithmSolver solver;
 
@@ -52,22 +51,6 @@ public abstract class ExplanationManager {
     
     public int getPossibleExplanationsSize(){
         return possibleExplanations.size();
-    }
-    
-    public void addLengthOneExplanation(OWLAxiom explanation){
-        lengthOneExplanations.add(explanation);
-    }
-    
-    public void setLengthOneExplanations(Collection<OWLAxiom> lengthOneExplanations) {
-        this.lengthOneExplanations = new HashSet<>(lengthOneExplanations);
-    }
-    
-    public Set<OWLAxiom> getLengthOneExplanations() {
-        return lengthOneExplanations;
-    }
-    
-    public int getLengthOneExplanationsSize(){
-        return lengthOneExplanations.size();
     }
     
     public void showExplanations(String message, TreeStats stats) {

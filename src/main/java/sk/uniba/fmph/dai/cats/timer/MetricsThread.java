@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.timer;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricsThread extends Thread {
 
@@ -10,7 +11,7 @@ public class MetricsThread extends Thread {
     private final long timeInterval;
     private final long thisThreadId;
     private long startTime;
-    private final Map<Long, TimeRecord> records = new HashMap<>();
+    private final Map<Long, TimeRecord> records = new ConcurrentHashMap<>();
     private int memorySum;
     private double memoryCount;
     private final Runtime runtime;

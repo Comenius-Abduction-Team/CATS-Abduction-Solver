@@ -1,6 +1,5 @@
 package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
-import com.google.common.collect.Iterables;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
@@ -20,6 +19,8 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
     private final ReasonerManager reasonerManager;
 
     final public Set<OWLAxiom> path;
+
+    private boolean explanationLargerThanOne = false;
 
     public MxpNodeProcessor(AlgorithmSolver solver){
         super(solver);
@@ -60,25 +61,29 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
     }
 
     @Override
-    public boolean findExplanations(Explanation explanation, boolean canReuseModel, boolean extractModel) {
-
-        if (canReuseModel)
-            return false;
+    public int findExplanations(Explanation explanation, boolean extractModel) {
 
         StaticPrinter.debugPrint("[MXP] Calling MXP");
-        boolean result = addExplanationsFoundByMxp();
-        if (result)
-            StaticPrinter.debugPrint("[PRUNING] Pruned by MXP!");
+        return addExplanationsFoundByMxp();
 
+    }
+
+    @Override
+    public boolean shouldCloseNode(int explanationsFound) {
+        if (explanationLargerThanOne)
+            return false;
+        boolean result = explanationsFound == 0;
+        if (result)
+            StaticPrinter.debugPrint("[CLOSING] Closed by MXP!");
         return result;
     }
 
-    private boolean addExplanationsFoundByMxp(){
-        explanationManager.getLengthOneExplanations().clear();
+    private int addExplanationsFoundByMxp(){
+        explanationLargerThanOne = false;
         List<Explanation> newExplanations = findExplanationsWithMxp();
         for (Explanation explanation : newExplanations){
-            if (explanation.getAxioms().size() == 1){
-                explanationManager.addLengthOneExplanation(Iterables.get(explanation.getAxioms(), 0));
+            if (!explanationLargerThanOne && explanation.getAxioms().size() > 1){
+                explanationLargerThanOne = true;
             }
 
             explanation.addAxioms(path);
@@ -95,25 +100,17 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
             }
 
         }
-        if (newExplanations.size() == explanationManager.getLengthOneExplanationsSize()){
-            return false;
-        }
-        return newExplanations.isEmpty();
+
+        return newExplanations.size();
     }
 
     private List<Explanation> findExplanationsWithMxp(){
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
-        Set<OWLAxiom> lengthOne = explanationManager.getLengthOneExplanations();
-
         for (OWLAxiom a : solver.abducibleAxioms.getAxioms()){
-            if (path.contains(a))
-                continue;
-            if (lengthOne.contains(a)) {
-                continue;
-            }
-            abduciblesCopy.add(a);
+            if (!path.contains(a))
+                abduciblesCopy.add(a);
         }
 
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){

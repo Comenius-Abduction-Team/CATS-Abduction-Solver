@@ -8,7 +8,9 @@ public interface NodeProcessor {
 
     boolean isInvalidExplanation(Explanation explanation);
 
-    boolean findExplanations(Explanation explanation, boolean canReuseModel, boolean extractModel);
+    int findExplanations(Explanation explanation, boolean extractModel);
+
+    boolean shouldCloseNode(int explanationsFound);
 
     void postProcessExplanations();
 
