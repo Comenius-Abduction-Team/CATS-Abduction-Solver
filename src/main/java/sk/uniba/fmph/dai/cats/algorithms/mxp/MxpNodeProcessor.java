@@ -60,11 +60,16 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor 
     }
 
     @Override
-    public boolean findExplanations(Explanation explanation, boolean extractModel) {
+    public boolean findExplanations(Explanation explanation, boolean canReuseModel, boolean extractModel) {
+
+        if (canReuseModel)
+            return false;
+
         StaticPrinter.debugPrint("[MXP] Calling MXP");
         boolean result = addExplanationsFoundByMxp();
         if (result)
             StaticPrinter.debugPrint("[PRUNING] Pruned by MXP!");
+
         return result;
     }
 

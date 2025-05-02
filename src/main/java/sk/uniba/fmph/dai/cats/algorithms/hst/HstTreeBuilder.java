@@ -82,9 +82,8 @@ public class HstTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean closeExplanation(Explanation explanation) {
-        boolean extractModel = !abducibles.areAllAbduciblesIndexed();
-        return nodeProcessor.findExplanations(explanation, extractModel);
+    public boolean shouldExtractModel() {
+        return !abducibles.areAllAbduciblesIndexed();
     }
 
     @Override

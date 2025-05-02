@@ -93,8 +93,8 @@ public class QxpNodeProcessor  implements NodeProcessor {
     }
 
     @Override
-    public boolean findExplanations(Explanation explanation, boolean extractModel) {
-        return false;
+    public boolean findExplanations(Explanation explanation, boolean canReuseModel, boolean extractModel) {
+        return true;
     }
 
     @Override

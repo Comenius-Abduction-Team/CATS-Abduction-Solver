@@ -24,7 +24,7 @@ public interface TreeBuilder {
      */
     boolean pruneNode(TreeNode node, Explanation explanation);
 
-    boolean closeExplanation(Explanation explanation);
+    boolean shouldExtractModel();
 
     /**
      * Create root tree node.

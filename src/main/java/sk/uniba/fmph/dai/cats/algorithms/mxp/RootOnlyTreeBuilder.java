@@ -38,8 +38,8 @@ public class RootOnlyTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean closeExplanation(Explanation explanation) {
-        return true;
+    public boolean shouldExtractModel() {
+        return false;
     }
 
     @Override

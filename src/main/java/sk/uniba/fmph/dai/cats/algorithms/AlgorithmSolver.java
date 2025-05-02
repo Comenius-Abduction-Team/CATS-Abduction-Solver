@@ -296,25 +296,23 @@ public class AlgorithmSolver {
                 if (Configuration.REUSE_OF_MODELS)
                     modelManager.findReuseModelForPath(path);
 
-                if (Configuration.REUSE_OF_MODELS && modelManager.canReuseModel()) {
+                boolean canReuseModel = Configuration.REUSE_OF_MODELS && modelManager.canReuseModel();
+
+                if (canReuseModel) {
                     currentLevel.reusedModels += 1;
                     StaticPrinter.debugPrint("[MODEL] Model was reused.");
                 }
-                else {
 
-                    StaticPrinter.debugPrint("[MODEL] Model was not reused.");
+                boolean shouldCloseNode = nodeProcessor.findExplanations(explanation, canReuseModel, treeBuilder.shouldExtractModel());
 
-//                    boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
+                if (shouldCloseNode){
+                    path.clear();
+                    continue;
+                }
 
-                    if (isTimeout()){
-                        logger.makeTimeoutPartialLog(currentLevel);
-                        throw new TimeoutException();
-                    }
-
-                    if (treeBuilder.closeExplanation(explanation)){
-                        path.clear();
-                        continue;
-                    }
+                if (isTimeout()){
+                    logger.makeTimeoutPartialLog(currentLevel);
+                    throw new TimeoutException();
                 }
 
                 treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));

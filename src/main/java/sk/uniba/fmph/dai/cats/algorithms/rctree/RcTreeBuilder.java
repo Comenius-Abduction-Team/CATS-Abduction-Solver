@@ -118,8 +118,8 @@ public class RcTreeBuilder implements TreeBuilder {
     }
 
     @Override
-    public boolean closeExplanation(Explanation explanation) {
-        return nodeProcessor.findExplanations(explanation, true);
+    public boolean shouldExtractModel() {
+        return true;
     }
 
     @Override
