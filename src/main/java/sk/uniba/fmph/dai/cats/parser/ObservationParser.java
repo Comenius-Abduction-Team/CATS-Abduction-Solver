@@ -43,7 +43,7 @@ public abstract class ObservationParser {
         if(resultingObservation.size() > 0){
             chooseProcessingObservationAccordingType(resultingObservation);
         } else {
-            String message = "In -o is not founded any correct observation - class assertion, object property assertion or negative object property assertion.";
+            String message = "The value of -o is not a correct observation (class assertion, object property assertion or negative object property assertion.)";
             throw new RuntimeException(message);
         }
     }
