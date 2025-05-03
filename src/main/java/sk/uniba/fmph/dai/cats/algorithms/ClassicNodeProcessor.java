@@ -6,7 +6,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 
-public class ClassicNodeProcessor implements NodeProcessor {
+public class ClassicNodeProcessor implements INodeProcessor {
 
     private final RuleChecker ruleChecker;
     private final ConsistencyChecker consistencyChecker;

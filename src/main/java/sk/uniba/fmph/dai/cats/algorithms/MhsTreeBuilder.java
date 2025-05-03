@@ -2,7 +2,6 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
-import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
@@ -13,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-public class MhsTreeBuilder implements TreeBuilder {
+public class MhsTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
     final Loader loader;
-    final NodeProcessor nodeProcessor;
+    final INodeProcessor nodeProcessor;
     final Queue<TreeNode> queue = new ArrayDeque<>();
 
     TreeNode parentNode;

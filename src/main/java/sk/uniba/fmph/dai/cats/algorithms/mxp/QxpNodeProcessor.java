@@ -3,7 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
-import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class QxpNodeProcessor  implements NodeProcessor {
+public class QxpNodeProcessor  implements INodeProcessor {
 
     protected final AlgorithmSolver solver;
     protected final SetDivider setDivider;

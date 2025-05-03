@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.algorithms.NodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
@@ -13,7 +13,7 @@ import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.*;
 
-public class MxpNodeProcessor extends QxpNodeProcessor implements NodeProcessor {
+public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor {
 
     private final RuleChecker ruleChecker;
     private final ReasonerManager reasonerManager;

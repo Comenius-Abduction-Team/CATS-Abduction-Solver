@@ -48,8 +48,8 @@ public class AlgorithmSolver {
     protected int currentDepth = 0;
     int maxDepth = -1;
 
-    protected TreeBuilder treeBuilder;
-    public NodeProcessor nodeProcessor;
+    protected ITreeBuilder treeBuilder;
+    public INodeProcessor nodeProcessor;
 
     public final TreeStats stats = new TreeStats();
     public Level currentLevel;

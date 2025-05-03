@@ -10,12 +10,11 @@ import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class RcTreeBuilder implements TreeBuilder {
+public class RcTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
-    final NodeProcessor nodeProcessor;
+    final INodeProcessor nodeProcessor;
     final TreeStats stats;
 
     final Queue<RcTreeNode> queue  = new PriorityQueue<>();

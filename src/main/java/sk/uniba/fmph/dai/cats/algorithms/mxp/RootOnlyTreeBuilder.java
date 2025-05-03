@@ -2,10 +2,9 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.*;
-import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
-public class RootOnlyTreeBuilder implements TreeBuilder {
+public class RootOnlyTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
 

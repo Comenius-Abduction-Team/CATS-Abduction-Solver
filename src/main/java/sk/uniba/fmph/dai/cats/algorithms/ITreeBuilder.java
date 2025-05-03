@@ -6,7 +6,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 /**
  * The interface Tree builder.
  */
-public interface TreeBuilder {
+public interface ITreeBuilder {
 
     /**
      * Create abducibles abducible axioms.

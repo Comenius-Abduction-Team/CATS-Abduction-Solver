@@ -9,12 +9,11 @@ import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.Set;
 
-public class HstTreeBuilder implements TreeBuilder {
+public class HstTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
-    final NodeProcessor nodeProcessor;
+    final INodeProcessor nodeProcessor;
     final Queue<HstTreeNode> queue = new ArrayDeque<>();
 
     HstTreeNode parentNode;

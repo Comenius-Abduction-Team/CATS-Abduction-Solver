@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
-public interface NodeProcessor {
+public interface INodeProcessor {
 
     boolean canCreateRoot(boolean extractModel);
 
