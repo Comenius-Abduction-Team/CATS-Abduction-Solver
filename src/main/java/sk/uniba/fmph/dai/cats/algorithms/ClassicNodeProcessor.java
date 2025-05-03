@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -35,14 +36,16 @@ public class ClassicNodeProcessor implements INodeProcessor {
     }
 
     @Override
-    public boolean isInvalidExplanation(Explanation explanation) {
-        if (!ruleChecker.isRelevant(explanation)) {
-            StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
-            return true;
-        }
-        if (!ruleChecker.isConsistent(explanation)) {
-            StaticPrinter.debugPrint("[PRUNING] INCONSISTENT EXPLANATION!");
-            return true;
+    public boolean shouldPruneBranch(Explanation explanation) {
+        if (Configuration.CONTINUOUS_MHS_CHECKS){
+            if (!ruleChecker.isRelevant(explanation)) {
+                StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
+                return true;
+            }
+            if (!ruleChecker.isConsistent(explanation)) {
+                StaticPrinter.debugPrint("[PRUNING] INCONSISTENT PATH!");
+                return true;
+            }
         }
         return false;
     }
@@ -53,10 +56,24 @@ public class ClassicNodeProcessor implements INodeProcessor {
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
             return 0;
 
-        explanationManager.addPossibleExplanation(explanation);
         stats.getCurrentLevelStats().prunedEdges += 1;
         stats.getCurrentLevelStats().explanationEdges += 1;
 
+        if (!Configuration.CONTINUOUS_MHS_CHECKS) {
+
+            if (!ruleChecker.isRelevant(explanation)) {
+                StaticPrinter.debugPrint("[FILTERING] IRRELEVANT EXPLANATION!");
+                stats.getCurrentLevelStats().originalExplanations += 1;
+                return 1;
+            }
+            if (!ruleChecker.isConsistent(explanation)) {
+                StaticPrinter.debugPrint("[FILTERING] INCONSISTENT EXPLANATION!");
+                stats.getCurrentLevelStats().originalExplanations += 1;
+                return 1;
+            }
+        }
+
+        explanationManager.addPossibleExplanation(explanation);
         return 1;
     }
 

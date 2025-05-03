@@ -33,6 +33,7 @@ public class Configuration {
     public static boolean CACHED_CONFLICTS_LONGEST_CONFLICT = false;
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
     public static boolean CONTINUOUS_RELEVANCE_CHECKS = false;
+    public static boolean CONTINUOUS_MHS_CHECKS = false;
 
     public static boolean CACHE_ABDUCIBLES = true;
 
