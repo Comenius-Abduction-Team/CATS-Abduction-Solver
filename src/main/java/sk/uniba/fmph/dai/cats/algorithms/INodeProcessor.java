@@ -6,7 +6,7 @@ public interface INodeProcessor {
 
     boolean canCreateRoot(boolean extractModel);
 
-    boolean isInvalidExplanation(Explanation explanation);
+    boolean shouldPruneBranch(Explanation explanation);
 
     int findExplanations(Explanation explanation, boolean extractModel);
 

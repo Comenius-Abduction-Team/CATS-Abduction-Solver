@@ -22,7 +22,7 @@ public interface ITreeBuilder {
      * @param node        the node
      * @param explanation the explanation
      */
-    boolean pruneNode(TreeNode node, Explanation explanation);
+    boolean shouldPruneChildBranch(TreeNode node, Explanation explanation);
 
     boolean shouldExtractModel();
 

@@ -18,7 +18,7 @@ public class RootOnlyTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public boolean pruneNode(TreeNode node, Explanation explanation) {
+    public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
         return true;
     }
 

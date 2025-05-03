@@ -284,7 +284,7 @@ public class AlgorithmSolver {
                 path.clear();
                 path.addAll(explanation.getAxioms());
 
-                boolean pruneThisChild = treeBuilder.pruneNode(node, explanation);
+                boolean pruneThisChild = treeBuilder.shouldPruneChildBranch(node, explanation);
 
                 if (pruneThisChild){
                     StaticPrinter.debugPrint("[PRUNING] NODE CLOSED!");

@@ -38,13 +38,6 @@ public class RuleChecker {
         return isConsistent;
     }
 
-    public boolean isExplanation(Explanation explanation) {
-        reasonerManager.addAxiomsToOntology(explanation.getAxioms());
-        boolean isConsistent = reasonerManager.isOntologyConsistent();
-        reasonerManager.resetOntologyToOriginal();
-        return !isConsistent;
-    }
-
     public boolean isMinimal(List<Explanation> explanationList, Explanation explanation) {
         if (explanation == null || explanation.getAxioms() == null) {
             return false;

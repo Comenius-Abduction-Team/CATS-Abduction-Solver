@@ -104,7 +104,7 @@ public class HstTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public boolean pruneNode(TreeNode node, Explanation explanation) {
+    public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -114,7 +114,7 @@ public class HstTreeBuilder implements ITreeBuilder {
             return true;
         }
 
-        return nodeProcessor.isInvalidExplanation(explanation);
+        return nodeProcessor.shouldPruneBranch(explanation);
     }
 
     //int index = node.min; index < node.index; index++

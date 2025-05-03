@@ -37,7 +37,7 @@ public class RcTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public boolean pruneNode(TreeNode originalNode, Explanation explanation){
+    public boolean shouldPruneChildBranch(TreeNode originalNode, Explanation explanation){
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -47,7 +47,7 @@ public class RcTreeBuilder implements ITreeBuilder {
             return true;
         }
 
-        if (nodeProcessor.isInvalidExplanation(explanation)){
+        if (nodeProcessor.shouldPruneBranch(explanation)){
             return true;
         }
 

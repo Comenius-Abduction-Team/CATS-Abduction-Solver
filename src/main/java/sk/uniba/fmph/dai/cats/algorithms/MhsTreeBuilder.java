@@ -35,7 +35,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public boolean pruneNode(TreeNode node, Explanation explanation) {
+    public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
         if (solver.isPathAlreadyStored()){
             StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
@@ -52,7 +52,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
             return true;
         }
 
-        if (nodeProcessor.isInvalidExplanation(explanation)){
+        if (nodeProcessor.shouldPruneBranch(explanation)){
             return true;
         }
 

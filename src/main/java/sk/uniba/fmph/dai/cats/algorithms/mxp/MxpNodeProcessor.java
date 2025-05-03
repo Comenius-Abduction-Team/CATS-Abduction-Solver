@@ -30,32 +30,18 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     }
 
     @Override
-    public boolean isInvalidExplanation(Explanation explanation) {
+    public boolean shouldPruneBranch(Explanation explanation) {
 
         if(Configuration.CONTINUOUS_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
             StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
             return true;
         }
 
-        if (isSupersetOfExistingExplanation(explanation)) {
-            StaticPrinter.debugPrint("[PRUNING] SUPERSET OF EXPLANATION");
-            return true;
-        }
-
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
-        //if (ruleChecker.isExplanation(explanation)){
             addToExplanations(explanation);
             StaticPrinter.debugPrint("[PRUNING] IS EXPLANATION!");
             solver.stats.getCurrentLevelStats().explanationEdges += 1;
             return true;
-        }
-        return false;
-    }
-
-    private boolean isSupersetOfExistingExplanation(Explanation explanation){
-        for (Explanation existingExplanation : explanationManager.getPossibleExplanations()){
-            if (explanation.containsAll(existingExplanation))
-                return true;
         }
         return false;
     }
@@ -116,7 +102,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
         }
-        Conflict conflict = runMxp(abduciblesCopy, true);
+        Conflict conflict = runMxp(abduciblesCopy, true,true);
 
         return conflict.getExplanations();
     }
@@ -161,12 +147,12 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         }
 
         StaticPrinter.debugPrint("[MXP] Initial MXP");
-        Conflict conflict = runMxp(solver.abducibleAxioms.getAxioms(), extractModel);
+        Conflict conflict = runMxp(solver.abducibleAxioms.getAxioms(), false, extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
     }
 
-    private Conflict runMxp(Set<OWLAxiom> axioms, boolean extractModel){
+    private Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
 
         solver.removeNegatedObservationFromPath();
 
@@ -176,7 +162,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         reasonerManager.addAxiomsToOntology(path);
 
-        if (!consistencyChecker.checkOntologyConsistency(extractModel))
+        if (!initialConsistencyAlreadyChecked && !consistencyChecker.checkOntologyConsistency(extractModel))
             return new Conflict();
 
         // if isConsistent(B ∪ C) then return [C, ∅];

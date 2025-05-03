@@ -88,7 +88,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
     }
 
     @Override
-    public boolean isInvalidExplanation(Explanation explanation) {
+    public boolean shouldPruneBranch(Explanation explanation) {
         return false;
     }
 
