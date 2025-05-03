@@ -47,6 +47,7 @@ A line in the input file can be commented out with a // at the start of the line
 * *-log: \<boolean\>* whether output log files should be created. *true* by default.
 * *-out: \<string\>* custom relative path to output log files.
 * *-p: \<boolean\>* prints a simple progress bar into the console. Most useful when *-d* or *-t* is set. Set to *false* by default.
+* *-debug: \<boolean\>* prints detailed messages that describe events happening during the algorithm's run into the console. Set to *false* by default.
 
 #### Relevance for multiple observation
 In the case where observation consists of multiple assertions (also called multiple observations), there are two ways of defining a relevant explanation.
