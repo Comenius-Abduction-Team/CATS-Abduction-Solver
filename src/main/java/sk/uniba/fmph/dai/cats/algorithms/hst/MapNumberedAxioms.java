@@ -66,7 +66,7 @@ public class MapNumberedAxioms
 
     @Override
     public boolean isIndexed(OWLAxiom axiom) {
-        return (DEFAULT_INDEX == getIndex(axiom));
+        return (DEFAULT_INDEX != getIndex(axiom));
     }
 
     @Override

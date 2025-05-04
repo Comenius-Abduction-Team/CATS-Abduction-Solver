@@ -82,7 +82,7 @@ public class MapArrayNumberedAxioms
 
     @Override
     public boolean isIndexed(OWLAxiom axiom) {
-        return (DEFAULT_INDEX.equals(getIndex(axiom)));
+        return (!DEFAULT_INDEX.equals(getIndex(axiom)));
     }
 
     @Override

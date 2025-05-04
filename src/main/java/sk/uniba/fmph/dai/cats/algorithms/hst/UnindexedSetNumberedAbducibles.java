@@ -112,7 +112,7 @@ public class UnindexedSetNumberedAbducibles implements INumberedAbducibles {
 
     @Override
     public boolean isIndexed(OWLAxiom axiom) {
-        return unindexed.contains(axiom);
+        return !unindexed.contains(axiom);
     }
 
     @Override
