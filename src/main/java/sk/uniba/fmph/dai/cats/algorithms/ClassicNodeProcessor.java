@@ -92,4 +92,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
         explanationManager.finalisePossibleExplanations();
         explanationManager.groupFinalExplanationsBySize();
     }
+
+    @Override
+    public void storeAbduciblesIfNeeded(IAbducibleAxioms abducibles) {}
 }

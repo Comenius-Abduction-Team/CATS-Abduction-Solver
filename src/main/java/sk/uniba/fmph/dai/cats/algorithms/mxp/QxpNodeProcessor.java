@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
+import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -21,6 +22,8 @@ public class QxpNodeProcessor  implements INodeProcessor {
     protected final SetDivider setDivider;
     protected final ConsistencyChecker consistencyChecker;
     protected final ExplanationManager explanationManager;
+
+    protected Set<OWLAxiom> abducibleAxioms;
 
     public QxpNodeProcessor(AlgorithmSolver solver) {
 
@@ -41,7 +44,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
 
         StaticPrinter.debugPrint("[QXP] Initial QXP");
         solver.removeNegatedObservationFromPath();
-        Explanation explanation = getConflict(solver.path, solver.path, solver.abducibleAxioms.getAxioms(), false);
+        Explanation explanation = getConflict(solver.path, solver.path, abducibleAxioms, false);
         explanationManager.addPossibleExplanation(explanation);
         return true;
     }
@@ -107,6 +110,11 @@ public class QxpNodeProcessor  implements INodeProcessor {
         explanationManager.readyExplanationsToProcess();
         explanationManager.filterToConsistentExplanations();
         explanationManager.filterToMinimalRelevantExplanations();
+    }
+
+    @Override
+    public void storeAbduciblesIfNeeded(IAbducibleAxioms abducibles) {
+        abducibleAxioms = abducibles.getAxioms();
     }
 
 

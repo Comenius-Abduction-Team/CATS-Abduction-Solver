@@ -14,4 +14,6 @@ public interface INodeProcessor {
 
     void postProcessExplanations();
 
+    void storeAbduciblesIfNeeded(IAbducibleAxioms abducibles);
+
 }
