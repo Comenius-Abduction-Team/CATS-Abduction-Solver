@@ -32,7 +32,7 @@ public class HstTreeBuilder implements ITreeBuilder {
     @Override
     public IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles) {
 
-        this.abducibles = new NumberedAxiomsUnindexedSet(abducibles);
+        this.abducibles = new UnindexedSetNumberedAbducibles(abducibles);
 
         //Initially, MIN is set to |COMP|
         globalMin = this.abducibles.size();
@@ -148,9 +148,9 @@ public class HstTreeBuilder implements ITreeBuilder {
         for (OWLAxiom child : node.model.getNegatedData()){
             //For every component C in y with no previously defined index ci,
             // let ci(C) be MIN and decrement MIN afterwards.
-            if (abducibles.shouldBeIndexed(child)){
+            if (!abducibles.isIndexed(child)){
                 if (globalMin > 0){
-                    abducibles.addWithIndex(child,globalMin);
+                    abducibles.assignIndex(child,globalMin);
                     globalMin -= 1;
                 }
                 else

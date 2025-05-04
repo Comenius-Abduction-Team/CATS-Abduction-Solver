@@ -5,9 +5,9 @@ import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 
 public interface INumberedAbducibles extends IAbducibleAxioms {
 
-    boolean shouldBeIndexed(OWLAxiom axiom);
+    boolean isIndexed(OWLAxiom axiom);
 
-    void addWithIndex(OWLAxiom axiom, Integer index);
+    void assignIndex(OWLAxiom axiom, Integer index);
 
     OWLAxiom getAxiomByIndex(int index);
 
