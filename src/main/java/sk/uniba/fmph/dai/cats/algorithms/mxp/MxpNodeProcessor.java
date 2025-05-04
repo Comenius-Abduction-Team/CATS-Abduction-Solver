@@ -32,7 +32,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
 
-        if(Configuration.CONTINUOUS_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
+        if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
             StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
             return true;
         }
@@ -73,13 +73,23 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
             }
 
             explanation.addAxioms(path);
-            if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-                continue;
+
+            if(Configuration.CONTINUOUS_HYBRID_MINIMALITY_CHECKS) {
+                if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
+                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
+                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                    continue;
+                }
+            }
+            else if(Configuration.CHECKING_MINIMALITY_BY_QXP){
+                explanation = getMinimalExplanationByCallingQXP(explanation);
+                if (explanationManager.getPossibleExplanations().contains(explanation)){
+                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
+                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                    continue;
+                }
             }
 
-            if(Configuration.CHECKING_MINIMALITY_BY_QXP){
-                explanation = getMinimalExplanationByCallingQXP(explanation);
-            }
             explanationManager.addPossibleExplanation(explanation);
             if(Configuration.CACHED_CONFLICTS_MEDIAN){
                 setDivider.addPairsOfLiteralsToTable(explanation);

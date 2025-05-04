@@ -32,7 +32,8 @@ public class Configuration {
     public static boolean CHECKING_MINIMALITY_BY_QXP = false;
     public static boolean CACHED_CONFLICTS_LONGEST_CONFLICT = false;
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
-    public static boolean CONTINUOUS_RELEVANCE_CHECKS = false;
+    public static boolean CONTINUOUS_HYBRID_RELEVANCE_CHECKS = false;
+    public static boolean CONTINUOUS_HYBRID_MINIMALITY_CHECKS = false;
     public static boolean CONTINUOUS_MHS_CHECKS = false;
 
     public static boolean CACHE_ABDUCIBLES = true;
