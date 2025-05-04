@@ -174,22 +174,4 @@ public class HstTreeBuilder implements ITreeBuilder {
         return child;
     }
 
-    @Override
-    public void labelNodeWithModel(TreeNode node){
-
-        if (abducibles.areAllAbduciblesIndexed()){
-
-            node.model = new Model();
-            return;
-
-        }
-
-        Model modelToReuse = solver.findAndGetModelToReuse();
-
-        if (modelToReuse == null)
-            return;
-
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
-
-    }
 }

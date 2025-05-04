@@ -69,6 +69,4 @@ public class RootOnlyTreeBuilder implements ITreeBuilder {
         return null;
     }
 
-    @Override
-    public void labelNodeWithModel(TreeNode node){}
 }

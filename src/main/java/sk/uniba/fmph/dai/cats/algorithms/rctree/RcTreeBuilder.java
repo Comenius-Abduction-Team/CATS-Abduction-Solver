@@ -189,10 +189,6 @@ public class RcTreeBuilder implements ITreeBuilder {
 
                 traverseTreeToUpdateIgnoredChildren(polledNode, difference);
 
-                // ??? ? ???
-                // Interchange the sets Cj and Ci in CS (Note that this has the same effect as eliminating Cj from CS.)
-                // ??? ? ???
-
             }
 
             nodes.addAll(polledNode.children);
@@ -283,24 +279,6 @@ public class RcTreeBuilder implements ITreeBuilder {
             currentNode.childrenToIgnore.add(child);
         }
         return child;
-    }
-
-    @Override
-    public void labelNodeWithModel(TreeNode node){
-
-        Model model = solver.findAndGetModelToReuse();
-
-        if (model == null)
-            return;
-
-        node.model = solver.removePathAxiomsFromModel(model);
-
-        RcTreeNode node_ = (RcTreeNode) node;
-
-        for (OWLAxiom axiom : model.getNegatedData()){
-            if (!node_.childrenToIgnore.contains(axiom))
-                node_.childrenToProcess.add(axiom);
-        }
     }
 
 }

@@ -85,6 +85,4 @@ public interface ITreeBuilder {
      */
     OWLAxiom getNextChild();
 
-    void labelNodeWithModel(TreeNode node);
-
 }

@@ -55,9 +55,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
         if (nodeProcessor.shouldPruneBranch(explanation)){
             return true;
         }
-
         return false;
-
     }
 
     @Override
@@ -130,15 +128,4 @@ public class MhsTreeBuilder implements ITreeBuilder {
         return child;
     }
 
-    @Override
-    public void labelNodeWithModel(TreeNode node){
-
-        Model model = solver.findAndGetModelToReuse();
-
-        if (model == null)
-            return;
-
-        node.model = solver.removePathAxiomsFromModel(model);
-
-    }
 }
