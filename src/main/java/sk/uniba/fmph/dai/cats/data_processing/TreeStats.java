@@ -12,8 +12,8 @@ public class TreeStats {
     public List<Level> levels = new ArrayList<>();
 
     private Level currentLevel;
+    private final Level filteringLevel = new Level(-1);
 
-    public double filteringStart, filteringEnd;
 
 //    public Map<Level, LevelStats> levels = new HashMap<>();
 //
@@ -27,6 +27,10 @@ public class TreeStats {
 
     public Level getCurrentLevelStats(){
         return currentLevel;
+    }
+
+    public Level getFilteringStats(){
+        return filteringLevel;
     }
 
     public Level getLevelStats(int level){
@@ -74,8 +78,6 @@ public class TreeStats {
     public String toString() {
         return "TreeStats{" +
                 "levels\n=" + levels +
-                ", filtering_start=" + filteringStart +
-                ", filtering_end=" + filteringEnd +
                 '}';
     }
 
@@ -102,12 +104,8 @@ public class TreeStats {
             buildCsvRow(builder, level);
         }
 
-        Level filteringStats = new Level(-1);
-        filteringStats.start = filteringStart;
-        filteringStats.finish = filteringEnd;
-
         builder.append("f;");
-        filteringStats.buildCsvRow(builder, false);
+        filteringLevel.buildCsvRow(builder, false);
 
         return builder.toString();
     }
@@ -121,25 +119,5 @@ public class TreeStats {
         builder.append(StringFactory.getExplanationsRepresentation(level.explanations));
         builder.append('\n');
 
-    }
-
-    public String buildCsvTablePartialRow(Map<Integer, List<Explanation>> explanationsByLevel){
-
-        StringBuilder builder = new StringBuilder();
-        builder.append(getCsvHeader(false));
-        builder.append('\n');
-
-        for (Level level : levels){
-            buildCsvRow(builder, level);
-        }
-
-        Level filteringStats = new Level(-1);
-        filteringStats.start = filteringStart;
-        filteringStats.finish = filteringEnd;
-
-        builder.append("f;");
-        filteringStats.buildCsvRow(builder, false);
-
-        return builder.toString();
     }
 }

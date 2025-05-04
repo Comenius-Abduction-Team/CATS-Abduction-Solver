@@ -162,9 +162,9 @@ public class AlgorithmSolver {
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
 
-            stats.filteringStart = metrics.getRunningTime();
+            stats.getFilteringStats().start = metrics.getRunningTime();
             nodeProcessor.postProcessExplanations();
-            stats.filteringEnd = metrics.getRunningTime();
+            stats.getFilteringStats().finish = metrics.getRunningTime();
 
             metrics.setEndTime();
             explanationManager.processExplanations(message, stats);

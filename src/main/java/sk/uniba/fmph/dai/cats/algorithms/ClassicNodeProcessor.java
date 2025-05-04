@@ -64,11 +64,13 @@ public class ClassicNodeProcessor implements INodeProcessor {
             if (!ruleChecker.isRelevant(explanation)) {
                 StaticPrinter.debugPrint("[FILTERING] IRRELEVANT EXPLANATION!");
                 stats.getCurrentLevelStats().originalExplanations += 1;
+                stats.getCurrentLevelStats().filteredExplanations += 1;
                 return 1;
             }
             if (!ruleChecker.isConsistent(explanation)) {
                 StaticPrinter.debugPrint("[FILTERING] INCONSISTENT EXPLANATION!");
                 stats.getCurrentLevelStats().originalExplanations += 1;
+                stats.getCurrentLevelStats().filteredExplanations += 1;
                 return 1;
             }
         }

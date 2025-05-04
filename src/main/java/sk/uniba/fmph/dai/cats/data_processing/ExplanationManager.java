@@ -60,7 +60,7 @@ public abstract class ExplanationManager {
         StringBuilder bySize = formatExplanationsBySize();
 
         bySize.insert(0,"Total explanations: " + finalExplanations.size());
-        bySize.append("Time: ").append(stats.filteringEnd);
+        bySize.append("Time: ").append(stats.getFilteringStats().finish);
         if (message != null && !message.isEmpty())
             bySize.append("\n").append(message);
 
@@ -83,6 +83,8 @@ public abstract class ExplanationManager {
             if (!containsContradictoryAxioms(explanation)
                     && ruleChecker.checkConsistencyUsingNewReasoner(explanation)) {
                 filteredExplanations.add(explanation);
+            } else {
+                solver.stats.getFilteringStats().filteredExplanations += 1;
             }
         }
 
@@ -126,6 +128,7 @@ public abstract class ExplanationManager {
         for(Explanation e : explanations){
             if(!ruleChecker.isRelevant(e)){
                 notRelevantExplanations.add(e);
+                solver.stats.getFilteringStats().filteredExplanations += 1;
             }
         }
         explanations.removeAll(notRelevantExplanations);
@@ -186,10 +189,6 @@ public abstract class ExplanationManager {
 
     public List<Explanation> getExplanationsBySize(int size) {
         return filterExplanationsBySize(possibleExplanations, size);
-    }
-
-    public List<Explanation> getExplanationsByLevel(int level) {
-        return filterExplanationsByLevel(possibleExplanations, level);
     }
 
     public void finalisePossibleExplanations(){

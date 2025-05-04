@@ -15,7 +15,7 @@ public class Level {
     public int reusedModels, modelExtractions, storedModels, consistencyChecks;
 
     public int hstGlobalMin;
-    public int originalExplanations, finalExplanations;
+    public int originalExplanations, filteredExplanations, finalExplanations;
 
     public double memory;
 
@@ -69,7 +69,7 @@ public class Level {
                 createdEdges, prunedEdges-explanationEdges, explanationEdges, createdNodes, deletedCreated,
                 reusedModels, modelExtractions, storedModels, consistencyChecks,
                 hstGlobalMin,
-                originalExplanations, originalExplanations-finalExplanations, finalExplanations,
+                originalExplanations, filteredExplanations, finalExplanations,
                 memory,
                 start, finish, finish-start, firstExplanationTime, lastExplanationTime,
                 message, (error ? "error" : null), errorMessage
