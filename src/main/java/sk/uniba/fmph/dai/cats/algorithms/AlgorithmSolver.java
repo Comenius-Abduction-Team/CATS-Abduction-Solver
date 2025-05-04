@@ -16,6 +16,7 @@ import sk.uniba.fmph.dai.cats.data_processing.Level;
 import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
+import sk.uniba.fmph.dai.cats.model.ModelExtractor;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -95,7 +96,7 @@ public class AlgorithmSolver {
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RcTreeBuilder(this);
-        else if (algorithm.isTreeOnly())
+        else if (algorithm.isRootOnly())
             treeBuilder = new RootOnlyTreeBuilder(this);
         else
             treeBuilder = new MhsTreeBuilder(this);
@@ -192,6 +193,7 @@ public class AlgorithmSolver {
         TransformedAbducibles transformedAbduciblesFromInput = new TransformedAbducibles(loader);
         abducibleAxioms = treeBuilder.createAbducibles(transformedAbduciblesFromInput);
         modelManager.setExtractor(new ModelExtractor(loader, abducibleAxioms));
+        nodeProcessor.storeAbduciblesIfNeeded(abducibleAxioms);
     }
 
     protected Void startSolving() throws TimeoutException {

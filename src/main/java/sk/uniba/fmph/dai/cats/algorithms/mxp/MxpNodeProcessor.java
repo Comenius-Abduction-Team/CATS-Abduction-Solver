@@ -50,7 +50,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     public int findExplanations(Explanation explanation, boolean extractModel) {
 
         StaticPrinter.debugPrint("[MXP] Calling MXP");
-        return addExplanationsFoundByMxp();
+        return addExplanationsFoundByMxp(Configuration.ALWAYS_EXTRACT_MODELS_IN_MXP || extractModel);
 
     }
 
@@ -64,9 +64,9 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return result;
     }
 
-    private int addExplanationsFoundByMxp(){
+    private int addExplanationsFoundByMxp(boolean extractModel){
         explanationLargerThanOne = false;
-        List<Explanation> newExplanations = findExplanationsWithMxp();
+        List<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
             if (!explanationLargerThanOne && explanation.getAxioms().size() > 1){
                 explanationLargerThanOne = true;
@@ -100,11 +100,11 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return newExplanations.size();
     }
 
-    private List<Explanation> findExplanationsWithMxp(){
+    private List<Explanation> findExplanationsWithMxp(boolean extractModel){
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
-        for (OWLAxiom a : solver.abducibleAxioms.getAxioms()){
+        for (OWLAxiom a : abducibleAxioms){
             if (!path.contains(a))
                 abduciblesCopy.add(a);
         }
@@ -112,7 +112,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
             setDivider.setIndexesOfExplanations(explanationManager.getPossibleExplanationsSize());
         }
-        Conflict conflict = runMxp(abduciblesCopy, true,true);
+        Conflict conflict = runMxp(abduciblesCopy, true, extractModel);
 
         return conflict.getExplanations();
     }
@@ -157,7 +157,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         }
 
         StaticPrinter.debugPrint("[MXP] Initial MXP");
-        Conflict conflict = runMxp(solver.abducibleAxioms.getAxioms(), false, extractModel);
+        Conflict conflict = runMxp(abducibleAxioms, false, extractModel);
         explanationManager.setPossibleExplanations(conflict.getExplanations());
         return true;
     }

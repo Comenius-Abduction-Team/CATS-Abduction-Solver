@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class Conflict {
+class Conflict {
 
     private Set<OWLAxiom> axioms;
     private List<Explanation> explanations;
@@ -30,7 +30,7 @@ public class Conflict {
         return axioms;
     }
 
-    public List<Explanation> getExplanations() {
+    List<Explanation> getExplanations() {
         if (explanations == null) {
             explanations = new LinkedList<>();
         }

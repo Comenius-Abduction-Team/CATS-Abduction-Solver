@@ -9,16 +9,16 @@ import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 
 import java.util.*;
 
-public class SetDivider {
+class SetDivider {
 
     ExplanationManager explanationManager;
     private final Map<AxiomPair, Integer> tableOfAxiomPairOccurance;
     private final List<Integer> numberOfAxiomPairOccurance;
     private double median = 0;
-    public Set<Integer> notUsedExplanations;
+    Set<Integer> notUsedExplanations;
     private int lastUsedIndex;
 
-    public SetDivider(ExplanationManager explanationManager){
+    SetDivider(ExplanationManager explanationManager){
         this.explanationManager = explanationManager;
         tableOfAxiomPairOccurance = new HashMap<>();
         numberOfAxiomPairOccurance = new ArrayList<>();
@@ -26,34 +26,34 @@ public class SetDivider {
         lastUsedIndex = -1;
     }
 
-    public void decreaseMedian(){
+    private void decreaseMedian(){
         median /= 2;
         if(median < 1){
             median = 0;
         }
     }
 
-    public void setMedian(double median){
+    void setMedian(double median){
         this.median = median;
     }
 
-    public double getMedian(){
+    double getMedian(){
         return median;
     }
 
-    public void setIndexesOfExplanations(int sizeOfCollection){
+    void setIndexesOfExplanations(int sizeOfCollection){
         for(int i = 0; i < sizeOfCollection; i++){
             notUsedExplanations.add(i);
         }
     }
 
-    public void addIndexToIndexesOfExplanations(int index){
+    void addIndexToIndexesOfExplanations(int index){
         if(index != -1){
             notUsedExplanations.add(index);
         }
     }
 
-    public List<AxiomSet> divideIntoSets(Set<OWLAxiom> literals) {
+    List<AxiomSet> divideIntoSets(Set<OWLAxiom> literals) {
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT && explanationManager.getPossibleExplanationsSize() > 0 && lastUsedIndex != -1){
             return divideIntoSetsAccordingTheLongestConflict(literals);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN && explanationManager.getPossibleExplanationsSize() > 0){
@@ -62,7 +62,7 @@ public class SetDivider {
         return divideIntoSetsWithoutCondition(literals);
     }
 
-    public List<AxiomSet> divideIntoSetsWithoutCondition(Set<OWLAxiom> literals){
+    List<AxiomSet> divideIntoSetsWithoutCondition(Set<OWLAxiom> literals){
         List<AxiomSet> dividedLiterals = new ArrayList<>();
 
         dividedLiterals.add(new AxiomSet());
@@ -102,7 +102,7 @@ public class SetDivider {
         return dividedLiterals;
     }
 
-    public int getIndexOfTheLongestAndNotUsedConflict(){
+    int getIndexOfTheLongestAndNotUsedConflict(){
         int indexOfLongestExp = -1;
         int length = 0;
 
@@ -147,7 +147,7 @@ public class SetDivider {
         return dividedLiterals;
     }
 
-    public void addPairsOfLiteralsToTable(Explanation explanation){
+    void addPairsOfLiteralsToTable(Explanation explanation){
         LinkedList<OWLAxiom> expAxioms;
         if (explanation.getAxioms() != null)
             expAxioms = (LinkedList<OWLAxiom>) explanation.getAxioms();
@@ -165,7 +165,7 @@ public class SetDivider {
         setMedianFromListOfAxiomPairOccurance();
     }
 
-    public void addToListOfAxiomPairOccurance(Integer value){
+    void addToListOfAxiomPairOccurance(Integer value){
         int index = 0;
         for (Integer integer : numberOfAxiomPairOccurance) {
             if (integer > value) {

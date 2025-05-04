@@ -36,6 +36,8 @@ public class Configuration {
     public static boolean CONTINUOUS_HYBRID_MINIMALITY_CHECKS = false;
     public static boolean CONTINUOUS_MHS_CHECKS = false;
 
+    public static boolean ALWAYS_EXTRACT_MODELS_IN_MXP = true;
+
     public static boolean CACHE_ABDUCIBLES = true;
 
     public static boolean SORTED_MODELS = false;

@@ -11,7 +11,7 @@ public enum Algorithm {
         }
 
         @Override
-        public boolean isTreeOnly() {
+        public boolean isRootOnly() {
             return true;
         }
     },
@@ -85,12 +85,12 @@ public enum Algorithm {
         }
 
         @Override
-        public boolean isTreeOnly() {
+        public boolean isRootOnly() {
             return true;
         }
     };
 
-    public boolean isTreeOnly(){
+    public boolean isRootOnly(){
         return false;
     }
     public boolean isHst(){

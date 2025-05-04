@@ -97,10 +97,7 @@ public class HstTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode getNextNodeFromTree() {
-        HstTreeNode node = queue.poll();
-        if (node == null)
-            return null;
-        return node;
+        return queue.poll();
     }
 
     @Override
