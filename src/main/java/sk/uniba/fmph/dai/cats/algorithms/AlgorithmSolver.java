@@ -422,13 +422,8 @@ public class AlgorithmSolver {
     }
 
     public Model findAndGetModelToReuse(){
-        boolean modelFound = false;
-
         if (!modelManager.canReuseModel())
-            modelFound = modelManager.findReuseModelForPath(path);
-
-        if (!modelFound && !modelManager.canReuseModel())
-            return null;
+            modelManager.findReuseModelForPath(path);
 
         return modelManager.getReusableModel();
     }
