@@ -32,22 +32,51 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
 
-        if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
-            StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
+        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE)
+            return false;
+
+        if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
+
+            solver.stats.getCurrentLevelStats().explanationEdges += 1;
+
+            if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
+                solver.stats.getCurrentLevelStats().originalExplanations += 1;
+                solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                StaticPrinter.debugPrint("[CLOSING] IRRELEVANT EXPLANATION!");
+                return true;
+            }
+
+            addToExplanations(explanation);
+            StaticPrinter.debugPrint("[CLOSING] IS EXPLANATION!");
             return true;
         }
 
-        if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
-            addToExplanations(explanation);
-            StaticPrinter.debugPrint("[PRUNING] IS EXPLANATION!");
-            solver.stats.getCurrentLevelStats().explanationEdges += 1;
-            return true;
-        }
         return false;
     }
 
     @Override
     public int findExplanations(Explanation explanation, boolean extractModel) {
+
+        explanationLargerThanOne = false;
+
+        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE){
+
+            if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
+
+                solver.stats.getCurrentLevelStats().explanationEdges += 1;
+
+                if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
+                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
+                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                    StaticPrinter.debugPrint("[CLOSING] IRRELEVANT EXPLANATION!");
+                    return 0;
+                }
+
+                addToExplanations(explanation);
+                StaticPrinter.debugPrint("[CLOSING] IS EXPLANATION!");
+                return 0; //explanation WAS found, but it was the path itself, i.e., no explanation larger than |path| can be found
+            }
+        }
 
         StaticPrinter.debugPrint("[MXP] Calling MXP");
         return addExplanationsFoundByMxp(Configuration.ALWAYS_EXTRACT_MODELS_IN_MXP || extractModel);
@@ -65,7 +94,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     }
 
     private int addExplanationsFoundByMxp(boolean extractModel){
-        explanationLargerThanOne = false;
+
         List<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
             if (!explanationLargerThanOne && explanation.getAxioms().size() > 1){

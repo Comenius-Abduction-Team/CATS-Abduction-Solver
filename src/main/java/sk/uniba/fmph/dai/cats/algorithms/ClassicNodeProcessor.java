@@ -5,7 +5,7 @@ import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
-import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 public class ClassicNodeProcessor implements INodeProcessor {
 
@@ -37,12 +37,18 @@ public class ClassicNodeProcessor implements INodeProcessor {
 
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
-        if (Configuration.CONTINUOUS_MHS_CHECKS){
+        if (!Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE){
             if (!ruleChecker.isRelevant(explanation)) {
+                stats.getCurrentLevelStats().originalExplanations += 1;
+                stats.getCurrentLevelStats().filteredExplanations += 1;
+                stats.getCurrentLevelStats().explanationEdges += 1;
                 StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
                 return true;
             }
             if (!ruleChecker.isConsistent(explanation)) {
+                stats.getCurrentLevelStats().originalExplanations += 1;
+                stats.getCurrentLevelStats().filteredExplanations += 1;
+                stats.getCurrentLevelStats().explanationEdges += 1;
                 StaticPrinter.debugPrint("[PRUNING] INCONSISTENT PATH!");
                 return true;
             }
@@ -59,7 +65,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
         stats.getCurrentLevelStats().prunedEdges += 1;
         stats.getCurrentLevelStats().explanationEdges += 1;
 
-        if (!Configuration.CONTINUOUS_MHS_CHECKS) {
+        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE) {
 
             if (!ruleChecker.isRelevant(explanation)) {
                 StaticPrinter.debugPrint("[FILTERING] IRRELEVANT EXPLANATION!");
