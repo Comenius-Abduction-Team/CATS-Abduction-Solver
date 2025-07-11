@@ -34,7 +34,7 @@ A line in the input file can be commented out with a // at the start of the line
 * **-o: \<ontology\>** observation $O$ in the form of an ontology (in any ontology syntax), which has to be written in one line.
 
 #### Algorithm settings:
-* *-alg: \[ mhs | hst | mxp | mhs-mxp | hst-mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
+* *-alg: \[ mhs | hst | rct | mhs-mxp | hst-mxp | rct-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
 * *-t: \<positive integer\>* the time after which the search for explanations terminates. By default, it is not set.
 * *-d: \<positive integer\>* the depth of the HS-tree, when the search terminates. For example, for *-d: 2* search terminates after completing level 1 of HS-tree. By default, it is not set.
 
@@ -110,9 +110,11 @@ Final logs are created only after the search for explanations is complete (it ei
 **Level log**
 *\<time\>__\<input file name\>__level.log*
 
-* final log which contains desired explanations found in a certain level in each line (except the last)
-  * line form: *\<level l\>; \<number of explanations\>; \<level l completion time\>; {\<explanations found in the level l\>}*
-* last line contains the total running time
+* final log which contains detailed statistics about the solver's run
+* the stats are separate for each level of the tree built by the algorithm used
+  * if the algorithm does not build a tree, the log contains only one "level"
+  * the last "level" in the log represents the final filtering of explanations
+* the stats are mostly numbers of occurences of specific actions/events in that level,e.g. how many nodes were created/pruned, how many consistency checks were performed, how many explanations were found and how many of those were filtered out... + average memory usage (in MB)
 
 **Info log**
 *\<time\>__\<input file name\>__info.log*
@@ -133,13 +135,10 @@ Partial logs are created while the solving of the abduction problem is running. 
 * may contain undesired explanations 
 
 **Partial level explanations log**
-*\<time\>__\<input file name\>__partial_level_explanations.log*
+*\<time\>__\<input file name\>__partial_level.log*
 
 * partial log with the same structure as **level log**
-* may contain also undesired explonations 
-
-When solving the abduction problem using MHS-MXP/HST-MXP, all the mentioned logs are produced.
-When using the MHS/HST algorithms, however, only some are produced: **final log**, **explanation times log**, **info log**, **error log** and **partial explanations log**. The reason for this is that other logs would be redundant. For the MHS/HST algorithm, the grouping of explanations according to the length is identical to grouping them according to the levels.
+* may contain also undesired explonations
 
 # License
 
