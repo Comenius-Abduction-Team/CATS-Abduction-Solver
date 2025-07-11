@@ -38,8 +38,6 @@ public class Configuration {
 
     public static boolean ALWAYS_EXTRACT_MODELS_IN_MXP = true;
 
-    public static boolean CACHE_ABDUCIBLES = true;
-
     public static boolean SORT_MODELS = false;
 
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
@@ -59,7 +57,6 @@ public class Configuration {
         String looping = "Looping allowed: " + LOOPING_ALLOWED;
         String negation = "Negation: " +  NEGATION_ALLOWED;
         String mhs_mode = "Algorithm: " + ALGORITHM;
-        String caching = "Abducible caching: " + CACHE_ABDUCIBLES;
         String relevance = "Strict relevance: " + STRICT_RELEVANCE;
         String depth = "Depth limit: ";
         if (DEPTH > 0) depth += DEPTH; else depth += "none";
@@ -67,6 +64,6 @@ public class Configuration {
         if (TIMEOUT > 0) timeout += TIMEOUT; else timeout += "none";
 
         return Arrays.asList(
-                roles, looping, negation, mhs_mode, caching, relevance, depth, timeout);
+                roles, looping, negation, mhs_mode, relevance, depth, timeout);
     }
 }

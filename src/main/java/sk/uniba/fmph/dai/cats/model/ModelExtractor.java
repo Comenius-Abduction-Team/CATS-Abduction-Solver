@@ -7,7 +7,6 @@ import org.semanticweb.owlapi.search.EntitySearcher;
 import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.InputAbducibles;
-import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -204,33 +203,18 @@ public class ModelExtractor {
                 }
             }
 
-            if (Configuration.CACHE_ABDUCIBLES){
-
-                OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                axiom = getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom)){
-                    model.add(axiom);
-                }
-
-                OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                if (!Configuration.NEGATION_ALLOWED)
-                    continue;
-                negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom)){
-                    model.addNegated(negatedAxiom);
-                }
-
+            OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
+            axiom = getFromAbducibles(axiom);
+            if (Objects.nonNull(axiom)){
+                model.add(axiom);
             }
-            else {
 
-                OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                if (abducibleAxioms.contains(axiom))
-                    model.add(axiom);
-
-                OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                if (Configuration.NEGATION_ALLOWED && abducibleAxioms.contains(negatedAxiom))
-                    model.addNegated(negatedAxiom);
-
+            if (!Configuration.NEGATION_ALLOWED)
+                continue;
+            OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
+            negatedAxiom = getFromAbducibles(negatedAxiom);
+            if (Objects.nonNull(negatedAxiom)){
+                model.addNegated(negatedAxiom);
             }
 
         }
@@ -242,36 +226,21 @@ public class ModelExtractor {
                 }
             }
 
-            if (Configuration.CACHE_ABDUCIBLES) {
 
-                OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                axiom = getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom)){
-                    model.addNegated(axiom);
-                }
-
-                if (!Configuration.NEGATION_ALLOWED)
-                    continue;
-                OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom)){
-                    model.add(negatedAxiom);
-
-                }
-
+            OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
+            axiom = getFromAbducibles(axiom);
+            if (Objects.nonNull(axiom)){
+                model.addNegated(axiom);
             }
 
-            else {
-
-                OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
-                if (abducibleAxioms.contains(axiom))
-                    model.addNegated(axiom);
-
-                OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
-                if (Configuration.NEGATION_ALLOWED && abducibleAxioms.contains(negatedAxiom))
-                    model.add(negatedAxiom);
-
+            if (!Configuration.NEGATION_ALLOWED)
+                continue;
+            OWLAxiom negatedAxiom = factory.getOWLClassAssertionAxiom(classExpression.getComplementNNF(), ind);
+            negatedAxiom = getFromAbducibles(negatedAxiom);
+            if (Objects.nonNull(negatedAxiom)){
+                model.add(negatedAxiom);
             }
+
         }
     }
 
@@ -295,32 +264,19 @@ public class ModelExtractor {
                 }
             }
 
-            if (Configuration.CACHE_ABDUCIBLES){
-
-                axiom = (OWLObjectPropertyAssertionAxiom) getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom)){
-                    model.add(axiom);
-                }
-
-                if (!Configuration.NEGATION_ALLOWED)
-                    continue;
-                OWLAxiom negatedAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
-                negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom)){
-                    model.addNegated(negatedAxiom);
-
-                }
-
-            }
-
-            else {
-
-                OWLAxiom neg = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+            axiom = (OWLObjectPropertyAssertionAxiom) getFromAbducibles(axiom);
+            if (Objects.nonNull(axiom)){
                 model.add(axiom);
-                model.addNegated(neg);
-
             }
 
+            if (!Configuration.NEGATION_ALLOWED)
+                continue;
+            OWLAxiom negatedAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+            negatedAxiom = getFromAbducibles(negatedAxiom);
+            if (Objects.nonNull(negatedAxiom)){
+                model.addNegated(negatedAxiom);
+
+            }
 
         }
 
@@ -331,31 +287,18 @@ public class ModelExtractor {
                 }
             }
 
-            if (Configuration.CACHE_ABDUCIBLES){
-
-                OWLAxiom negatedAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
-                negatedAxiom = getFromAbducibles(negatedAxiom);
-                if (Objects.nonNull(negatedAxiom)){
-                    model.add(negatedAxiom);
-                }
-
-                if (!Configuration.NEGATION_ALLOWED)
-                    continue;
-                axiom = getFromAbducibles(axiom);
-                if (Objects.nonNull(axiom)){
-                    model.addNegated(axiom);
-                }
-
+            OWLAxiom negatedAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+            negatedAxiom = getFromAbducibles(negatedAxiom);
+            if (Objects.nonNull(negatedAxiom)){
+                model.add(negatedAxiom);
             }
 
-            else {
-
-                OWLAxiom neg = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+            if (!Configuration.NEGATION_ALLOWED)
+                continue;
+            axiom = getFromAbducibles(axiom);
+            if (Objects.nonNull(axiom)){
                 model.addNegated(axiom);
-                model.add(neg);
-
             }
-
 
         }
 
