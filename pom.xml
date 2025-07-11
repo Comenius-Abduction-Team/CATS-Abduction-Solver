@@ -4,9 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>CATS</name>
+    <description>CATS (Comenius-Abduction-Team Solver) is an experimental tool for solving A-Box abduction problems in description logics. It allows the user to choose from multiple various algorithms.</description>
+
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
+            <distribution>repo</distribution>
+            <comments>Open source license requiring source availability, including for network use.</comments>
+        </license>
+    </licenses>
+
     <groupId>sk.uniba.fmph.dai</groupId>
     <artifactId>cats</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
 <!--    <packaging>jar</packaging>-->
 

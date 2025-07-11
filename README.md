@@ -141,6 +141,11 @@ Partial logs are created while the solving of the abduction problem is running. 
 When solving the abduction problem using MHS-MXP/HST-MXP, all the mentioned logs are produced.
 When using the MHS/HST algorithms, however, only some are produced: **final log**, **explanation times log**, **info log**, **error log** and **partial explanations log**. The reason for this is that other logs would be redundant. For the MHS/HST algorithm, the grouping of explanations according to the length is identical to grouping them according to the levels.
 
+# License
+
+This software is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+See the [LICENSE](./LICENSE) file for more information.
+
 # Acknowledgements
 
 The development of this sofwtare was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
