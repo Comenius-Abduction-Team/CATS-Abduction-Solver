@@ -5,15 +5,14 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 
 import sk.uniba.fmph.dai.cats.common.LogTypes;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.timer.MetricsManager;
+import sk.uniba.fmph.dai.cats.metrics.Level;
+import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ExplanationLogger {

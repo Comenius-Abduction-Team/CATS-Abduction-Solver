@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 import java.util.*;
 

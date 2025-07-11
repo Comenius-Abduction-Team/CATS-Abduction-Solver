@@ -1,11 +1,9 @@
-package sk.uniba.fmph.dai.cats.data_processing;
+package sk.uniba.fmph.dai.cats.metrics;
 
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.data.Explanation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class TreeStats {
 

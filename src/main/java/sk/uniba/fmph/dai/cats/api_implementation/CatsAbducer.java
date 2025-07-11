@@ -18,7 +18,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.timer.MetricsThread;
+import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 
 import java.util.Collection;
 import java.util.Collections;

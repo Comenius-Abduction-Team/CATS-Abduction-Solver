@@ -34,13 +34,13 @@ public class Configuration {
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
     public static boolean CONTINUOUS_HYBRID_RELEVANCE_CHECKS = false;
     public static boolean CONTINUOUS_HYBRID_MINIMALITY_CHECKS = false;
-    public static boolean CONTINUOUS_MHS_CHECKS = false;
+    public static boolean MOVE_CHECKS_AFTER_MODEL_REUSE = false;
 
     public static boolean ALWAYS_EXTRACT_MODELS_IN_MXP = true;
 
     public static boolean CACHE_ABDUCIBLES = true;
 
-    public static boolean SORTED_MODELS = false;
+    public static boolean SORT_MODELS = false;
 
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 

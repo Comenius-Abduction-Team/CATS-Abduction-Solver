@@ -13,7 +13,7 @@ import sk.uniba.fmph.dai.cats.application.ExitCode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.ConsolePrinter;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
-import sk.uniba.fmph.dai.cats.timer.MetricsThread;
+import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 
 import java.io.File;
 import java.util.Set;

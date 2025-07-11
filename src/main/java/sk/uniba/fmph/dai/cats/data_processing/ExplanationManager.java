@@ -5,7 +5,9 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.timer.MetricsManager;
+import sk.uniba.fmph.dai.cats.metrics.Level;
+import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 import java.util.*;
 import java.util.stream.Collectors;

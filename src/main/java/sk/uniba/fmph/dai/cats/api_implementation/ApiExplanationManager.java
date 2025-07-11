@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.api_implementation;
 
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 public class ApiExplanationManager extends ExplanationManager {
 

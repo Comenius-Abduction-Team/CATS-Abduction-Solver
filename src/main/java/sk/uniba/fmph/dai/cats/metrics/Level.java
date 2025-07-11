@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.data_processing;
+package sk.uniba.fmph.dai.cats.metrics;
 
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;

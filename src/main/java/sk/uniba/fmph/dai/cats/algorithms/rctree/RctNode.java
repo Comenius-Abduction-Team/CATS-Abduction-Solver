@@ -4,33 +4,35 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
-import sk.uniba.fmph.dai.cats.data_processing.Level;
+import sk.uniba.fmph.dai.cats.metrics.Level;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
+public class RctNode extends TreeNode implements Comparable<RctNode> {
 
     final int id;
 
+    boolean closed;
+
     OWLAxiom labelAxiom;
 
-    RcTreeNode parent;
+    RctNode parent;
 
     final AxiomSet childrenToIgnore = new AxiomSet();
 
     final List<OWLAxiom> childrenToProcess = new ArrayList<>();
-    final List<RcTreeNode> children = new ArrayList<>();
+    final List<RctNode> children = new ArrayList<>();
 
     final List<OWLAxiom> usedLabels = new ArrayList<>();
 
     Level level;
 
-    RcTreeNode(int id){
+    RctNode(int id){
         this.id = id;
     }
 
-    boolean isSubsetOf(RcTreeNode other){
+    boolean isSubsetOf(RctNode other){
         if (this == other)
             return false;
         if (model.getNegatedData().size() >= other.model.getNegatedData().size())
@@ -38,8 +40,12 @@ public class RcTreeNode extends TreeNode implements Comparable<RcTreeNode> {
         return other.model.getNegatedData().containsAll(model.getNegatedData());
     }
 
+    public void closeNode() {
+        closed = true;
+    }
+
     @Override
-    public int compareTo(RcTreeNode other) {
+    public int compareTo(RctNode other) {
         //return depth.compareTo(other.depth);
         return Integer.compare(id, other.id);
     }

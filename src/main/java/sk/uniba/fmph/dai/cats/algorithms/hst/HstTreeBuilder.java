@@ -14,9 +14,9 @@ public class HstTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
     final INodeProcessor nodeProcessor;
-    final Queue<HstTreeNode> queue = new ArrayDeque<>();
+    final Queue<HstNode> queue = new ArrayDeque<>();
 
-    HstTreeNode parentNode;
+    HstNode parentNode;
 
     int globalMin;
 
@@ -54,9 +54,9 @@ public class HstTreeBuilder implements ITreeBuilder {
 
     }
 
-    private HstTreeNode createNode(Explanation label, Integer depth, int index){
+    private HstNode createNode(Explanation label, Integer depth, int index){
 
-        HstTreeNode node = new HstTreeNode();
+        HstNode node = new HstNode();
         node.index = index;
 
         if (label != null) {
@@ -87,7 +87,7 @@ public class HstTreeBuilder implements ITreeBuilder {
 
     @Override
     public void addNodeToTree(TreeNode node){
-        queue.add((HstTreeNode) node);
+        queue.add((HstNode) node);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class HstTreeBuilder implements ITreeBuilder {
     //int index = node.min; index < node.index; index++
     @Override
     public boolean startIteratingNodeChildren(TreeNode node){
-        parentNode = (HstTreeNode) node;
+        parentNode = (HstNode) node;
 
         if (globalMin > 0)
             indexAxiomsFromModel(parentNode, abducibles);
@@ -141,7 +141,7 @@ public class HstTreeBuilder implements ITreeBuilder {
         return true;
     }
 
-    private void indexAxiomsFromModel(HstTreeNode node, INumberedAbducibles abducibles){
+    private void indexAxiomsFromModel(HstNode node, INumberedAbducibles abducibles){
         for (OWLAxiom child : node.model.getNegatedData()){
             //For every component C in y with no previously defined index ci,
             // let ci(C) be MIN and decrement MIN afterwards.

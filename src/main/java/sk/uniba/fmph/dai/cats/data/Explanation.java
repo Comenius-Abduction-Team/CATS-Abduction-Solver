@@ -3,7 +3,7 @@ package sk.uniba.fmph.dai.cats.data;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.abduction_api.abducer.IExplanation;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.data_processing.Level;
+import sk.uniba.fmph.dai.cats.metrics.Level;
 
 import java.util.*;
 

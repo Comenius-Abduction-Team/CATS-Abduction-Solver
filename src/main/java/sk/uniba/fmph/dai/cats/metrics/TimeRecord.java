@@ -1,4 +1,4 @@
-package sk.uniba.fmph.dai.cats.timer;
+package sk.uniba.fmph.dai.cats.metrics;
 
 class TimeRecord {
     long id;

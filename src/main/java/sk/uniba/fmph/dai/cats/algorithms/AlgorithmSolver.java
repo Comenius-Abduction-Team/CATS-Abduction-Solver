@@ -5,15 +5,15 @@ import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
-import sk.uniba.fmph.dai.cats.algorithms.rctree.RcTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
-import sk.uniba.fmph.dai.cats.data_processing.Level;
-import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
+import sk.uniba.fmph.dai.cats.metrics.Level;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelExtractor;
@@ -21,8 +21,8 @@ import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.timer.MetricsThread;
-import sk.uniba.fmph.dai.cats.timer.MetricsManager;
+import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
+import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -72,7 +72,7 @@ public class AlgorithmSolver {
 
         this.progressManager = progressManager;
 
-        if (Configuration.SORTED_MODELS)
+        if (Configuration.SORT_MODELS)
             modelManager = new InsertSortModelManager(this);
         else
             modelManager = new ModelManager(this);
@@ -95,7 +95,7 @@ public class AlgorithmSolver {
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isRcTree())
-            treeBuilder = new RcTreeBuilder(this);
+            treeBuilder = new RctTreeBuilder(this);
         else if (algorithm.isRootOnly())
             treeBuilder = new RootOnlyTreeBuilder(this);
         else
@@ -295,10 +295,7 @@ public class AlgorithmSolver {
                     continue;
                 }
 
-                if (Configuration.REUSE_OF_MODELS)
-                    modelManager.findReuseModelForPath(path);
-
-                boolean canReuseModel = Configuration.REUSE_OF_MODELS && modelManager.canReuseModel();
+                boolean canReuseModel = Configuration.REUSE_OF_MODELS && modelManager.findReuseModelForPath(path);
 
                 if (!canReuseModel) {
 

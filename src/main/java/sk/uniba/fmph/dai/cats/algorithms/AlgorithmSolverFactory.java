@@ -10,7 +10,7 @@ import sk.uniba.fmph.dai.cats.progress.ConsoleProgressManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.ConsoleLoader;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.timer.MetricsThread;
+import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 
 public class AlgorithmSolverFactory {
 

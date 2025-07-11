@@ -2,7 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
-import sk.uniba.fmph.dai.cats.data_processing.Level;
+import sk.uniba.fmph.dai.cats.metrics.Level;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.ArrayList;
@@ -15,13 +15,9 @@ public class TreeNode {
     public List<OWLAxiom> path = new ArrayList<>();
     public Integer depth = DEFAULT_DEPTH;
     public Model model;
-    public boolean closed, processed;
+    public boolean processed;
 
     public Level assignedLevel;
-
-    public void closeNode() {
-        closed = true;
-    }
 
     @Override
     public String toString() {

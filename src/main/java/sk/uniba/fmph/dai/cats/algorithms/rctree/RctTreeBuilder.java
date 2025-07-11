@@ -6,26 +6,26 @@ import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
-import sk.uniba.fmph.dai.cats.data_processing.TreeStats;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.*;
 
-public class RcTreeBuilder implements ITreeBuilder {
+public class RctTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
     final INodeProcessor nodeProcessor;
     final TreeStats stats;
 
-    final Queue<RcTreeNode> queue  = new PriorityQueue<>();
+    final Queue<RctNode> queue  = new PriorityQueue<>();
 
-    int index = 0;
+    public int idToAssign = 0;
 
-    RcTreeNode root;
+    RctNode root;
 
-    RcTreeNode currentNode;
+    RctNode currentNode;
 
-    public RcTreeBuilder(AlgorithmSolver solver){
+    public RctTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.nodeProcessor = solver.nodeProcessor;
         this.stats = solver.stats;
@@ -55,8 +55,8 @@ public class RcTreeBuilder implements ITreeBuilder {
     }
 
     private int getAndIncreaseId(){
-        int oldIndex = index;
-        index++;
+        int oldIndex = idToAssign;
+        idToAssign++;
         return oldIndex;
     }
 
@@ -71,7 +71,7 @@ public class RcTreeBuilder implements ITreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        root = new RcTreeNode(getAndIncreaseId());
+        root = new RctNode(getAndIncreaseId());
         root.model = modelToReuse;
 
         root.childrenToProcess.addAll(root.model.getNegatedData());
@@ -81,17 +81,17 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label) {
-        return createNode(label, parent.depth + 1, (RcTreeNode) parent);
+        return createNode(label, parent.depth + 1, (RctNode) parent);
     }
 
-    private RcTreeNode createNode(Explanation path, int depth, RcTreeNode parent){
+    private RctNode createNode(Explanation path, int depth, RctNode parent){
 
         Model modelToReuse = solver.findAndGetModelToReuse();
 
         if (modelToReuse == null)
             return null;
 
-        RcTreeNode node = new RcTreeNode(getAndIncreaseId());
+        RctNode node = new RctNode(getAndIncreaseId());
         node.model = solver.removePathAxiomsFromModel(modelToReuse);
         node.path = path.getAxioms();
         node.depth = depth;
@@ -123,7 +123,7 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     @Override
     public void addNodeToTree(TreeNode node) {
-        queue.add((RcTreeNode) node);
+        queue.add((RctNode) node);
     }
 
     @Override
@@ -133,14 +133,14 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode getNextNodeFromTree() {
-        RcTreeNode node = queue.poll();
+        RctNode node = queue.poll();
         //System.out.println(queue.stream().map(n -> n.depth).collect(Collectors.toSet()));
         return node;
     }
 
     @Override
     public boolean startIteratingNodeChildren(TreeNode node){
-        currentNode = (RcTreeNode) node;
+        currentNode = (RctNode) node;
         pruneTree();
         if (currentNode.closed || currentNode.childrenToProcess.isEmpty())
             return false;
@@ -149,12 +149,12 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     private void pruneTree(){
 
-        Queue<RcTreeNode> nodes = new ArrayDeque<>();
+        Queue<RctNode> nodes = new ArrayDeque<>();
         nodes.add(root);
 
         while (!nodes.isEmpty()){
 
-            RcTreeNode polledNode = nodes.poll();
+            RctNode polledNode = nodes.poll();
 
             if (polledNode == currentNode)
                 continue;
@@ -179,9 +179,9 @@ public class RcTreeBuilder implements ITreeBuilder {
                 polledNode.childrenToIgnore.addAll(difference);
                 polledNode.childrenToProcess.removeAll(difference);
 
-                List<RcTreeNode> children = new ArrayList<>(polledNode.children);
+                List<RctNode> children = new ArrayList<>(polledNode.children);
 
-                for (RcTreeNode child : children){
+                for (RctNode child : children){
                     if (difference.contains(child.labelAxiom)){
                         deleteNode(child, polledNode);
                     }
@@ -196,15 +196,15 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     }
 
-    void deleteNode(RcTreeNode child, RcTreeNode parent){
+    void deleteNode(RctNode child, RctNode parent){
 
         parent.children.remove(child);
 
-        Queue<RcTreeNode> localQueue = new ArrayDeque<>();
+        Queue<RctNode> localQueue = new ArrayDeque<>();
         localQueue.add(child);
 
         while (!localQueue.isEmpty()){
-            RcTreeNode node = localQueue.poll();
+            RctNode node = localQueue.poll();
 
             if (node.closed)
                 continue;
@@ -227,17 +227,17 @@ public class RcTreeBuilder implements ITreeBuilder {
 
     }
 
-    private void traverseTreeToUpdateIgnoredChildren(RcTreeNode originalPolledNode, Set<OWLAxiom> difference){
+    private void traverseTreeToUpdateIgnoredChildren(RctNode originalPolledNode, Set<OWLAxiom> difference){
 
-        Queue<RcTreeNode> nodes = new ArrayDeque<>();
+        Queue<RctNode> nodes = new ArrayDeque<>();
         nodes.add(originalPolledNode);
 
         while(!nodes.isEmpty()){
 
-            RcTreeNode polledNode = nodes.poll();
+            RctNode polledNode = nodes.poll();
 
             // for all children n'' of n' update ΘC(n'') to ΘC(n'')\(Cj\Ci)
-            for (RcTreeNode child : polledNode.children) {
+            for (RctNode child : polledNode.children) {
 
                 updateIgnoredChildren(child, difference);
 
@@ -247,7 +247,7 @@ public class RcTreeBuilder implements ITreeBuilder {
         }
     }
 
-    void updateIgnoredChildren(RcTreeNode node, Set<OWLAxiom> difference){
+    void updateIgnoredChildren(RctNode node, Set<OWLAxiom> difference){
         Set<OWLAxiom> removedIgnored = node.childrenToIgnore.removeAllAndReturn(difference);
 
         if (!removedIgnored.isEmpty()){
