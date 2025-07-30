@@ -9,6 +9,7 @@ import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.*;
@@ -134,8 +135,12 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
         for (OWLAxiom a : abducibleAxioms){
-            if (!path.contains(a))
-                abduciblesCopy.add(a);
+            if (path.contains(a))
+                continue;
+            if (Configuration.REMOVE_COMPLEMENTS_FROM_MXP && Configuration.NEGATION_ALLOWED
+                    && path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, a)))
+                continue;
+            abduciblesCopy.add(a);
         }
 
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){

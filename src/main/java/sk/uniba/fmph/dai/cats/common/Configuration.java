@@ -40,6 +40,8 @@ public class Configuration {
 
     public static boolean SORT_MODELS = false;
 
+    public static boolean REMOVE_COMPLEMENTS_FROM_MXP = false;
+
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;
