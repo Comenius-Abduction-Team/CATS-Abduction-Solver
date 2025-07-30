@@ -192,6 +192,17 @@ public class ArgumentParser {
                         System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
+                case "-opt:":
+                    if (next.contains("1")){
+                        Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE = true;
+                    }
+                    if (next.contains("2")){
+                        Configuration.SORT_MODELS = true;
+                    }
+                    if (next.contains("3")) {
+                        Configuration.REMOVE_COMPLEMENTS_FROM_MXP = true;
+                    }
+                    break;
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
                     throw new RuntimeException(message);
