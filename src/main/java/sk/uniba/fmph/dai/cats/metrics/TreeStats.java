@@ -84,10 +84,10 @@ public class TreeStats {
                 "level",
                 "processed nodes", "childless nodes", "(RCT) repeated node processing", "(RCT) deleted processed nodes",
                 "created edges", "pruned edges", "explanation edges", "created nodes", "(RCT) deleted created nodes",
-                "reused models", "model extractions", "stored models", "consistency checks",
+                "reused models", "model extractions", "stored models", "consistency checks", "QXP calls", "MXP calls",
                 "(HST) largest unassigned index",
                 "explanations", "filtered explanations", "final explanations",
-                "memory",
+                "average memory",
                 "start time", "finish time", "duration", "first explanation time", "last explanation time",
                 "message", "error", "error message", "explanations");
     }

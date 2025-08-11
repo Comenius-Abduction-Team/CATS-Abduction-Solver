@@ -175,7 +175,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         Set<OWLAxiom> minimalityPath = new HashSet<>();
 
         consistencyChecker.turnMinimalityCheckingOn(minimalityPath);
-        Explanation newExplanation = getConflict(minimalityPath, new HashSet<>(), potentialExplanations, false);
+        Explanation newExplanation = runQxp(minimalityPath, new HashSet<>(), potentialExplanations, false);
         consistencyChecker.turnMinimalityCheckingOff();
 
         return newExplanation;
@@ -205,6 +205,8 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         }
 
         reasonerManager.addAxiomsToOntology(path);
+
+        solver.currentLevel.mxpCalls++;
 
         if (!initialConsistencyAlreadyChecked && !consistencyChecker.checkOntologyConsistency(extractModel))
             return new Conflict();
@@ -280,12 +282,12 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
             // X ← GETCONFLICT(B ∪ C'2, C'2, C'1)
             path.addAll(conflictC2.getAxioms());
-            Explanation X = getConflict(path, conflictC2.getAxioms(), conflictC1.getAxioms(), extractModel);
+            Explanation X = runQxp(path, conflictC2.getAxioms(), conflictC1.getAxioms(), extractModel);
             path.removeAll(conflictC2.getAxioms());
 
             // temp ← GETCONFLICT(B ∪ X, X, C'2)
             path.addAll(X.getAxioms());
-            Explanation CS = getConflict(path, X.getAxioms(), conflictC2.getAxioms(), extractModel);
+            Explanation CS = runQxp(path, X.getAxioms(), conflictC2.getAxioms(), extractModel);
             // removeAll(X) is inefficient if X is a list and its size is larger than the set itself
             X.getAxioms().forEach(path::remove);
 
