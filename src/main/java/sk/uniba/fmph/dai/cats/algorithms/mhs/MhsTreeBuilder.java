@@ -1,16 +1,14 @@
-package sk.uniba.fmph.dai.cats.algorithms;
+package sk.uniba.fmph.dai.cats.algorithms.mhs;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class MhsTreeBuilder implements ITreeBuilder {
 
@@ -22,8 +20,9 @@ public class MhsTreeBuilder implements ITreeBuilder {
     TreeNode parentNode;
 
     List<OWLAxiom> iteratedChildren;
+    private final Set<Set<OWLAxiom>> pathsInCurrentLevel = new HashSet<>();
 
-    MhsTreeBuilder(AlgorithmSolver solver){
+    public MhsTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.loader = solver.loader;
         this.nodeProcessor = solver.nodeProcessor;
@@ -37,12 +36,12 @@ public class MhsTreeBuilder implements ITreeBuilder {
     @Override
     public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
-        if (solver.isPathAlreadyStored()){
+        if (pathsInCurrentLevel.contains(solver.path)){
             StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
             return true;
         }
 
-        solver.storePath();
+        pathsInCurrentLevel.add(new HashSet<>(solver.path));
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -128,4 +127,8 @@ public class MhsTreeBuilder implements ITreeBuilder {
         return child;
     }
 
+    @Override
+    public void resetLevel() {
+        pathsInCurrentLevel.clear();
+    }
 }

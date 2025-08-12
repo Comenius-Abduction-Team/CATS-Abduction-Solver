@@ -85,4 +85,6 @@ public interface ITreeBuilder {
      */
     OWLAxiom getNextChild();
 
+    default void resetLevel(){}
+
 }
