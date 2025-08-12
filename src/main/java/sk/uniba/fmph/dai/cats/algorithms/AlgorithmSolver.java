@@ -6,6 +6,7 @@ import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.TripleMxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -85,8 +86,13 @@ public class AlgorithmSolver {
 
     void setAlgorithm(Algorithm algorithm){
 
-        if (algorithm.usesMxp())
-            nodeProcessor = new MxpNodeProcessor(this);
+        if (algorithm.usesMxp()){
+            if (Configuration.NEGATION_ALLOWED && Configuration.USE_TRIPLE_MXP)
+                nodeProcessor = new TripleMxpNodeProcessor(this);
+            else
+                nodeProcessor = new MxpNodeProcessor(this);
+        }
+
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
         else

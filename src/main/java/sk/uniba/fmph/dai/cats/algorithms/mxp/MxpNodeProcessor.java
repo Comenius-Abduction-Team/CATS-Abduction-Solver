@@ -96,7 +96,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
     private int addExplanationsFoundByMxp(boolean extractModel){
 
-        List<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
+        Collection<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
             if (!explanationLargerThanOne && explanation.getAxioms().size() > 1){
                 explanationLargerThanOne = true;
@@ -130,14 +130,15 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return newExplanations.size();
     }
 
-    private List<Explanation> findExplanationsWithMxp(boolean extractModel){
+    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel){
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
         for (OWLAxiom a : abducibleAxioms){
             if (path.contains(a))
                 continue;
-            if (Configuration.REMOVE_COMPLEMENTS_FROM_MXP && Configuration.NEGATION_ALLOWED
+            if (Configuration.NEGATION_ALLOWED
+                    && Configuration.REMOVE_COMPLEMENTS_FROM_MXP
                     && path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, a)))
                 continue;
             abduciblesCopy.add(a);
@@ -196,15 +197,20 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return true;
     }
 
-    private Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+        return runMxp(axioms,initialConsistencyAlreadyChecked,extractModel,false);
+    }
 
-        solver.removeNegatedObservationFromPath();
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent){
+
+        if (!subsequent){
+            solver.removeNegatedObservationFromPath();
+            reasonerManager.addAxiomsToOntology(path);
+        }
 
         if (solver.isTimeout()) {
             return new Conflict();
         }
-
-        reasonerManager.addAxiomsToOntology(path);
 
         solver.currentLevel.mxpCalls++;
 

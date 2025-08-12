@@ -42,11 +42,13 @@ public class Configuration {
 
     public static boolean REMOVE_COMPLEMENTS_FROM_MXP = false;
 
+    public static boolean USE_TRIPLE_MXP = false;
+
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;
 
-    /** Use to wrap testing prints in an if block. These block should not get to production code. **/
+    /** Use to wrap testing prints in an if block. These blocks should not get to production code. **/
     public static boolean DEBUG_PRINT = false;
 
     public static boolean LOGGING = true;

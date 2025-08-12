@@ -202,6 +202,9 @@ public class ArgumentParser {
                     if (next.contains("3")) {
                         Configuration.REMOVE_COMPLEMENTS_FROM_MXP = true;
                     }
+                    if (next.contains("4")) {
+                        Configuration.USE_TRIPLE_MXP = true;
+                    }
                     break;
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
