@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.reasoner;
 import org.semanticweb.owlapi.model.*;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,6 @@ public class AxiomManager {
         return owlAxioms;
     }
 
-    /**UPRAVENA FUNKCIA - vrati skutocny komplement**/
     public static OWLAxiom getComplementOfOWLAxiom(Loader loader, OWLAxiom owlAxiom) {
         OWLAxiom complement = null;
         if(owlAxiom.getAxiomType() == AxiomType.CLASS_ASSERTION){
@@ -61,37 +61,17 @@ public class AxiomManager {
         return complement;
     }
 
-    //stara funkcia - vracala komplement v pripade, ak v owlAxiom bola trieda, ale ak tam bol OWLObjectComplementOf, tak to vratilo to iste
-    public static OWLAxiom getComplementOfOWLAxiom2(Loader loader, OWLAxiom owlAxiom) {
-        Set<OWLClass> names = owlAxiom.classesInSignature().collect(Collectors.toSet());
-        String name = "";
-        OWLAxiom complement = null;
+    public static boolean isNegatedClassAssertion(OWLAxiom axiom){
 
-        if (names.size() == 1) {
-            name = names.iterator().next().getIRI().getFragment();
-            OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
-            OWLClassExpression owlClassExpression = ((OWLClassAssertionAxiom) owlAxiom).getClassExpression();
+        if (!axiom.isOfType(AxiomType.CLASS_ASSERTION))
+            return false;
 
-            if (OWLObjectComplementOf.class.isAssignableFrom(owlClassExpression.getClass())) {
-                complement = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, ((OWLClassAssertionAxiom) owlAxiom).getIndividual());
-            } else {
-                complement = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), ((OWLClassAssertionAxiom) owlAxiom).getIndividual());
-            }
-
-        } else {
-            if (OWLObjectPropertyAssertionAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
-                OWLObjectPropertyExpression owlObjectProperty = ((OWLObjectPropertyAssertionAxiom) owlAxiom).getProperty();
-                complement = loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(owlObjectProperty, ((OWLObjectPropertyAssertionAxiom) owlAxiom).getSubject(), ((OWLObjectPropertyAssertionAxiom) owlAxiom).getObject());
-
-            } else if (OWLNegativeObjectPropertyAssertionAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
-                OWLObjectPropertyExpression owlObjectProperty = ((OWLNegativeObjectPropertyAssertionAxiom) owlAxiom).getProperty();
-                complement = loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(owlObjectProperty, ((OWLNegativeObjectPropertyAssertionAxiom) owlAxiom).getSubject(), ((OWLNegativeObjectPropertyAssertionAxiom) owlAxiom).getObject());
-            }
-        }
-        return complement;
+        return DLSyntax.containsNegation(StringFactory.extractClassName(axiom));
     }
 
+    public static boolean isNegatedRoleAssertion(OWLAxiom axiom){
 
+        return axiom.isOfType(AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION);
 
-
+    }
 }

@@ -11,4 +11,9 @@ public class DLSyntax {
 
     public final static String DISPLAY_NEGATION = "¬";
     public final static String IRI_REGEX = "[a-z]*:[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+
+    public static boolean containsNegation(String name) {
+        return name.contains(DISPLAY_NEGATION);
+    }
+
 }

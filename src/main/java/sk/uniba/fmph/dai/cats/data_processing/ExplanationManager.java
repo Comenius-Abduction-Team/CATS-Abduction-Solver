@@ -160,7 +160,7 @@ public abstract class ExplanationManager {
         for (int i = 0; i < explanation.getAxioms().size(); i++) {
             OWLAxiom axiom1 = explanation.getAxioms().get(i);
             String name1 = StringFactory.extractClassName(axiom1);
-            boolean negated1 = containsNegation(name1);
+            boolean negated1 = DLSyntax.containsNegation(name1);
             if (negated1) {
                 name1 = name1.substring(1);
             }
@@ -170,7 +170,7 @@ public abstract class ExplanationManager {
                 if (!axiom1.equals(axiom2) && axiom1.getIndividualsInSignature().equals(axiom2.getIndividualsInSignature())) {
                     String name2 = StringFactory.extractClassName(axiom2);
 
-                    boolean negated2 = containsNegation(name2);
+                    boolean negated2 = DLSyntax.containsNegation(name2);
                     if (negated2) {
                         name2 = name2.substring(1);
                     }
@@ -183,10 +183,6 @@ public abstract class ExplanationManager {
         }
 
         return false;
-    }
-
-    private boolean containsNegation(String name) {
-        return name.contains(DLSyntax.DISPLAY_NEGATION);
     }
 
     public List<Explanation> getExplanationsBySize(int size) {
