@@ -67,7 +67,18 @@ public class Configuration {
         String timeout = "Timeout: ";
         if (TIMEOUT > 0) timeout += TIMEOUT; else timeout += "none";
 
-        return Arrays.asList(
-                roles, looping, negation, mhs_mode, relevance, depth, timeout);
+        List<String> result = new ArrayList<>(Arrays.asList(
+                roles, looping, negation, mhs_mode, relevance, depth, timeout));
+
+        if (MOVE_CHECKS_AFTER_MODEL_REUSE)
+            result.add("Optimisation: fewer conistency checks");
+        if (SORT_MODELS)
+            result.add("Optimisation: model sorting");
+        if (REMOVE_COMPLEMENTS_FROM_MXP)
+            result.add("Optimisation: path complements removed from MXP abducibles");
+        if (USE_TRIPLE_MXP)
+            result.add("Optimisation: triple MXP");
+
+        return result;
     }
 }
