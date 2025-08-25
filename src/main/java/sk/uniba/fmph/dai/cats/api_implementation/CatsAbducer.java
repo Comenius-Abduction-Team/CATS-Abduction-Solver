@@ -44,6 +44,7 @@ public class CatsAbducer implements IThreadAbducer {
     Algorithm algorithm = Algorithm.MHS_MXP;
     boolean strictRelevance = true;
     boolean logging = false;
+    boolean debug = false;
 
     boolean multithread = false;
 
@@ -163,6 +164,11 @@ public class CatsAbducer implements IThreadAbducer {
                             setLogging(logging);
                             i++;
                             continue;
+                        case "-debug":
+                            boolean debug = Boolean.parseBoolean(arguments[i + 1]);
+                            setDebug(debug);
+                            i++;
+                            continue;
                         default:
                             throw new InvalidSolverParameterException(arguments[i], "Unknown solver argument");
                     }
@@ -235,6 +241,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
         Configuration.LOGGING = logging;
+        Configuration.DEBUG_PRINT = true;
         Configuration.ALGORITHM = algorithm;
 
         setDepthInConfiguration();
@@ -344,6 +351,10 @@ public class CatsAbducer implements IThreadAbducer {
 
     public void setLogging(boolean logging) {
         this.logging = logging;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     void appendToLog(String message){

@@ -29,7 +29,7 @@ public class ArgumentParser {
         for (String[] line: lines){
             String new_line = line[0].trim();
 
-            if (new_line.equals("//"))
+            if (new_line.equals("//") || new_line.equals("#"))
                     continue;
 
             if (read_concepts || read_individuals || read_prefixes || read_roles || read_abducibles){
@@ -190,6 +190,20 @@ public class ArgumentParser {
                         Configuration.DEBUG_PRINT = true;
                     } else if (!next.equals("false")) {
                         System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
+                case "-opt:":
+                    if (next.contains("1")){
+                        Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE = true;
+                    }
+                    if (next.contains("2")){
+                        Configuration.SORT_MODELS = true;
+                    }
+                    if (next.contains("3")) {
+                        Configuration.REMOVE_COMPLEMENTS_FROM_MXP = true;
+                    }
+                    if (next.contains("4")) {
+                        Configuration.USE_TRIPLE_MXP = true;
                     }
                     break;
                 default:

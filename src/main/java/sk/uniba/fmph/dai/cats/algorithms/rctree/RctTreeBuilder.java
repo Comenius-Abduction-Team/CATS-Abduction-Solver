@@ -47,11 +47,7 @@ public class RctTreeBuilder implements ITreeBuilder {
             return true;
         }
 
-        if (nodeProcessor.shouldPruneBranch(explanation)){
-            return true;
-        }
-
-        return false;
+        return nodeProcessor.shouldPruneBranch(explanation);
     }
 
     private int getAndIncreaseId(){

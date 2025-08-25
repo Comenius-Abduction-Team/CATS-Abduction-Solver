@@ -40,11 +40,15 @@ public class Configuration {
 
     public static boolean SORT_MODELS = false;
 
+    public static boolean REMOVE_COMPLEMENTS_FROM_MXP = false;
+
+    public static boolean USE_TRIPLE_MXP = false;
+
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;
 
-    /** Use to wrap testing prints in an if block. These block should not get to production code. **/
+    /** Use to wrap testing prints in an if block. These blocks should not get to production code. **/
     public static boolean DEBUG_PRINT = false;
 
     public static boolean LOGGING = true;
@@ -63,7 +67,18 @@ public class Configuration {
         String timeout = "Timeout: ";
         if (TIMEOUT > 0) timeout += TIMEOUT; else timeout += "none";
 
-        return Arrays.asList(
-                roles, looping, negation, mhs_mode, relevance, depth, timeout);
+        List<String> result = new ArrayList<>(Arrays.asList(
+                roles, looping, negation, mhs_mode, relevance, depth, timeout));
+
+        if (MOVE_CHECKS_AFTER_MODEL_REUSE)
+            result.add("Optimisation: fewer conistency checks");
+        if (SORT_MODELS)
+            result.add("Optimisation: model sorting");
+        if (REMOVE_COMPLEMENTS_FROM_MXP)
+            result.add("Optimisation: path complements removed from MXP abducibles");
+        if (USE_TRIPLE_MXP)
+            result.add("Optimisation: triple MXP");
+
+        return result;
     }
 }

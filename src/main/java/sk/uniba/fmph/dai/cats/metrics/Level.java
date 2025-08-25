@@ -14,6 +14,8 @@ public class Level {
     public int createdEdges, prunedEdges, explanationEdges, createdNodes, deletedCreated;
     public int reusedModels, modelExtractions, storedModels, consistencyChecks;
 
+    public int qxpCalls, mxpCalls;
+
     public int hstGlobalMin;
     public int originalExplanations, filteredExplanations, finalExplanations;
 
@@ -67,7 +69,7 @@ public class Level {
         StringFactory.buildCsvRow(builder, addCommas,
                 processedNodes, childlessNodes, repeatedProcessing, deletedProcessed,
                 createdEdges, prunedEdges-explanationEdges, explanationEdges, createdNodes, deletedCreated,
-                reusedModels, modelExtractions, storedModels, consistencyChecks,
+                reusedModels, modelExtractions, storedModels, consistencyChecks, qxpCalls, mxpCalls,
                 hstGlobalMin,
                 originalExplanations, filteredExplanations, finalExplanations,
                 memory,

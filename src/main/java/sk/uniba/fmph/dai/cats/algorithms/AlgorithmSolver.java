@@ -2,9 +2,11 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.mxp.TripleMxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -42,7 +44,6 @@ public class AlgorithmSolver {
 
     // COLLECTIONS
     final public Set<OWLAxiom> path = new HashSet<>();
-    protected final Set<Set<OWLAxiom>> pathsInCertainDepth = new HashSet<>();
     public IAbducibleAxioms abducibleAxioms;
 
     // INTEGERS
@@ -85,8 +86,13 @@ public class AlgorithmSolver {
 
     void setAlgorithm(Algorithm algorithm){
 
-        if (algorithm.usesMxp())
-            nodeProcessor = new MxpNodeProcessor(this);
+        if (algorithm.usesMxp()){
+            if (Configuration.NEGATION_ALLOWED && Configuration.USE_TRIPLE_MXP)
+                nodeProcessor = new TripleMxpNodeProcessor(this);
+            else
+                nodeProcessor = new MxpNodeProcessor(this);
+        }
+
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
         else
@@ -340,7 +346,7 @@ public class AlgorithmSolver {
         StaticPrinter.debugPrint("[TREE] Finished iterating the tree.");
 
         path.clear();
-        pathsInCertainDepth.clear();
+        treeBuilder.resetLevel();
         logger.makePartialLog(currentLevel);
 
         return null;
@@ -372,14 +378,6 @@ public class AlgorithmSolver {
         return new Explanation(axioms, currentLevel, metrics.getRunningTime());
     }
 
-    boolean isPathAlreadyStored(){
-        return pathsInCertainDepth.contains(path);
-    }
-
-    void storePath(){
-        pathsInCertainDepth.add(new HashSet<>(path));
-    }
-
     protected boolean depthLimitReached(){
         return Configuration.DEPTH > 0 && currentDepth == Configuration.DEPTH;
     }
@@ -391,7 +389,7 @@ public class AlgorithmSolver {
             return;
         }
 
-        pathsInCertainDepth.clear();
+        treeBuilder.resetLevel();
         currentLevel.finish = metrics.getRunningTime();
         currentLevel.memory = metrics.measureAverageMemory();
 
@@ -404,14 +402,10 @@ public class AlgorithmSolver {
 
         currentDepth = node.depth;
 
-        // if (node.assignedLevel == null) {
-            currentLevel = stats.getNewLevelStats(currentDepth);
-            currentLevel.start = metrics.getRunningTime();
-            node.assignedLevel = currentLevel;
-//        }
-//        else {
-//            currentLevel = node.assignedLevel;
-//        }
+
+        currentLevel = stats.getNewLevelStats(currentDepth);
+        currentLevel.start = metrics.getRunningTime();
+        node.assignedLevel = currentLevel;
 
 
 

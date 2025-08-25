@@ -9,6 +9,7 @@ import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.*;
@@ -95,7 +96,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
     private int addExplanationsFoundByMxp(boolean extractModel){
 
-        List<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
+        Collection<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
             if (!explanationLargerThanOne && explanation.getAxioms().size() > 1){
                 explanationLargerThanOne = true;
@@ -129,13 +130,18 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return newExplanations.size();
     }
 
-    private List<Explanation> findExplanationsWithMxp(boolean extractModel){
+    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel){
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
         for (OWLAxiom a : abducibleAxioms){
-            if (!path.contains(a))
-                abduciblesCopy.add(a);
+            if (path.contains(a))
+                continue;
+            if (Configuration.NEGATION_ALLOWED
+                    && Configuration.REMOVE_COMPLEMENTS_FROM_MXP
+                    && path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, a)))
+                continue;
+            abduciblesCopy.add(a);
         }
 
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT){
@@ -170,7 +176,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         Set<OWLAxiom> minimalityPath = new HashSet<>();
 
         consistencyChecker.turnMinimalityCheckingOn(minimalityPath);
-        Explanation newExplanation = getConflict(minimalityPath, new HashSet<>(), potentialExplanations, false);
+        Explanation newExplanation = runQxp(minimalityPath, new HashSet<>(), potentialExplanations, false);
         consistencyChecker.turnMinimalityCheckingOff();
 
         return newExplanation;
@@ -191,15 +197,22 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return true;
     }
 
-    private Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+        return runMxp(axioms,initialConsistencyAlreadyChecked,extractModel,false);
+    }
 
-        solver.removeNegatedObservationFromPath();
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent){
+
+        if (!subsequent){
+            solver.removeNegatedObservationFromPath();
+            reasonerManager.addAxiomsToOntology(path);
+        }
 
         if (solver.isTimeout()) {
             return new Conflict();
         }
 
-        reasonerManager.addAxiomsToOntology(path);
+        solver.currentLevel.mxpCalls++;
 
         if (!initialConsistencyAlreadyChecked && !consistencyChecker.checkOntologyConsistency(extractModel))
             return new Conflict();
@@ -275,12 +288,12 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
             // X ← GETCONFLICT(B ∪ C'2, C'2, C'1)
             path.addAll(conflictC2.getAxioms());
-            Explanation X = getConflict(path, conflictC2.getAxioms(), conflictC1.getAxioms(), extractModel);
+            Explanation X = runQxp(path, conflictC2.getAxioms(), conflictC1.getAxioms(), extractModel);
             path.removeAll(conflictC2.getAxioms());
 
             // temp ← GETCONFLICT(B ∪ X, X, C'2)
             path.addAll(X.getAxioms());
-            Explanation CS = getConflict(path, X.getAxioms(), conflictC2.getAxioms(), extractModel);
+            Explanation CS = runQxp(path, X.getAxioms(), conflictC2.getAxioms(), extractModel);
             // removeAll(X) is inefficient if X is a list and its size is larger than the set itself
             X.getAxioms().forEach(path::remove);
 

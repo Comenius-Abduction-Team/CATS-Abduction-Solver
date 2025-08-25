@@ -44,13 +44,15 @@ public class QxpNodeProcessor  implements INodeProcessor {
 
         StaticPrinter.debugPrint("[QXP] Initial QXP");
         solver.removeNegatedObservationFromPath();
-        Explanation explanation = getConflict(solver.path, solver.path, abducibleAxioms, false);
+        Explanation explanation = runQxp(solver.path, solver.path, abducibleAxioms, false);
         explanationManager.addPossibleExplanation(explanation);
         return true;
     }
 
     //                                              B                          D                     C
-    protected Explanation getConflict(Set<OWLAxiom> path, Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, boolean extractModel) {
+    protected Explanation runQxp(Set<OWLAxiom> path, Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, boolean extractModel) {
+
+        solver.currentLevel.qxpCalls++;
 
 //        if (solver.isTimeout()) {
 //            return new Explanation();
@@ -72,14 +74,14 @@ public class QxpNodeProcessor  implements INodeProcessor {
         //B ∪ C1
         path.addAll(sets.get(0).getAxioms());
         //D2 ← GETCONFLICT (B ∪ C1, C1, C2)
-        Explanation D2 = getConflict(path, sets.get(0).getAxioms(), sets.get(1).getAxioms(), extractModel);
+        Explanation D2 = runQxp(path, sets.get(0).getAxioms(), sets.get(1).getAxioms(), extractModel);
         //B ∪ C1 back to B
         path.removeAll(sets.get(0).getAxioms());
 
         //B ∪ D2
         path.addAll(D2.getAxioms());
         //D1 ← GETCONFLICT (B ∪ D2, D2, C1)
-        Explanation D1 = getConflict(path, D2.getAxioms(), sets.get(0).getAxioms(), extractModel);
+        Explanation D1 = runQxp(path, D2.getAxioms(), sets.get(0).getAxioms(), extractModel);
         //B ∪ D2 back to B
         D2.getAxioms().forEach(path::remove);
 
