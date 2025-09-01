@@ -1,6 +1,6 @@
-package sk.uniba.fmph.dai.cats.common;
+package sk.uniba.fmph.dai.cats.data_processing;
 
-public enum LogTypes {
+enum LogTypes {
     INFO,
     FINAL,
     LEVEL,

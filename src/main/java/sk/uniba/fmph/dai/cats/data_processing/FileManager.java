@@ -2,7 +2,6 @@ package sk.uniba.fmph.dai.cats.data_processing;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
-import sk.uniba.fmph.dai.cats.common.LogTypes;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,64 +21,105 @@ public class FileManager {
         map.put(LogTypes.INFO, "info");
         map.put(LogTypes.FINAL, "final");
         map.put(LogTypes.LEVEL, "level");
-        map.put(LogTypes.PARTIAL, "partial_level");
-        map.put(LogTypes.TIMES, "explanation_times");
+        map.put(LogTypes.PARTIAL, "partial-level");
+        map.put(LogTypes.TIMES, "explanation-times");
         map.put(LogTypes.ERROR, "error");
         LOG_PREFIXES = Collections.unmodifiableMap(map);
     }
 
-    public static final String INFO_LOG__PREFIX = "info";
-    public static final String ERROR_LOG__PREFIX = "error";
-    public static final String FINAL_LOG__PREFIX = "final";
-    public static final String LEVEL_LOG__PREFIX = "level";
-    public static final String EXP_TIMES_LOG__PREFIX = "explanation_times";
-    public static final String PARTIAL_LOG__PREFIX = "partial_explanations";
-    public static final String PARTIAL_LEVEL_LOG__PREFIX = "partial_level_explanations";
     public static final String LOG_FILE__POSTFIX = ".log";
     private static String FILE_DIRECTORY = "";
 
-    static void appendToFile(LogTypes type, String time, String log) {
+    static void appendToFile(String fileName, String log) {
         if (!Configuration.LOGGING)
             return;
-        FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
 
-        String fileName = LOG_PREFIXES.get(type);
-
-        createFileIfNotExists(fileName, time);
+        createFileIfNotExists(fileName);
         try {
-            String file_path = getFilePath(fileName, time);
-            Files.write(Paths.get(file_path), log.getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(fileName), log.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
 
-    private static void createFileIfNotExists(String fileName, String time) {
-        File file = new File(getFilePath(fileName, time));
+    static void appendToFile(LogTypes type, String time, String log) {
+        if (!Configuration.LOGGING)
+            return;
+
+        String fileName = createLogFileName(type, time, true);
+
+        createFileIfNotExists(fileName);
+        try {
+            Files.write(Paths.get(fileName), log.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    static boolean checkIfFileExists(String fileName){
+
+        if (fileName.equals(""))
+            return false;
+
+        File file = new File(fileName);
+
+        return file.exists();
+    }
+
+    static void deleteFile(String fileName){
+        new File(fileName).delete();
+    }
+
+    /**
+     * Builds a full relative path to a log of the given type, including the file name.
+     * {@param createDirectory} forces the method to also create the required hierarchy of directories.
+     * If set to false and the directories don't already exist, the method does not create them and instead returns
+     * an empty string.
+     *
+     * @param  type the type of log file
+     * @param  time time when the solver run started
+     * @param  createDirectory whether required directories should be created
+     */
+    static String createLogFileName(LogTypes type, String time, boolean createDirectory){
+        if (FILE_DIRECTORY.equals(""))
+            FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
+
+        String directoryPath = getDirectoryPath();
+        File directory = new File(directoryPath);
+
+        if (!directory.exists()) {
+            if (createDirectory)
+                directory.mkdirs();
+            else
+                return "";
+        }
+
+        return directoryPath.concat(File.separator).concat(time + "_")
+                .concat(Configuration.INPUT_FILE_NAME + "_")
+                .concat(LOG_PREFIXES.get(type))
+                .concat(LOG_FILE__POSTFIX);
+    }
+
+    private static String getDirectoryPath(){
+        if (Configuration.OUTPUT_PATH.isEmpty()) {
+            return getDefaultOutputPath();
+        }
+        else {
+            return FILE_DIRECTORY
+                    .concat(File.separator)
+                    .concat(Configuration.OUTPUT_PATH);
+        }
+    }
+
+    private static void createFileIfNotExists(String fileName) {
+        File file = new File(fileName);
+        if (file.exists())
+            return;
         try {
             file.createNewFile();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
-    }
-
-    private static String getFilePath(String fileName, String time) {
-        String directoryPath;
-
-        if (Configuration.OUTPUT_PATH.isEmpty()) {
-            directoryPath = getDefaultOutputPath();
-        }
-        else {
-            directoryPath = FILE_DIRECTORY
-                    .concat(File.separator)
-                    .concat(Configuration.OUTPUT_PATH);
-        }
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        return directoryPath.concat(File.separator).concat(time + "_").concat(Configuration.INPUT_FILE_NAME + "_").concat(fileName).concat(LOG_FILE__POSTFIX);
     }
 
     private static String getDefaultOutputPath() {

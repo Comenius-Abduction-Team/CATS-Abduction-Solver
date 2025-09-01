@@ -1,9 +1,7 @@
 package sk.uniba.fmph.dai.cats.data_processing;
 
-import org.apache.commons.lang3.StringUtils;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 
-import sk.uniba.fmph.dai.cats.common.LogTypes;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.metrics.Level;
 import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
@@ -23,13 +21,38 @@ public class ExplanationLogger {
 
     final MetricsManager timer;
 
-    private String startTimeText;
+    private String startTimeText, partialLog, levelLog;
 
     public ExplanationLogger(AlgorithmSolver solver) {
         this.solver = solver;
         explanationManager = solver.explanationManager;
         explanationManager.logger = this;
         timer = solver.metrics;
+    }
+
+    void logExplanationsTimes(List<Explanation> explanations){
+        if (!Configuration.LOGGING)
+            return;
+        StringBuilder result = new StringBuilder();
+        for (Explanation e: explanations){
+            result.append(StringFactory.buildCsvRow(false, e.getAcquireTime(), e.size(), e));
+            result.append('\n');
+        }
+        log(LogTypes.TIMES, result);
+    }
+
+    void createFinalLogs(String finalLogContent, String levelLogContent){
+        if (!Configuration.LOGGING)
+            return;
+        log(LogTypes.FINAL, finalLogContent);
+        log(getLevelLogFileName(true), levelLogContent);
+    }
+
+    void clearPartialLog(){
+        if (FileManager.checkIfFileExists(getPartialLogFileName(false))
+                && FileManager.checkIfFileExists(getLevelLogFileName(false))){
+            FileManager.deleteFile(partialLog);
+        }
     }
 
     private String getStartTime(){
@@ -39,7 +62,21 @@ public class ExplanationLogger {
         return startTimeText;
     }
 
-    public void logMessage(List<String> info, String message) {
+    private String getPartialLogFileName(boolean createDirectory){
+        if (partialLog == null)
+            partialLog = FileManager.createLogFileName(LogTypes.PARTIAL, getStartTime(), createDirectory);
+        return partialLog;
+    }
+
+    private String getLevelLogFileName(boolean createDirectory){
+        if (levelLog == null)
+            levelLog = FileManager.createLogFileName(LogTypes.LEVEL, getStartTime(), createDirectory);
+        return levelLog;
+    }
+
+    public void logInfo(List<String> info, String message) {
+        if (!Configuration.LOGGING)
+            return;
         StringBuilder result = new StringBuilder();
         result.append(String.join("\n", info));
 
@@ -50,53 +87,28 @@ public class ExplanationLogger {
     }
 
     public void makeErrorAndPartialLog(Level level, Throwable e) {
+        if (!Configuration.LOGGING)
+            return;
         logError(e);
-        createPartialLevelLog(level);
+        addLevelToPartialLog(level);
 
-//        logExplanationsWithSize(level, false, true, time);
-//        if(Configuration.ALGORITHM.usesMxp()){
-//            logExplanationsWithSize(level + 1, false, true, time);
-//            createPartialLevelLog(level);
-//        }
     }
 
-    public void makePartialLog(Level level) {
-        createPartialLevelLog(level);
-//        time = timer.getTimeForLevel(level);
-//        logExplanationsWithSize(level, false, false, time);
-    }
-
-    public void makeTimeoutPartialLog(Level level) {
-        createPartialLevelLog(level);
-//        time = timer.getTimeForLevel(level);
-//        logExplanationsWithSize(level, true, false, time);
-//        if(Configuration.ALGORITHM.usesMxp()){
-//            logExplanationsWithSize(level + 1, true, false, time);
-//        }
-    }
-
-    private void logExplanationsWithSize(int size, boolean timeout, boolean error, double time) {
+    public void addLevelToPartialLog(Level level) {
         if (!Configuration.LOGGING)
             return;
-        List<Explanation> explanations = explanationManager.getExplanationsBySize(size);
-        String explanationsFormat = StringUtils.join(explanations, ", ");
-        String line = String.format("%d; %d; %.2f%s%s; { %s }\n", size, explanations.size(), time,
-                timeout ? "-TIMEOUT" : "", error ? "-ERROR" : "", explanationsFormat);
-        //FileManager.appendToFile(FileManager.PARTIAL_LOG__PREFIX, getStartTime(), line);
+        String content = buildLevelContent(level);
+        log(getPartialLogFileName(true), content);
     }
 
-    private void createPartialLevelLog(Level level){
-        if (!Configuration.LOGGING)
-            return;
-
+    private String buildLevelContent(Level level){
         StringBuilder builder = new StringBuilder();
         if (level.depth == 0){
             builder.append(TreeStats.getCsvHeader(false));
             builder.append('\n');
         }
-
         solver.stats.buildCsvRow(builder,level);
-        log(LogTypes.PARTIAL, builder);
+        return builder.toString();
     }
 
     private void logError(Throwable e) {
@@ -106,19 +118,28 @@ public class ExplanationLogger {
         log(LogTypes.ERROR, result);
     }
 
-    void logExplanationsTimes(List<Explanation> explanations){
-        if (!Configuration.LOGGING)
-            return;
-        StringBuilder result = new StringBuilder();
-        for (Explanation e: explanations){
-            result.append(StringFactory.buildCsvRow(false, e.getAcquireTime(), e));
-            result.append('\n');
-        }
-        log(LogTypes.TIMES, result);
+    /**
+     * Appends content to a log file of a given type. If the log file does not exist, it is created.
+     * This should be used for logs that should be created by this method call and not reused again, i.e., their file
+     * name does not need to be reused elsewhere in code.
+     *
+     * @param  type the type of log file
+     * @param  data content that is converted into string and appended into the log file
+     */
+    private void log(LogTypes type, Object data){
+        String fileName = FileManager.createLogFileName(type, getStartTime(), true);
+        FileManager.appendToFile(fileName, data.toString());
     }
 
-    void log(LogTypes type, Object data){
-        FileManager.appendToFile(type, getStartTime(), data.toString());
+    /**
+     * Appends content to a log file of a given type. If the log file does not exist, it is created.
+     * This should be used for logs that are reused elsewhere.
+     *
+     * @param  fileName name of the log file
+     * @param  data content that is converted into string and appended into the log file
+     */
+    private void log(String fileName, Object data){
+        FileManager.appendToFile(fileName, data.toString());
     }
 
 }

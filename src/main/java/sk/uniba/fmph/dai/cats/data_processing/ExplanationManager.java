@@ -68,13 +68,9 @@ public abstract class ExplanationManager {
 
         StaticPrinter.print(bySize.toString());
 
-//        System.out.println();
-//        System.out.println(stats.buildCsvTable());
-
-        logger.log(LogTypes.FINAL, bySize);
-        logger.log(LogTypes.LEVEL, stats.buildCsvTable());
-
+        logger.createFinalLogs(bySize.toString(), stats.buildCsvTable());
         logger.logExplanationsTimes(finalExplanations);
+        logger.clearPartialLog();
 
     }
 

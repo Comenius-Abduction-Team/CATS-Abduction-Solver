@@ -145,7 +145,7 @@ public class AlgorithmSolver {
                     future.cancel(true);
                     message += "Time-out reached! ";
                     currentLevel.message = "time-out";
-                    logger.makeTimeoutPartialLog(currentLevel);
+                    logger.addLevelToPartialLog(currentLevel);
                 }
                 else {
                     if (!(future == null))
@@ -176,8 +176,7 @@ public class AlgorithmSolver {
             metrics.setEndTime();
             explanationManager.processExplanations(message, stats);
 
-            if (!message.isEmpty())
-                logger.logMessage(Configuration.getInfo(), message);
+            logger.logInfo(Configuration.getInfo(), message);
         }
 
     }
@@ -219,7 +218,7 @@ public class AlgorithmSolver {
         currentLevel.createdNodes = 1;
 
         if(isTimeout()) {
-            logger.makeTimeoutPartialLog(currentLevel);
+            logger.addLevelToPartialLog(currentLevel);
             throw new TimeoutException();
         }
 
@@ -240,7 +239,7 @@ public class AlgorithmSolver {
             }
 
             if(isTimeout()){
-                logger.makeTimeoutPartialLog(currentLevel);
+                logger.addLevelToPartialLog(currentLevel);
                 throw new TimeoutException();
             }
 
@@ -277,7 +276,7 @@ public class AlgorithmSolver {
                 currentLevel.createdEdges += 1;
 
                 if(isTimeout()){
-                    logger.makeTimeoutPartialLog(currentLevel);
+                    logger.addLevelToPartialLog(currentLevel);
                     throw new TimeoutException();
                 }
 
@@ -306,7 +305,7 @@ public class AlgorithmSolver {
                 if (!canReuseModel) {
 
                     if (isTimeout()){
-                        logger.makeTimeoutPartialLog(currentLevel);
+                        logger.addLevelToPartialLog(currentLevel);
                         throw new TimeoutException();
                     }
 
@@ -326,7 +325,7 @@ public class AlgorithmSolver {
                 }
 
                 if (isTimeout()){
-                    logger.makeTimeoutPartialLog(currentLevel);
+                    logger.addLevelToPartialLog(currentLevel);
                     throw new TimeoutException();
                 }
 
@@ -347,7 +346,7 @@ public class AlgorithmSolver {
 
         path.clear();
         treeBuilder.resetLevel();
-        logger.makePartialLog(currentLevel);
+        logger.addLevelToPartialLog(currentLevel);
 
         return null;
 
@@ -395,7 +394,7 @@ public class AlgorithmSolver {
 
         if (node.depth > maxDepth) {
             maxDepth = node.depth;
-            logger.makePartialLog(currentLevel);
+            logger.addLevelToPartialLog(currentLevel);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
         }
