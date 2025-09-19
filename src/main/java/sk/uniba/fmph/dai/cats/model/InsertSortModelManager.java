@@ -3,24 +3,23 @@ package sk.uniba.fmph.dai.cats.model;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class InsertSortModelManager extends ModelManager {
 
     public InsertSortModelManager(AlgorithmSolver solver){
-        stats = solver.stats;
-        models = new TreeSet<>();
+        super(solver);
+    }
+
+    @Override
+    protected Collection<Model> createModelCollection() {
+        return new TreeSet<>();
     }
 
     @Override
     protected boolean findReusableModel(Model model){
-
-//        Model foundModel = models.stream().filter(model::equals).findFirst().orElse(null);
-//        if (foundModel == null)
-//            return false;
-//        modelToReuse = foundModel;
-//        return true;
 
         for (Model storedModel : models) {
 

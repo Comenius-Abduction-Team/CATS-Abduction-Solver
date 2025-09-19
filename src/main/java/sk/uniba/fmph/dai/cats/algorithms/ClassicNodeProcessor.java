@@ -2,9 +2,11 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
-import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.Event;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 public class ClassicNodeProcessor implements INodeProcessor {
@@ -39,17 +41,13 @@ public class ClassicNodeProcessor implements INodeProcessor {
     public boolean shouldPruneBranch(Explanation explanation) {
         if (!Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE){
             if (!ruleChecker.isRelevant(explanation)) {
-                stats.getCurrentLevelStats().originalExplanations += 1;
-                stats.getCurrentLevelStats().filteredExplanations += 1;
                 stats.getCurrentLevelStats().explanationEdges += 1;
-                StaticPrinter.debugPrint("[PRUNING] IRRELEVANT EXPLANATION!");
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return true;
             }
             if (!ruleChecker.isConsistent(explanation)) {
-                stats.getCurrentLevelStats().originalExplanations += 1;
-                stats.getCurrentLevelStats().filteredExplanations += 1;
                 stats.getCurrentLevelStats().explanationEdges += 1;
-                StaticPrinter.debugPrint("[PRUNING] INCONSISTENT PATH!");
+                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
                 return true;
             }
         }
@@ -62,21 +60,16 @@ public class ClassicNodeProcessor implements INodeProcessor {
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
             return 0;
 
-        stats.getCurrentLevelStats().prunedEdges += 1;
-        stats.getCurrentLevelStats().explanationEdges += 1;
+        EventPublisher.publishGenericEvent(solver, EventType.EXPLANATION_EDGE);
 
         if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE) {
 
             if (!ruleChecker.isRelevant(explanation)) {
-                StaticPrinter.debugPrint("[FILTERING] IRRELEVANT EXPLANATION!");
-                stats.getCurrentLevelStats().originalExplanations += 1;
-                stats.getCurrentLevelStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return 1;
             }
             if (!ruleChecker.isConsistent(explanation)) {
-                StaticPrinter.debugPrint("[FILTERING] INCONSISTENT EXPLANATION!");
-                stats.getCurrentLevelStats().originalExplanations += 1;
-                stats.getCurrentLevelStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
                 return 1;
             }
         }
@@ -87,10 +80,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
 
     @Override
     public boolean shouldCloseNode(int explanationsFound) {
-        boolean result = explanationsFound > 0;
-        if (result)
-            StaticPrinter.debugPrint("[CLOSING] EXPLANATION FOUND!");
-        return result;
+        return explanationsFound > 0;
     }
 
     @Override

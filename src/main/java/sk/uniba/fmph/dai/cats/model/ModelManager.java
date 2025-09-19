@@ -2,7 +2,8 @@ package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
-import sk.uniba.fmph.dai.cats.metrics.TreeStats;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 
 import java.util.*;
 
@@ -10,19 +11,21 @@ public class ModelManager {
 
     ModelExtractor extractor;
 
-    Collection<Model> models;
+    protected final Collection<Model> models;
 
-    Model modelToReuse;
+    protected Model modelToReuse;
 
-    TreeStats stats;
-
-    protected ModelManager(){}
+    private final AlgorithmSolver solver;
 
     public ModelManager(AlgorithmSolver solver){
 
-        models = new ArrayList<>();
-        stats = solver.stats;
+        this.solver = solver;
+        models = createModelCollection();
 
+    }
+
+    protected Collection<Model> createModelCollection(){
+        return new ArrayList<>();
     }
 
     public void setExtractor(ModelExtractor extractor) {
@@ -43,7 +46,7 @@ public class ModelManager {
 
     private void add(Model model){
         models.add(model);
-        stats.getCurrentLevelStats().storedModels++;
+        EventPublisher.publishGenericEvent(solver, EventType.MODEL_STORED);
     }
 
     protected boolean findReusableModel(Model model){
