@@ -6,4 +6,6 @@ public interface IEventSubscriber {
 
     void processEvent(Event event);
 
+    default void setSolver(AlgorithmSolver solver){}
+
 }
