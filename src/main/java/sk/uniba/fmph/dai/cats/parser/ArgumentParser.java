@@ -192,7 +192,7 @@ public class ArgumentParser {
                         System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
-                case "-opt:":
+                /*case "-opt:":
                     if (next.contains("1")){
                         Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE = true;
                     }
@@ -205,7 +205,7 @@ public class ArgumentParser {
                     if (next.contains("4")) {
                         Configuration.USE_TRIPLE_MXP = true;
                     }
-                    break;
+                    break;*/
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
                     throw new RuntimeException(message);
@@ -260,11 +260,11 @@ public class ArgumentParser {
     }
 
     private void add_axiom_based_abd(String[] abd){
-        String assertion = "";
+        StringBuilder assertion = new StringBuilder();
         for(String abd1 : abd){
-            assertion += abd1 + " ";
+            assertion.append(abd1).append(" ");
         }
-        Configuration.AXIOM_BASED_ABDUCIBLES.add(assertion);
+        Configuration.AXIOM_BASED_ABDUCIBLES.add(assertion.toString());
     }
 
     private ArrayList<String[]> read_input_file(String input_file_path) {

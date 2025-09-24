@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class ConsistencyChecker {
 
-    final ModelManager modelManager;
+    ModelManager modelManager;
     final ReasonerManager reasonerManager;
     final Loader loader;
     final Set<OWLAxiom> path;
