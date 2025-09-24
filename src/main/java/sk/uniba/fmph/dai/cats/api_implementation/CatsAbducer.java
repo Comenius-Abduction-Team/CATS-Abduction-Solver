@@ -207,6 +207,9 @@ public class CatsAbducer implements IThreadAbducer {
 
         solver = AlgorithmSolverFactory.createApiSolver(timer, algorithm, this);
 
+        if (subscribersToRegister == null)
+            return;
+
         for (IEventSubscriber subscriber : subscribersToRegister){
             EventPublisher.registerSubscriber(solver, subscriber);
             subscriber.setSolver(solver);
