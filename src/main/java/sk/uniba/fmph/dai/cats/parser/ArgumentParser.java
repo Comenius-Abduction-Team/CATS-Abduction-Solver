@@ -58,12 +58,10 @@ public class ArgumentParser {
             boolean silentTrue = false;
             String next = "";
 
-            try {
+            if (line.length == 1)
+                silentTrue = true;
+            else
                 next = line[1];
-            } catch (ArrayIndexOutOfBoundsException e){
-                if (line.length == 1)
-                    silentTrue = true;
-            }
 
             switch(new_line) {
                 case "-f:":
@@ -76,13 +74,12 @@ public class ArgumentParser {
                     break;
                 case "-o:":
                 case "-o":
-                    String observation = String.join(" ", line).replace("-o: ", "");
-                    Configuration.OBSERVATION = observation;
+                    Configuration.OBSERVATION = String.join(" ", line).replace("-o: ", "");
                     break;
                 case "-out:":
                 case "-out":
                     String path = String.join(" ", line).replace("-out: ", "");
-                    if (path.matches("^[\\w\\\\/]*[\\w]+$")) {
+                    if (path.matches("^[\\w\\\\/]*\\w+$")) {
                         Configuration.OUTPUT_PATH = path;
                     } else {
                         String message = "Wrong output path -out " + path + "\nOutput path should contain only alphanumeric symbols, _ and separators (\\,/) and cannot end with a separator";
@@ -105,20 +102,20 @@ public class ArgumentParser {
                 case "-d:":
                 case "-d":
                     try {
-                        Configuration.DEPTH = Integer.valueOf(next);
+                        Configuration.DEPTH = Integer.parseInt(next);
                     }
                     catch (NumberFormatException e) {
-                        String message = "Wrong tree depth -d " + next + ", choose a whole number value";
+                        String message = "Wrong tree depth -d " + next + ", must be an integer!";
                         throw new RuntimeException(message);
                     }
                     break;
                 case "-t:":
                 case "-t":
                     try {
-                        Configuration.TIMEOUT = Long.valueOf(next);
+                        Configuration.TIMEOUT = Long.parseLong(next);
                     }
                     catch (NumberFormatException e) {
-                        String message = "Wrong timeout value -t " + next + ", choose a whole number value";
+                        String message = "Wrong timeout value -t " + next + ", must be an integer!";
                         throw new RuntimeException(message);
                     }
                     break;
@@ -158,13 +155,13 @@ public class ArgumentParser {
                 case "-l":
                     if (next.equals("false")) {
                         Configuration.LOOPING_ALLOWED = false;
-                    } else if (!next.equals("true")) {
+                    } else if (!silentTrue && !next.equals("true")) {
                         System.err.println("Wrong looping allowed value -l" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-r:":
                 case "-r":
-                    if (next.equals("true")) {
+                    if (silentTrue || next.equals("true")) {
                         Configuration.ROLES_IN_EXPLANATIONS_ALLOWED = true;
                     } else if (!next.equals("false")) {
                         System.err.println("Wrong roles in explanations allowed value -r" + next + ", allowed values are 'true' and 'false'");
@@ -174,14 +171,14 @@ public class ArgumentParser {
                 case "-sR":
                     if (next.equals("false")) {
                         Configuration.STRICT_RELEVANCE = false;
-                    } else if (!next.equals("true")) {
+                    } else if (!silentTrue && !next.equals("true")) {
                         System.err.println("Wrong strict relevance value -sR" + next + ", allowed values are 'true' and 'false'");
                 }
                 case "-n:":
                 case "-n":
                     if (next.equals("false")) {
                         Configuration.NEGATION_ALLOWED = false;
-                    } else if (!next.equals("true")) {
+                    } else if (!silentTrue && !next.equals("true")) {
                         System.err.println("Wrong negation allowed value -n" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
@@ -189,7 +186,7 @@ public class ArgumentParser {
                 case "-log":
                     if (next.equals("false")) {
                         Configuration.LOGGING = false;
-                    } else if (!next.equals("true")) {
+                    } else if (!silentTrue && !next.equals("true")) {
                         System.err.println("Wrong logging value -log" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
@@ -207,7 +204,7 @@ public class ArgumentParser {
                     break;
                 case "-p:":
                 case "-p":
-                    if (next.equals("true")) {
+                    if (silentTrue || next.equals("true")) {
                         Configuration.PRINT_PROGRESS = true;
                     } else if (!next.equals("false")) {
                         System.err.println("Wrong progress value -p" + next + ", allowed values are 'true' and 'false'");
@@ -215,7 +212,7 @@ public class ArgumentParser {
                     break;
                 case "-debug:":
                 case "-debug":
-                    if (next.equals("true")){
+                    if (silentTrue || next.equals("true")){
                         Configuration.DEBUG_PRINT = true;
                     } else if (!next.equals("false")) {
                         System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");

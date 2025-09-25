@@ -45,6 +45,8 @@ public class Configuration {
 
     public static boolean LOGGING = true;
 
+    public static boolean FORCED_OPTIMISATIONS = false;
+
     public static final Set<Optimisation> optimisations = new HashSet<>();
 
     public static List<String> getInfo() {
