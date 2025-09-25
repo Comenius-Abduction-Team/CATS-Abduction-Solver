@@ -54,9 +54,20 @@ public class ArgumentParser {
                 }
                 continue;
             }
-            String next = line[1];
+
+            boolean silentTrue = false;
+            String next = "";
+
+            try {
+                next = line[1];
+            } catch (ArrayIndexOutOfBoundsException e){
+                if (line.length == 1)
+                    silentTrue = true;
+            }
+
             switch(new_line) {
                 case "-f:":
+                case "-f":
                     if (!(new File(next).exists())){
                         String message = "Could not open -f file " + next;
                         throw new RuntimeException(message);
@@ -64,10 +75,12 @@ public class ArgumentParser {
                     Configuration.INPUT_ONT_FILE = next;
                     break;
                 case "-o:":
+                case "-o":
                     String observation = String.join(" ", line).replace("-o: ", "");
                     Configuration.OBSERVATION = observation;
                     break;
                 case "-out:":
+                case "-out":
                     String path = String.join(" ", line).replace("-out: ", "");
                     if (path.matches("^[\\w\\\\/]*[\\w]+$")) {
                         Configuration.OUTPUT_PATH = path;
@@ -90,6 +103,7 @@ public class ArgumentParser {
 //                    break;
 
                 case "-d:":
+                case "-d":
                     try {
                         Configuration.DEPTH = Integer.valueOf(next);
                     }
@@ -99,6 +113,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-t:":
+                case "-t":
                     try {
                         Configuration.TIMEOUT = Long.valueOf(next);
                     }
@@ -108,6 +123,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-aI:":
+                case "-aI":
                     if (next.equals("{")){
                         read_individuals = true;
                     } else {
@@ -115,6 +131,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-aC:":
+                case "-aC":
                     if (next.equals("{")){
                         read_concepts = true;
                     } else {
@@ -122,6 +139,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-aR:":
+                case "-aR":
                     if (next.equals("{")){
                         read_roles = true;
                     } else {
@@ -129,6 +147,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-abd:":
+                case "-abd":
                     if (next.equals("{")){
                         read_abducibles = true;
                     } else {
@@ -136,6 +155,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-l:":
+                case "-l":
                     if (next.equals("false")) {
                         Configuration.LOOPING_ALLOWED = false;
                     } else if (!next.equals("true")) {
@@ -143,6 +163,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-r:":
+                case "-r":
                     if (next.equals("true")) {
                         Configuration.ROLES_IN_EXPLANATIONS_ALLOWED = true;
                     } else if (!next.equals("false")) {
@@ -150,12 +171,14 @@ public class ArgumentParser {
                     }
                     break;
                 case "-sR:":
+                case "-sR":
                     if (next.equals("false")) {
                         Configuration.STRICT_RELEVANCE = false;
                     } else if (!next.equals("true")) {
                         System.err.println("Wrong strict relevance value -sR" + next + ", allowed values are 'true' and 'false'");
                 }
                 case "-n:":
+                case "-n":
                     if (next.equals("false")) {
                         Configuration.NEGATION_ALLOWED = false;
                     } else if (!next.equals("true")) {
@@ -163,6 +186,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-log:":
+                case "-log":
                     if (next.equals("false")) {
                         Configuration.LOGGING = false;
                     } else if (!next.equals("true")) {
@@ -170,6 +194,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-abdF:":
+                case "-abdF":
                     if (!(new File(next).exists())){
                         String message = "Could not open -abdF file " + next;
                         throw new RuntimeException(message);
@@ -177,9 +202,11 @@ public class ArgumentParser {
                     Configuration.ABDUCIBLES_FILE_NAME = next;
                     break;
                 case "-alg:":
+                case "-alg":
                     chooseAlgorithm(next);
                     break;
                 case "-p:":
+                case "-p":
                     if (next.equals("true")) {
                         Configuration.PRINT_PROGRESS = true;
                     } else if (!next.equals("false")) {
@@ -187,6 +214,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-debug:":
+                case "-debug":
                     if (next.equals("true")){
                         Configuration.DEBUG_PRINT = true;
                     } else if (!next.equals("false")) {
@@ -194,6 +222,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-opt:":
+                case "-opt":
                     Configuration.FORCED_OPTIMISATIONS = true;
                     if (next.contains("1")){
                         Configuration.optimisations.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
