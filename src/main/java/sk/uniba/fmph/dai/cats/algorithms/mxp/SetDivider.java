@@ -18,6 +18,8 @@ class SetDivider {
     Set<Integer> notUsedExplanations;
     private int lastUsedIndex;
 
+    private final Random rng = new Random();
+
     SetDivider(ExplanationManager explanationManager){
         this.explanationManager = explanationManager;
         tableOfAxiomPairOccurance = new HashMap<>();
@@ -57,7 +59,7 @@ class SetDivider {
         if(Configuration.CACHED_CONFLICTS_LONGEST_CONFLICT && explanationManager.getPossibleExplanationsSize() > 0 && lastUsedIndex != -1){
             return divideIntoSetsAccordingTheLongestConflict(literals);
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN && explanationManager.getPossibleExplanationsSize() > 0){
-            return divideIntoSetsAccordingTableOfLiteralsPairOccurrence(literals);
+            return divideIntoSetsAccordingToLiteralsPairOccurrence(literals);
         }
         return divideIntoSetsWithoutCondition(literals);
     }
@@ -74,6 +76,38 @@ class SetDivider {
             dividedLiterals.get(count % 2).add(owlAxiom);
             count++;
         }
+        return dividedLiterals;
+    }
+
+    //fully random set division
+    List<AxiomSet> divideIntoSetsRandomly(Set<OWLAxiom> literals){
+        List<AxiomSet> dividedLiterals = new ArrayList<>();
+
+        dividedLiterals.add(new AxiomSet());
+        dividedLiterals.add(new AxiomSet());
+
+        for (OWLAxiom owlAxiom : literals) {
+            dividedLiterals.get(rng.nextInt(2)).add(owlAxiom);
+        }
+        return dividedLiterals;
+    }
+
+    // elements are chosen randomly, but both sets have the same size if possible
+    List<AxiomSet> divideIntoEqualRandomSets(Set<OWLAxiom> literals){
+        List<OWLAxiom> literalsCopy = new ArrayList<>(literals);
+        List<AxiomSet> dividedLiterals = new ArrayList<>();
+
+        dividedLiterals.add(new AxiomSet());
+        dividedLiterals.add(new AxiomSet());
+        int index = 0;
+
+        while (!literalsCopy.isEmpty()){
+            int literalsIndex = rng.nextInt(literalsCopy.size());
+            OWLAxiom chosenAxiom = literalsCopy.remove(literalsIndex);
+            dividedLiterals.get(index).add(chosenAxiom);
+            index = (index + 1) % 2;
+        }
+
         return dividedLiterals;
     }
 
@@ -120,7 +154,7 @@ class SetDivider {
         return indexOfLongestExp;
     }
 
-    private List<AxiomSet> divideIntoSetsAccordingTableOfLiteralsPairOccurrence(Set<OWLAxiom> literals){
+    private List<AxiomSet> divideIntoSetsAccordingToLiteralsPairOccurrence(Set<OWLAxiom> literals){
         Set<OWLAxiom> axiomsFromLiterals = new HashSet<>(literals);
         List<AxiomSet> dividedLiterals = new ArrayList<>();
         dividedLiterals.add(new AxiomSet());
