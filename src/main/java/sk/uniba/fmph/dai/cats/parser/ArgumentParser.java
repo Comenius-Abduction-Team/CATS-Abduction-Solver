@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.parser;
 
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
@@ -192,20 +193,21 @@ public class ArgumentParser {
                         System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
-                /*case "-opt:":
+                case "-opt:":
+                    Configuration.FORCED_OPTIMISATIONS = true;
                     if (next.contains("1")){
-                        Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE = true;
+                        Configuration.optimisations.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
                     }
                     if (next.contains("2")){
-                        Configuration.SORT_MODELS = true;
+                        Configuration.optimisations.add(Optimisation.SORT_MODEL);
                     }
                     if (next.contains("3")) {
-                        Configuration.REMOVE_COMPLEMENTS_FROM_MXP = true;
+                        Configuration.optimisations.add(Optimisation.REMOVE_NEGATED_PATH);
                     }
                     if (next.contains("4")) {
-                        Configuration.USE_TRIPLE_MXP = true;
+                        Configuration.optimisations.add(Optimisation.TRIPLE_MXP);
                     }
-                    break;*/
+                    break;
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
                     throw new RuntimeException(message);

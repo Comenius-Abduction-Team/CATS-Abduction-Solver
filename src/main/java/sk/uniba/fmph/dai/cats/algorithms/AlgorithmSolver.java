@@ -89,6 +89,10 @@ public class AlgorithmSolver {
     }
 
     void setOptimisations(Algorithm algorithm){
+
+        if (Configuration.FORCED_OPTIMISATIONS)
+            return;
+
         Optimisation[] optimisations;
 
         if (Configuration.NEGATION_ALLOWED)
