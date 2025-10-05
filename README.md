@@ -27,7 +27,13 @@ The abduction problem is then defined in the *runApiTestingMain()* method, which
 ## Input
 CATS receives a structured input file as a parameter. The input file contains one switch per line. Mandatory switches are **-f** and **-o**, other switches are optional.
 
-A line in the input file can be commented out with a // at the start of the line (there must be a space after the slashes). 
+The '**:**' in the arguments is optional. Boolean arguments can be used without an explicit value, being equivalent to *true*. This means that the following lines have the exact same meaning:
+
+*-n: true*  
+*-n true*  
+*-n*
+
+A line in the input file can be commented out with a '**//**' or '**#**' at the start of the line (there must be a space after the comment symbol). 
 
 #### Problem definition:
 * **-f: \<string\>**  a relative path to the ontology file, which represents the knowledge base $K$.
@@ -44,10 +50,13 @@ A line in the input file can be commented out with a // at the start of the line
 * *-l: \<boolean\>* allows assertions of form $i, i: R$ in explanations, i.e. individual $i$ can be in role $R$ with itself (it is also called *looping*).  
 
 #### Output:
-* *-log: \<boolean\>* whether output log files should be created. *true* by default.
+* *-log: \<boolean\>* whether any output log files should be created. *true* by default.
+* *-partial: \<boolean\>* whether partial log files (see section Output) should be created. *true* by default. If set to *false*, the run may be faster, bu there are no level data in the case of a crash.
+* *-stats: \<boolean\>* whether stats for the level log should be tracked. *true* by default. If set to *false*, the run may be a bit faster, but no data is stored in the level logs. 
 * *-out: \<string\>* custom relative path to output log files.
 * *-p: \<boolean\>* prints a simple progress bar into the console. Most useful when *-d* or *-t* is set. Set to *false* by default.
 * *-debug: \<boolean\>* prints detailed messages that describe events happening during the algorithm's run into the console. Set to *false* by default.
+* *-fast: \<boolean\>* is a shorthand for *-log: false*,*-stats: false*,*-debug: false*. Additionally, the internal event communication system is shut down, providing an extra speed boost.  Set to *false* by default. If set to *true*, the run should be faster, but no information is stored or tracked except for the final explanations.
 
 #### Relevance for multiple observation
 In the case where observation consists of multiple assertions (also called multiple observations), there are two ways of defining a relevant explanation.
@@ -126,19 +135,14 @@ Final logs are created only after the search for explanations is complete (it ei
 * records an error that occurred
 
 ### Partial logs
-Partial logs are created while the solving of the abduction problem is running. They help us to have an overview of the progress along the run. They record, for example, possible explanations which were found after passing one level. However, these explanations are only possible explanations and therefore may not be desired.
-
-**Partial explanations log**
-*\<time\>__\<input file name\>__partial_explanations.log*
-
-* partial log with the same structure as **final log**
-* may contain undesired explanations 
+Partial log is a temporary version of the level log, updated after each level of the tree. It is deleted if the run successfully finished. However, if the run crashed and could not create the final level log for some reason, at least some data is stored in the partial log. 
 
 **Partial level explanations log**
 *\<time\>__\<input file name\>__partial_level.log*
 
 * partial log with the same structure as **level log**
-* may contain also undesired explonations
+* may contain undesired explonations
+* if the run successfully finished, the log is deleted
 
 # License
 
@@ -149,3 +153,4 @@ See the [LICENSE](./LICENSE) file for more information.
 
 The development of this sofwtare was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
 under the H2020 grant no. 952215 (TAILOR)
+
