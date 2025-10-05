@@ -1,11 +1,10 @@
 package sk.uniba.fmph.dai.cats.common;
 
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Configuration {
     public static String OBSERVATION = "";
@@ -34,15 +33,8 @@ public class Configuration {
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
     public static boolean CONTINUOUS_HYBRID_RELEVANCE_CHECKS = false;
     public static boolean CONTINUOUS_HYBRID_MINIMALITY_CHECKS = false;
-    public static boolean MOVE_CHECKS_AFTER_MODEL_REUSE = false;
 
     public static boolean ALWAYS_EXTRACT_MODELS_IN_MXP = true;
-
-    public static boolean SORT_MODELS = false;
-
-    public static boolean REMOVE_COMPLEMENTS_FROM_MXP = false;
-
-    public static boolean USE_TRIPLE_MXP = false;
 
     //public static boolean RETURN_CACHED_EXPLANATION_IN_QXP = true;
 
@@ -52,6 +44,10 @@ public class Configuration {
     public static boolean DEBUG_PRINT = true;
     public static boolean TRACKING_STATS = true;
     public static boolean LOGGING = true;
+
+    public static boolean IGNORE_DEFAULT_OPTIMISATIONS = false;
+
+    public static final Set<Optimisation> optimisations = new HashSet<>();
 
     public static List<String> getInfo() {
 //        String optimizationQXP = "Optimization QXP: " + CHECKING_MINIMALITY_BY_QXP;
@@ -70,14 +66,8 @@ public class Configuration {
         List<String> result = new ArrayList<>(Arrays.asList(
                 roles, looping, negation, mhs_mode, relevance, depth, timeout));
 
-        if (MOVE_CHECKS_AFTER_MODEL_REUSE)
-            result.add("Optimisation: fewer conistency checks");
-        if (SORT_MODELS)
-            result.add("Optimisation: model sorting");
-        if (REMOVE_COMPLEMENTS_FROM_MXP)
-            result.add("Optimisation: path complements removed from MXP abducibles");
-        if (USE_TRIPLE_MXP)
-            result.add("Optimisation: triple MXP");
+        for (Optimisation opt : optimisations)
+            result.add("Optimisation: " + opt.getDescription());
 
         return result;
     }

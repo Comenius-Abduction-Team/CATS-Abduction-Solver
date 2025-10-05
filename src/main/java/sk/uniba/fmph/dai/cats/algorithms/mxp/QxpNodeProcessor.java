@@ -72,7 +72,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
         }
 
         // Split C into disjoint, non-empty sets
-        List<AxiomSet> sets = setDivider.divideIntoSetsWithoutCondition(literals);
+        List<AxiomSet> sets = setDivider.divideIntoSets(literals);
 
         //B ∪ C1
         path.addAll(sets.get(0).getAxioms());

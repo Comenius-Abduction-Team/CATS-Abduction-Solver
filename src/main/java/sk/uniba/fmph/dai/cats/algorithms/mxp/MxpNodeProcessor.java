@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
@@ -36,7 +37,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
 
-        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE)
+        if (Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS))
             return false;
 
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
@@ -61,7 +62,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         explanationLargerThanOne = false;
 
-        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE){
+        if (Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS)){
 
             if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
@@ -132,7 +133,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
             if (path.contains(a))
                 continue;
             if (Configuration.NEGATION_ALLOWED
-                    && Configuration.REMOVE_COMPLEMENTS_FROM_MXP
+                    && Configuration.optimisations.contains(Optimisation.REMOVE_NEGATED_PATH)
                     && path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, a)))
                 continue;
             abduciblesCopy.add(a);

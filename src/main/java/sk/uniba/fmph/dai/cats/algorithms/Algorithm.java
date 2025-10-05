@@ -113,4 +113,23 @@ public enum Algorithm {
         return this.name().equals(name);
     }
 
+    public Optimisation[] getDefaultOptimisationsWithoutNegations(){
+        if (isRootOnly())
+            return new Optimisation[0];
+        if (isHst())
+            return new Optimisation[]{Optimisation.SORT_MODEL};
+        if (isRcTree())
+            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS};
+        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.SORT_MODEL};
+    }
+
+    public Optimisation[] getDefaultOptimisationsWithNegations(){
+        if (isRootOnly())
+            return new Optimisation[0];
+        if (!isHst() && !isRcTree())
+            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP,
+                    Optimisation.SORT_MODEL};
+        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP};
+    }
+
 }
