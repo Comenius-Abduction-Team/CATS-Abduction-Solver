@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.parser;
 
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.DLSyntax;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerType;
@@ -53,9 +54,18 @@ public class ArgumentParser {
                 }
                 continue;
             }
-            String next = line[1];
+
+            boolean silentTrue = false;
+            String next = "";
+
+            if (line.length == 1)
+                silentTrue = true;
+            else
+                next = line[1];
+
             switch(new_line) {
                 case "-f:":
+                case "-f":
                     if (!(new File(next).exists())){
                         String message = "Could not open -f file " + next;
                         throw new RuntimeException(message);
@@ -63,15 +73,16 @@ public class ArgumentParser {
                     Configuration.INPUT_ONT_FILE = next;
                     break;
                 case "-o:":
-                    String observation = String.join(" ", line).replace("-o: ", "");
-                    Configuration.OBSERVATION = observation;
+                case "-o":
+                    Configuration.OBSERVATION = String.join(" ", line).replace("-o: ", "");
                     break;
                 case "-out:":
+                case "-out":
                     String path = String.join(" ", line).replace("-out: ", "");
-                    if (path.matches("^[\\w\\\\/]*[\\w]+$")) {
+                    if (path.matches("^[\\w\\\\/]*\\w+$")) {
                         Configuration.OUTPUT_PATH = path;
                     } else {
-                        String message = "Wrong output path -out " + path + "\nOutput path should contain only alphanumeric symbols, _ and separators (\\,/) and cannot end with a separator";
+                        String message = "Wrong 'output path (-out)' value: " + path + ". Output path should contain only alphanumeric symbols, _ and separators (\\,/) and cannot end with a separator";
                         throw new RuntimeException(message);
                     }
                     break;
@@ -89,24 +100,27 @@ public class ArgumentParser {
 //                    break;
 
                 case "-d:":
+                case "-d":
                     try {
-                        Configuration.DEPTH = Integer.valueOf(next);
+                        Configuration.DEPTH = Integer.parseInt(next);
                     }
                     catch (NumberFormatException e) {
-                        String message = "Wrong tree depth -d " + next + ", choose a whole number value";
+                        String message = "Wrong 'tree depth (-d)' value: " + next + ", must be an integer!";
                         throw new RuntimeException(message);
                     }
                     break;
                 case "-t:":
+                case "-t":
                     try {
-                        Configuration.TIMEOUT = Long.valueOf(next);
+                        Configuration.TIMEOUT = Long.parseLong(next);
                     }
                     catch (NumberFormatException e) {
-                        String message = "Wrong timeout value -t " + next + ", choose a whole number value";
+                        String message = "Wrong 'timeout (-t)' value: " + next + ", must be an integer!";
                         throw new RuntimeException(message);
                     }
                     break;
                 case "-aI:":
+                case "-aI":
                     if (next.equals("{")){
                         read_individuals = true;
                     } else {
@@ -114,6 +128,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-aC:":
+                case "-aC":
                     if (next.equals("{")){
                         read_concepts = true;
                     } else {
@@ -121,6 +136,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-aR:":
+                case "-aR":
                     if (next.equals("{")){
                         read_roles = true;
                     } else {
@@ -128,6 +144,7 @@ public class ArgumentParser {
                     }
                     break;
                 case "-abd:":
+                case "-abd":
                     if (next.equals("{")){
                         read_abducibles = true;
                     } else {
@@ -135,40 +152,46 @@ public class ArgumentParser {
                     }
                     break;
                 case "-l:":
+                case "-l":
                     if (next.equals("false")) {
                         Configuration.LOOPING_ALLOWED = false;
-                    } else if (!next.equals("true")) {
-                        System.err.println("Wrong looping allowed value -l" + next + ", allowed values are 'true' and 'false'");
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'looping allowed (-l)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-r:":
-                    if (next.equals("true")) {
+                case "-r":
+                    if (silentTrue || next.equals("true")) {
                         Configuration.ROLES_IN_EXPLANATIONS_ALLOWED = true;
                     } else if (!next.equals("false")) {
-                        System.err.println("Wrong roles in explanations allowed value -r" + next + ", allowed values are 'true' and 'false'");
+                        System.err.println("Wrong 'roles in explanations allowed (-r)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-sR:":
+                case "-sR":
                     if (next.equals("false")) {
                         Configuration.STRICT_RELEVANCE = false;
-                    } else if (!next.equals("true")) {
-                        System.err.println("Wrong strict relevance value -sR" + next + ", allowed values are 'true' and 'false'");
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'strict relevance (-sR)' value: " + next + ", allowed values are 'true' and 'false'");
                 }
                 case "-n:":
+                case "-n":
                     if (next.equals("false")) {
                         Configuration.NEGATION_ALLOWED = false;
-                    } else if (!next.equals("true")) {
-                        System.err.println("Wrong negation allowed value -n" + next + ", allowed values are 'true' and 'false'");
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'negation (-n)' allowed value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-log:":
+                case "-log":
                     if (next.equals("false")) {
                         Configuration.LOGGING = false;
-                    } else if (!next.equals("true")) {
-                        System.err.println("Wrong logging value -log" + next + ", allowed values are 'true' and 'false'");
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'logging (-log)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-abdF:":
+                case "-abdF":
                     if (!(new File(next).exists())){
                         String message = "Could not open -abdF file " + next;
                         throw new RuntimeException(message);
@@ -176,34 +199,52 @@ public class ArgumentParser {
                     Configuration.ABDUCIBLES_FILE_NAME = next;
                     break;
                 case "-alg:":
+                case "-alg":
                     chooseAlgorithm(next);
                     break;
                 case "-p:":
-                    if (next.equals("true")) {
+                case "-p":
+                    if (silentTrue || next.equals("true")) {
                         Configuration.PRINT_PROGRESS = true;
                     } else if (!next.equals("false")) {
-                        System.err.println("Wrong progress value -p" + next + ", allowed values are 'true' and 'false'");
+                        System.err.println("Wrong 'progress (-p)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-debug:":
-                    if (next.equals("true")){
+                case "-debug":
+                    if (silentTrue || next.equals("true")){
                         Configuration.DEBUG_PRINT = true;
                     } else if (!next.equals("false")) {
-                        System.err.println("Wrong progress value -d" + next + ", allowed values are 'true' and 'false'");
+                        System.err.println("Wrong 'debug' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 case "-opt:":
+                case "-opt":
                     if (next.contains("1")){
-                        Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE = true;
+                        Configuration.optimisations.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
                     }
                     if (next.contains("2")){
-                        Configuration.SORT_MODELS = true;
+                        Configuration.optimisations.add(Optimisation.SORT_MODEL);
                     }
                     if (next.contains("3")) {
-                        Configuration.REMOVE_COMPLEMENTS_FROM_MXP = true;
+                        Configuration.optimisations.add(Optimisation.REMOVE_NEGATED_PATH);
                     }
                     if (next.contains("4")) {
-                        Configuration.USE_TRIPLE_MXP = true;
+                        Configuration.optimisations.add(Optimisation.TRIPLE_MXP);
+                    }
+                    if (next.contains("5")) {
+                        Configuration.optimisations.add(Optimisation.FULLY_RANDOM_SET_DIVISION);
+                    }
+                    else if (next.contains("6")) {
+                        Configuration.optimisations.add(Optimisation.EQUAL_SIZE_RANDOM_SET_DIVISION);
+                    }
+                    break;
+                case "-defOpt:":
+                case "-defOpt":
+                    if (next.equals("false")) {
+                        Configuration.IGNORE_DEFAULT_OPTIMISATIONS = true;
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'default optimisations (-defOpt)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
                 default:
@@ -212,7 +253,7 @@ public class ArgumentParser {
             }
         }
         if (Configuration.INPUT_ONT_FILE.equals("") || Configuration.OBSERVATION.equals("")){
-            String message = "Input file -f and observation -o are both required argument";
+            String message = "Input file -f and observation -o are both required arguments";
             throw new RuntimeException(message);
         }
         if (Configuration.REASONER == null) {
@@ -260,11 +301,11 @@ public class ArgumentParser {
     }
 
     private void add_axiom_based_abd(String[] abd){
-        String assertion = "";
+        StringBuilder assertion = new StringBuilder();
         for(String abd1 : abd){
-            assertion += abd1 + " ";
+            assertion.append(abd1).append(" ");
         }
-        Configuration.AXIOM_BASED_ABDUCIBLES.add(assertion);
+        Configuration.AXIOM_BASED_ABDUCIBLES.add(assertion.toString());
     }
 
     private ArrayList<String[]> read_input_file(String input_file_path) {

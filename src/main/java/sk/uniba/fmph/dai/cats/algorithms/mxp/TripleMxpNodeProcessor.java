@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -23,7 +24,7 @@ public class TripleMxpNodeProcessor extends MxpNodeProcessor {
         for (OWLAxiom a : abducibleAxioms){
             if (path.contains(a))
                 continue;
-            if (Configuration.REMOVE_COMPLEMENTS_FROM_MXP
+            if (Configuration.optimisations.contains(Optimisation.REMOVE_NEGATED_PATH)
                     && path.contains(AxiomManager.getComplementOfOWLAxiom(solver.loader, a)))
                 continue;
             if (AxiomManager.isNegatedClassAssertion(a)

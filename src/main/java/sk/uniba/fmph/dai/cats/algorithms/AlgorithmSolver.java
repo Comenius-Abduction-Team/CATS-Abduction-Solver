@@ -26,6 +26,7 @@ import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,21 +74,39 @@ public class AlgorithmSolver {
 
         this.progressManager = progressManager;
 
-        if (Configuration.SORT_MODELS)
+        consistencyChecker = new ConsistencyChecker(this);
+
+        setOptimisations(algorithm);
+        setAlgorithm(algorithm);
+
+        if (Configuration.optimisations.contains(Optimisation.SORT_MODEL))
             modelManager = new InsertSortModelManager(this);
         else
             modelManager = new ModelManager(this);
 
-        consistencyChecker = new ConsistencyChecker(this);
+        consistencyChecker.modelManager = modelManager;
 
-        setAlgorithm(algorithm);
+    }
 
+    void setOptimisations(Algorithm algorithm){
+
+        if (Configuration.IGNORE_DEFAULT_OPTIMISATIONS)
+            return;
+
+        Optimisation[] optimisations;
+
+        if (Configuration.NEGATION_ALLOWED)
+            optimisations = algorithm.getDefaultOptimisationsWithNegations();
+        else
+            optimisations = algorithm.getDefaultOptimisationsWithoutNegations();
+
+        Configuration.optimisations.addAll(Arrays.asList(optimisations));
     }
 
     void setAlgorithm(Algorithm algorithm){
 
         if (algorithm.usesMxp()){
-            if (Configuration.NEGATION_ALLOWED && Configuration.USE_TRIPLE_MXP)
+            if (Configuration.NEGATION_ALLOWED && Configuration.optimisations.contains(Optimisation.TRIPLE_MXP))
                 nodeProcessor = new TripleMxpNodeProcessor(this);
             else
                 nodeProcessor = new MxpNodeProcessor(this);

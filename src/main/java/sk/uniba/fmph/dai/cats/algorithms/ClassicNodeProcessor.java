@@ -37,7 +37,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
 
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
-        if (!Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE){
+        if (!Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS)){
             if (!ruleChecker.isRelevant(explanation)) {
                 stats.getCurrentLevelStats().originalExplanations += 1;
                 stats.getCurrentLevelStats().filteredExplanations += 1;
@@ -65,7 +65,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
         stats.getCurrentLevelStats().prunedEdges += 1;
         stats.getCurrentLevelStats().explanationEdges += 1;
 
-        if (Configuration.MOVE_CHECKS_AFTER_MODEL_REUSE) {
+        if (Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS)) {
 
             if (!ruleChecker.isRelevant(explanation)) {
                 StaticPrinter.debugPrint("[FILTERING] IRRELEVANT EXPLANATION!");
