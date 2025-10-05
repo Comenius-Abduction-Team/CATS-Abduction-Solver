@@ -247,7 +247,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
         Configuration.LOGGING = logging;
-        Configuration.DEBUG_PRINT = true;
+        Configuration.DEBUG_PRINT = debug;
         Configuration.ALGORITHM = algorithm;
 
         setDepthInConfiguration();
