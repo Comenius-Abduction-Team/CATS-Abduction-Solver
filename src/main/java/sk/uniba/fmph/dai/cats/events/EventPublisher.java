@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.events;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ public class EventPublisher {
 
     public static void publishGenericEvent(AlgorithmSolver solver, EventType type){
 
+        if (!Configuration.EVENTS)
+            return;
+
         List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
@@ -25,6 +29,9 @@ public class EventPublisher {
     }
 
     public static void publishNodeEvent(AlgorithmSolver solver, EventType type, TreeNode node){
+
+        if (!Configuration.EVENTS)
+            return;
 
         List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
 
@@ -37,6 +44,9 @@ public class EventPublisher {
 
     public static void publishEdgeEvent(AlgorithmSolver solver, EventType type, OWLAxiom label){
 
+        if (!Configuration.EVENTS)
+            return;
+
         List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
@@ -47,6 +57,9 @@ public class EventPublisher {
     }
 
     public static void publishExplanationEvent(AlgorithmSolver solver, EventType type, Explanation explanation){
+
+        if (!Configuration.EVENTS)
+            return;
 
         List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
 

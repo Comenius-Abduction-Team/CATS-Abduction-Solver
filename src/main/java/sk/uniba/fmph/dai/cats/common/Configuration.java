@@ -41,11 +41,15 @@ public class Configuration {
     public static Algorithm ALGORITHM = Algorithm.MHS_MXP;
 
     /** Use to wrap testing prints in an if block. These blocks should not get to production code. **/
-    public static boolean DEBUG_PRINT = true;
+    public static boolean DEBUG_PRINT = false;
     public static boolean TRACKING_STATS = true;
     public static boolean LOGGING = true;
 
+    public static boolean PARTIAL_LOGS = true;
+
     public static boolean IGNORE_DEFAULT_OPTIMISATIONS = false;
+
+    public static boolean EVENTS = true;
 
     public static final Set<Optimisation> optimisations = new HashSet<>();
 

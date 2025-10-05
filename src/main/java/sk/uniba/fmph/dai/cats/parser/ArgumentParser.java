@@ -247,6 +247,33 @@ public class ArgumentParser {
                         System.err.println("Wrong 'default optimisations (-defOpt)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
+                case "-partial:":
+                case "-partial":
+                    if (next.equals("false")) {
+                        Configuration.PARTIAL_LOGS = false;
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'partial logs (-partial)' value: " + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
+                case "-stats:":
+                case "-stats":
+                    if (next.equals("false")) {
+                        Configuration.TRACKING_STATS = false;
+                    } else if (!silentTrue && !next.equals("true")) {
+                        System.err.println("Wrong 'statistics (-stats)' value: " + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
+                case "-fast:":
+                case "-fast":
+                    if (silentTrue || next.equals("true")){
+                        Configuration.LOGGING = false;
+                        Configuration.DEBUG_PRINT = false;
+                        Configuration.TRACKING_STATS = false;
+                        Configuration.EVENTS = false;
+                    } else if (!next.equals("false")) {
+                        System.err.println("Wrong 'fast' value: " + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
                 default:
                     String message = "Unknown option " + line[0] + " in input file";
                     throw new RuntimeException(message);

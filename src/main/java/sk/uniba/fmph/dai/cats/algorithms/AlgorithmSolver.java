@@ -75,6 +75,7 @@ public class AlgorithmSolver {
         consistencyChecker = new ConsistencyChecker(this);
 
         setOptimisations(algorithm);
+        registerSubscribersFromConfiguration();
         setAlgorithm(algorithm);
 
         if (Configuration.optimisations.contains(Optimisation.SORT_MODEL))
@@ -86,7 +87,7 @@ public class AlgorithmSolver {
 
     }
 
-    void setOptimisations(Algorithm algorithm){
+    private void setOptimisations(Algorithm algorithm){
 
         if (Configuration.IGNORE_DEFAULT_OPTIMISATIONS)
             return;
@@ -99,14 +100,16 @@ public class AlgorithmSolver {
             optimisations = algorithm.getDefaultOptimisationsWithoutNegations();
       
         Configuration.optimisations.addAll(Arrays.asList(optimisations));
+    }
 
+    private void registerSubscribersFromConfiguration(){
         if (Configuration.TRACKING_STATS)
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
         if (Configuration.DEBUG_PRINT)
             EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
     }
 
-    void setAlgorithm(Algorithm algorithm){
+    private void setAlgorithm(Algorithm algorithm){
 
         if (algorithm.usesMxp()){
             if (Configuration.NEGATION_ALLOWED && Configuration.optimisations.contains(Optimisation.TRIPLE_MXP))

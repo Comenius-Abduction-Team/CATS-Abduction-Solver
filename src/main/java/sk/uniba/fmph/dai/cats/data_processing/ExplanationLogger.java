@@ -49,6 +49,8 @@ public class ExplanationLogger {
     }
 
     void clearPartialLog(){
+        if (!Configuration.PARTIAL_LOGS)
+            return;
         if (FileManager.checkIfFileExists(getPartialLogFileName(false))
                 && FileManager.checkIfFileExists(getLevelLogFileName(false))){
             FileManager.deleteFile(partialLog);
@@ -95,7 +97,7 @@ public class ExplanationLogger {
     }
 
     public void addLevelToPartialLog(Level level) {
-        if (!Configuration.LOGGING)
+        if (!Configuration.LOGGING || !Configuration.PARTIAL_LOGS)
             return;
         String content = buildLevelContent(level);
         log(getPartialLogFileName(true), content);
