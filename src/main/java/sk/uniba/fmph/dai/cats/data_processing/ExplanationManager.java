@@ -5,6 +5,8 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.metrics.Level;
 import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
 import sk.uniba.fmph.dai.cats.metrics.TreeStats;
@@ -30,8 +32,7 @@ public abstract class ExplanationManager {
 
     public void addPossibleExplanation(Explanation explanation){
         possibleExplanations.add(explanation);
-        StaticPrinter.debugPrint("[EXPLANATION] " + explanation + " at time: " + explanation.getAcquireTime() );
-        solver.currentLevel.originalExplanations++;
+        EventPublisher.publishExplanationEvent(solver, EventType.POSSIBLE_EXPLANATION, explanation);
     }
 
     abstract public void processExplanations(String message, TreeStats stats);

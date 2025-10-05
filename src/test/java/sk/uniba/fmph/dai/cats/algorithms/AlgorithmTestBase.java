@@ -155,7 +155,6 @@ public abstract class AlgorithmTestBase {
         abducer.solveAbduction();
         if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty()) {
             System.err.println(abducer.getOutputMessage());
-            System.err.println(abducer.getFullLog());
         }
     }
 
@@ -191,7 +190,7 @@ public abstract class AlgorithmTestBase {
     }
     
     private void setNoNeg(){
-        Configuration.INPUT_FILE_NAME += "NoNeg";
+        Configuration.INPUT_FILE_NAME += "NoNeg"; // set up artifically to change the file path of created logs
         abducer.setExplanationConfigurator(noNeg);
     }
 

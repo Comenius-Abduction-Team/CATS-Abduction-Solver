@@ -1,6 +1,9 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
+import sk.uniba.fmph.dai.cats.events.Event;
 import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -12,10 +15,12 @@ import java.util.Set;
 
 public class ConsistencyChecker {
 
+    final AlgorithmSolver solver;
     ModelManager modelManager;
+
     final ReasonerManager reasonerManager;
     final Loader loader;
-    final Set<OWLAxiom> path;
+    Set<OWLAxiom> path;
 
     public boolean checkingMinimalityWithQXP = false;
     public Set<OWLAxiom> pathDuringCheckingMinimality;
@@ -23,6 +28,7 @@ public class ConsistencyChecker {
     TreeStats stats;
 
     ConsistencyChecker(AlgorithmSolver solver){
+        this.solver = solver;
         modelManager = solver.modelManager;
         loader = solver.loader;
         reasonerManager = loader.reasonerManager;
@@ -33,14 +39,14 @@ public class ConsistencyChecker {
     public boolean checkOntologyConsistency(boolean extractModel){
 
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-        stats.getCurrentLevelStats().consistencyChecks += 1;
+        EventPublisher.publishGenericEvent(solver, EventType.CONSISTENCY_CHECK);
 
         if (!isConsistent)
             return false;
 
         if (extractModel){
             modelManager.storeModelFoundByConsistencyCheck();
-            stats.getCurrentLevelStats().modelExtractions += 1;
+            EventPublisher.publishGenericEvent(solver, EventType.MODEL_EXTRACTION);
         }
 
         reasonerManager.resetOntologyToOriginal();

@@ -17,13 +17,12 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.IEventSubscriber;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
 import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CatsAbducer implements IThreadAbducer {
 
@@ -51,9 +50,8 @@ public class CatsAbducer implements IThreadAbducer {
     AlgorithmSolver solver;
     MetricsThread timer;
 
-    public CatsAbducer() {
-
-    }
+    List<IEventSubscriber> subscribersToRegister;
+    public CatsAbducer() {}
 
     public boolean isMultithread() {
         return multithread;
@@ -209,6 +207,14 @@ public class CatsAbducer implements IThreadAbducer {
 
         solver = AlgorithmSolverFactory.createApiSolver(timer, algorithm, this);
 
+        if (subscribersToRegister == null)
+            return;
+
+        for (IEventSubscriber subscriber : subscribersToRegister){
+            EventPublisher.registerSubscriber(solver, subscriber);
+            subscriber.setSolver(solver);
+        }
+
     }
 
     private void solve(){
@@ -241,7 +247,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.STRICT_RELEVANCE = strictRelevance;
         Configuration.PRINT_PROGRESS = true;
         Configuration.LOGGING = logging;
-        Configuration.DEBUG_PRINT = true;
+        Configuration.DEBUG_PRINT = debug;
         Configuration.ALGORITHM = algorithm;
 
         setDepthInConfiguration();
@@ -335,8 +341,6 @@ public class CatsAbducer implements IThreadAbducer {
         this.algorithm = algorithm;
     }
 
-    public void setHst(boolean hst){this.hst = hst;}
-
     public boolean isStrictRelevance() {
         return strictRelevance;
     }
@@ -364,5 +368,11 @@ public class CatsAbducer implements IThreadAbducer {
 
     public void setMessage(String message){
         this.message = message;
+    }
+
+    public void registerSubscriber(IEventSubscriber subscriber){
+        if (subscribersToRegister == null)
+            subscribersToRegister = new ArrayList<>();
+        subscribersToRegister.add(subscriber);
     }
 }

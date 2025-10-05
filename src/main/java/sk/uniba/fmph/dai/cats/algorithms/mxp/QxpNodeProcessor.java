@@ -10,6 +10,9 @@ import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
+import sk.uniba.fmph.dai.cats.events.Event;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,7 +55,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
     //                                              B                          D                     C
     protected Explanation runQxp(Set<OWLAxiom> path, Collection<OWLAxiom> axioms, Set<OWLAxiom> literals, boolean extractModel) {
 
-        solver.currentLevel.qxpCalls++;
+        EventPublisher.publishGenericEvent(solver, EventType.QXP_CALL);
 
 //        if (solver.isTimeout()) {
 //            return new Explanation();

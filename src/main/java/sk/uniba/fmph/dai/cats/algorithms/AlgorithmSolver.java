@@ -14,8 +14,8 @@ import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
-import sk.uniba.fmph.dai.cats.metrics.Level;
-import sk.uniba.fmph.dai.cats.metrics.TreeStats;
+import sk.uniba.fmph.dai.cats.events.*;
+import sk.uniba.fmph.dai.cats.metrics.*;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelExtractor;
@@ -23,8 +23,6 @@ import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
-import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,7 +46,7 @@ public class AlgorithmSolver {
     public IAbducibleAxioms abducibleAxioms;
 
     // INTEGERS
-    protected int currentDepth = 0;
+    public int currentDepth = 0;
     int maxDepth = -1;
 
     protected ITreeBuilder treeBuilder;
@@ -99,8 +97,13 @@ public class AlgorithmSolver {
             optimisations = algorithm.getDefaultOptimisationsWithNegations();
         else
             optimisations = algorithm.getDefaultOptimisationsWithoutNegations();
-
+      
         Configuration.optimisations.addAll(Arrays.asList(optimisations));
+
+        if (Configuration.TRACKING_STATS)
+            EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
+        if (Configuration.DEBUG_PRINT)
+            EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
     }
 
     void setAlgorithm(Algorithm algorithm){
@@ -225,12 +228,12 @@ public class AlgorithmSolver {
         metrics.setStartTime();
 
         currentDepth = 0;
-        currentLevel = stats.getLevelStats(currentDepth);
+        currentLevel = stats.getLevelStats(0);
         currentLevel.start = metrics.getRunningTime();
 
         TreeNode root = treeBuilder.createRoot();
         if (root == null) {
-            StaticPrinter.debugPrint("[!!!] ROOT COULD NOT BE CREATED!");
+            EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
         treeBuilder.addNodeToTree(root);
@@ -245,15 +248,15 @@ public class AlgorithmSolver {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
 
-            if (node == null){
+            /*if (node == null){
                 StaticPrinter.debugPrint("[!!!] Null node!");
                 continue;
-            }
+            }*/
 
-            updateDepthIfNeeded(node);
+            assignLevelToNode(node);
 
             if (depthLimitReached()) {
-                currentLevel.message = "max depth";
+                EventPublisher.publishGenericEvent(this, EventType.MAX_DEPTH_REACHED);
                 break;
             }
 
@@ -262,46 +265,37 @@ public class AlgorithmSolver {
                 throw new TimeoutException();
             }
 
-            StaticPrinter.debugPrint("*********\n" + "[TREE] PROCESSING node: " + node);
+            EventPublisher.publishNodeEvent(this, EventType.PROCESSING_NODE, node);
 
-            if (!node.processed) {
-                node.processed = true;
-                currentLevel.processedNodes += 1;
-            } else {
-                currentLevel.repeatedProcessing += 1;
-            }
+            node.processed = true;
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
             if (!canIterateNodeChildren){
-                StaticPrinter.debugPrint("[TREE] NO CHILDREN TO ITERATE!");
-                currentLevel.childlessNodes += 1;
+                EventPublisher.publishNodeEvent(this, EventType.CHILDLESS_NODE, node);
                 continue;
             }
 
-            StaticPrinter.debugPrint("[TREE] Iterating child edges");
+            //StaticPrinter.debugPrint("[TREE] Iterating child edges");
 
             while (!treeBuilder.noChildrenLeft()){
 
                 OWLAxiom child = treeBuilder.getNextChild();
 
-                if (child == null) {
+                /*if (child == null) {
                     StaticPrinter.debugPrint("[!!!] NULL CHILD");
                     continue;
-                }
+                }*/
 
-                StaticPrinter.debugPrint("[TREE] TRYING EDGE: " + StringFactory.getRepresentation(child));
-
-                currentLevel.createdEdges += 1;
+                EventPublisher.publishEdgeEvent(this, EventType.EDGE_CREATED, child);
 
                 if(isTimeout()){
                     logger.addLevelToPartialLog(currentLevel);
                     throw new TimeoutException();
                 }
 
-                if(isIncorrectPath(node, child)){
-                    StaticPrinter.debugPrint("[PRUNING] INCORRECT PATH!");
-                    currentLevel.prunedEdges += 1;
+                if(isInvalidPath(node, child)){
+                    EventPublisher.publishEdgeEvent(this, EventType.INVALID_PATH, child);
                     continue;
                 }
 
@@ -313,8 +307,6 @@ public class AlgorithmSolver {
                 boolean pruneThisChild = treeBuilder.shouldPruneChildBranch(node, explanation);
 
                 if (pruneThisChild){
-                    StaticPrinter.debugPrint("[PRUNING] NODE CLOSED!");
-                    currentLevel.prunedEdges += 1;
                     path.clear();
                     continue;
                 }
@@ -328,18 +320,20 @@ public class AlgorithmSolver {
                         throw new TimeoutException();
                     }
 
-                    int explanationsFound = nodeProcessor.findExplanations(explanation, treeBuilder.shouldExtractModel());
+                    int explanationsFound = nodeProcessor.findExplanations(
+                            explanation, treeBuilder.shouldExtractModel()
+                        );
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
 
                     if (shouldCloseNode){
+                        EventPublisher.publishNodeEvent(this, EventType.CLOSING_NODE, node);
                         path.clear();
                         continue;
                     }
 
                 } else {
 
-                    currentLevel.reusedModels += 1;
-                    StaticPrinter.debugPrint("[MODEL] Model was reused.");
+                    EventPublisher.publishGenericEvent(this, EventType.MODEL_REUSE);
 
                 }
 
@@ -349,19 +343,14 @@ public class AlgorithmSolver {
                 }
 
                 treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
-                currentLevel.createdNodes += 1;
-
-                StaticPrinter.debugPrint("[TREE] Created node");
-
+                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, node);
                 path.clear();
 
             }
 
         }
 
-        currentLevel.finish = metrics.getRunningTime();
-
-        StaticPrinter.debugPrint("[TREE] Finished iterating the tree.");
+        EventPublisher.publishGenericEvent(this, EventType.TREE_FINISHED);
 
         path.clear();
         treeBuilder.resetLevel();
@@ -371,7 +360,7 @@ public class AlgorithmSolver {
 
     }
 
-    private boolean isIncorrectPath(TreeNode parent, OWLAxiom edgeLabel){
+    private boolean isInvalidPath(TreeNode parent, OWLAxiom edgeLabel){
         return parent.path.contains(AxiomManager.getComplementOfOWLAxiom(loader, edgeLabel)) ||
                 edgeLabel.equals(loader.getObservationAxiom());
     }
@@ -400,34 +389,29 @@ public class AlgorithmSolver {
         return Configuration.DEPTH > 0 && currentDepth == Configuration.DEPTH;
     }
 
-    private void updateDepthIfNeeded(TreeNode node){
+    private void assignLevelToNode(TreeNode node){
 
-        if (node.depth == currentDepth) {
-            node.assignedLevel = currentLevel;
-            return;
+        if (node.depth != currentDepth) {
+
+            treeBuilder.resetLevel();
+            EventPublisher.publishGenericEvent(this, EventType.LEVEL_FINISHED);
+            updateDepthIfNeeded(node);
+            EventPublisher.publishGenericEvent(this, EventType.LEVEL_STARTED);
+
         }
 
-        treeBuilder.resetLevel();
-        currentLevel.finish = metrics.getRunningTime();
-        currentLevel.memory = metrics.measureAverageMemory();
+        node.assignedLevel = currentLevel;
 
+    }
+
+    private void updateDepthIfNeeded(TreeNode node){
         if (node.depth > maxDepth) {
             maxDepth = node.depth;
             logger.addLevelToPartialLog(currentLevel);
             if (Configuration.PRINT_PROGRESS)
                 updateProgress();
         }
-
         currentDepth = node.depth;
-
-
-        currentLevel = stats.getNewLevelStats(currentDepth);
-        currentLevel.start = metrics.getRunningTime();
-        node.assignedLevel = currentLevel;
-
-
-
-        StaticPrinter.debugPrint("[TREE] entering depth " + node.depth);
     }
 
     public Model findAndGetModelToReuse(){

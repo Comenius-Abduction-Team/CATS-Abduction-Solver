@@ -10,6 +10,9 @@ import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
+import sk.uniba.fmph.dai.cats.events.Event;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
@@ -42,9 +45,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
             solver.stats.getCurrentLevelStats().explanationEdges += 1;
 
             if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
-                solver.stats.getCurrentLevelStats().originalExplanations += 1;
-                solver.stats.getCurrentLevelStats().filteredExplanations += 1;
-                StaticPrinter.debugPrint("[CLOSING] IRRELEVANT EXPLANATION!");
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return true;
             }
 
@@ -68,9 +69,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
                 solver.stats.getCurrentLevelStats().explanationEdges += 1;
 
                 if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
-                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
-                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
-                    StaticPrinter.debugPrint("[CLOSING] IRRELEVANT EXPLANATION!");
+                    EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                     return 0;
                 }
 
@@ -89,10 +88,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     public boolean shouldCloseNode(int explanationsFound) {
         if (explanationLargerThanOne)
             return false;
-        boolean result = explanationsFound == 0;
-        if (result)
-            StaticPrinter.debugPrint("[CLOSING] Closed by MXP!");
-        return result;
+        return explanationsFound == 0;
     }
 
     private int addExplanationsFoundByMxp(boolean extractModel){
@@ -107,16 +103,14 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
             if(Configuration.CONTINUOUS_HYBRID_MINIMALITY_CHECKS) {
                 if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
-                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                    EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
                     continue;
                 }
             }
             else if(Configuration.CHECKING_MINIMALITY_BY_QXP){
                 explanation = getMinimalExplanationByCallingQXP(explanation);
                 if (explanationManager.getPossibleExplanations().contains(explanation)){
-                    solver.stats.getCurrentLevelStats().originalExplanations += 1;
-                    solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                    EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
                     continue;
                 }
             }
@@ -213,7 +207,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
             return new Conflict();
         }
 
-        solver.currentLevel.mxpCalls++;
+        EventPublisher.publishGenericEvent(solver, EventType.MXP_CALL);
 
         if (!initialConsistencyAlreadyChecked && !consistencyChecker.checkOntologyConsistency(extractModel))
             return new Conflict();
