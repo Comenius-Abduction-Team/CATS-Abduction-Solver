@@ -25,8 +25,19 @@ public enum Optimisation {
         public String getDescription() {
             return "triple MXP";
         }
+    },
+    FULLY_RANDOM_SET_DIVISION { // inside QXP/MXP, sets are divided randomly
+        @Override
+        public String getDescription() {
+            return "random set division";
+        }
+    },
+    EQUAL_SIZE_RANDOM_SET_DIVISION { // inside QXP/MXP, sets are divided randomly into equal-sized halves
+        @Override
+        public String getDescription() {
+            return "random set division with equal size";
+        }
     };
-
     public String getDescription(){return "";}
 
 }

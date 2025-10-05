@@ -90,7 +90,7 @@ public class AlgorithmSolver {
 
     void setOptimisations(Algorithm algorithm){
 
-        if (Configuration.FORCED_OPTIMISATIONS)
+        if (Configuration.IGNORE_DEFAULT_OPTIMISATIONS)
             return;
 
         Optimisation[] optimisations;

@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms.mxp;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.AxiomPair;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
@@ -61,7 +62,11 @@ class SetDivider {
         } else if (Configuration.CACHED_CONFLICTS_MEDIAN && explanationManager.getPossibleExplanationsSize() > 0){
             return divideIntoSetsAccordingToLiteralsPairOccurrence(literals);
         }
-        return divideIntoSetsWithoutCondition(literals);
+        if (Configuration.optimisations.contains(Optimisation.FULLY_RANDOM_SET_DIVISION))
+            return divideIntoSetsRandomly(literals);
+        if (Configuration.optimisations.contains(Optimisation.EQUAL_SIZE_RANDOM_SET_DIVISION))
+            return divideIntoEqualRandomSets(literals);
+        return  divideIntoSetsWithoutCondition(literals);
     }
 
     List<AxiomSet> divideIntoSetsWithoutCondition(Set<OWLAxiom> literals){

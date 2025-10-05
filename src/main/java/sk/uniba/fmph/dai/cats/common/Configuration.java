@@ -45,7 +45,7 @@ public class Configuration {
 
     public static boolean LOGGING = true;
 
-    public static boolean FORCED_OPTIMISATIONS = false;
+    public static boolean IGNORE_DEFAULT_OPTIMISATIONS = false;
 
     public static final Set<Optimisation> optimisations = new HashSet<>();
 
