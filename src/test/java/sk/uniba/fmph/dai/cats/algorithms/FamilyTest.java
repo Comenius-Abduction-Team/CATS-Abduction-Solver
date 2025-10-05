@@ -166,7 +166,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.mhsMxp();
         abducer.setDepth(4);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
 
     }
 
@@ -334,7 +334,7 @@ public class FamilyTest extends AlgorithmTestBase {
         super.rctMxp();
         abducer.setDepth(4);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
 
     }
 
