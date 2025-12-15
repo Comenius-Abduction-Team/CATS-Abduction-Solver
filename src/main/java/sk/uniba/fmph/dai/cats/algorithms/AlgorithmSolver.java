@@ -1,6 +1,19 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.semanticweb.owlapi.model.OWLAxiom;
+
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
@@ -12,10 +25,17 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
-import sk.uniba.fmph.dai.cats.events.*;
-import sk.uniba.fmph.dai.cats.metrics.*;
+import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.DebugPrintEventSubscriber;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
+import sk.uniba.fmph.dai.cats.events.JsonExportEventSubscriber;
+import sk.uniba.fmph.dai.cats.metrics.Level;
+import sk.uniba.fmph.dai.cats.metrics.MetricsManager;
+import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
+import sk.uniba.fmph.dai.cats.metrics.StatEventSubscriber;
+import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.InsertSortModelManager;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.model.ModelExtractor;
@@ -23,12 +43,6 @@ import sk.uniba.fmph.dai.cats.model.ModelManager;
 import sk.uniba.fmph.dai.cats.progress.ProgressManager;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.*;
 
 public class AlgorithmSolver {
 
@@ -105,8 +119,10 @@ public class AlgorithmSolver {
     private void registerSubscribersFromConfiguration(){
         if (Configuration.TRACKING_STATS)
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
-        if (Configuration.DEBUG_PRINT)
+        if (Configuration.DEBUG_PRINT){
             EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
+        EventPublisher.registerSubscriber(this, new JsonExportEventSubscriber());
+        }
     }
 
     private void setAlgorithm(Algorithm algorithm){
