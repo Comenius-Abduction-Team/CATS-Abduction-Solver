@@ -345,8 +345,9 @@ public class AlgorithmSolver {
                     throw new TimeoutException();
                 }
 
-                treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
-                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, node);
+                TreeNode childNode = treeBuilder.createChildNode(node, explanation);
+                treeBuilder.addNodeToTree(childNode);
+                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
                 path.clear();
 
             }
