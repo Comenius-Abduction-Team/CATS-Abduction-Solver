@@ -24,10 +24,11 @@ public class Main {
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
-    //"in/multiple_obs/family.in"
-    //"in/toothache.in"
-    //"in/ore_ont_8666_obs04_ont01_1729028695588_mxp_.in"
-    private static final String INPUT_FILE = "in/multiple_obs/family.in";
+    // files often used for manual testing
+    private static final String FAMILY_MULTI = "in/multiple_obs/family.in";
+    private static final String TOOTHACHE = "in/toothache.in";
+
+    private static final String INPUT_FILE = TOOTHACHE;
 
     public static void main(String[] args) throws Exception {
 
