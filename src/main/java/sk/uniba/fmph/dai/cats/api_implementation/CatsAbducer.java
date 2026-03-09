@@ -44,6 +44,7 @@ public class CatsAbducer implements IThreadAbducer {
     boolean strictRelevance = true;
     boolean logging = false;
     boolean debug = false;
+    boolean json = false;
 
     boolean multithread = false;
 
@@ -167,6 +168,11 @@ public class CatsAbducer implements IThreadAbducer {
                             setDebug(debug);
                             i++;
                             continue;
+                        case "-json":
+                            boolean json = Boolean.parseBoolean(arguments[i + 1]);
+                            Configuration.JSON_EXPORT = json;
+                            i++;
+                            continue;
                         default:
                             throw new InvalidSolverParameterException(arguments[i], "Unknown solver argument");
                     }
@@ -249,6 +255,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.LOGGING = logging;
         Configuration.DEBUG_PRINT = debug;
         Configuration.ALGORITHM = algorithm;
+        Configuration.JSON_EXPORT = json;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

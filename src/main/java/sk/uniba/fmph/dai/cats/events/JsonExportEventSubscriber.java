@@ -8,21 +8,30 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public class JsonExportEventSubscriber implements IEventSubscriber {
+    private final AlgorithmSolver solver;
+    public JsonExportEventSubscriber(AlgorithmSolver solver) { this.solver = solver; }
+
     private final Map<TreeNode, Integer> nodeIds = new IdentityHashMap<>();
 
     // JSON collections
     private final List<Map<String, Object>> nodes = new ArrayList<>();
     private final List<Map<String, Object>> edges = new ArrayList<>();
+
+    private final List<String> ontologyAxioms = new ArrayList<>();
+    private final List<String> tbox = new ArrayList<>();
+    private final List<String> observations = new ArrayList<>();
+    private boolean ontologyLoaded = false;
 
     // hrana ktorú ešte nemôžeme spojiť s dieťaťom
     // solver najpr vztvorí rodiča až potom pridáva dieťa keď vytvorí node
@@ -44,6 +53,8 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     @Override
     public void processEvent(Event event) {
 
+        if (!ontologyLoaded) { loadOntology(); ontologyLoaded = true; }
+
         switch (event.getEventType()) {
             case LEVEL_STARTED: break;
             case PROCESSING_NODE:
@@ -52,7 +63,21 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             case EDGE_CREATED:
                 lastCreatedEdge = ((EdgeEvent) event).branchLabel;
                 break;
-            case EDGE_PRUNED:break;
+            case EDGE_PRUNED:
+                handleEdgePruned(currentNode, "PRUNED PATH!");
+                break;
+            case INVALID_PATH:
+                handleEdgePruned(currentNode, "INVALID PATH!");
+                break;
+            case MODEL_REUSE:
+                handleEdgePruned(currentNode, "Model was reused.");
+                break;
+            case INCONSISTENT_EXPLANATION:
+                handleEdgePruned(currentNode, "INCONSISTENT EXPLANATION:");
+                break;
+            case IRELEVANT_EXPLANATION:
+                handleEdgePruned(currentNode, "IRRELEVANT EXPLANATION:");
+                break;
             case NODE_CREATED:
                 handleNodeCreated((NodeEvent) event);
                 break;
@@ -69,10 +94,97 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         }
     }
 
+// --------------------------------------------------
+    // ONTOLOGY LOADING
+    // --------------------------------------------------
+
+    private void loadOntology() {
+
+        try {
+
+            OWLOntology ontology = solver.loader.getOntology();
+
+            if (ontology == null) return;
+
+            for (OWLAxiom ax : ontology.getAxioms()) {
+                //ontologyAxioms.add(ax.toString());
+                //if (ax.isOfType(AxiomType.DECLARATION)) continue;
+                //ontologyAxioms.add(axiomToDL(ax));
+
+                String dl = axiomToDL(ax);
+
+                if (ax instanceof OWLSubClassOfAxiom) {
+                    tbox.add(dl);
+                }
+                else if (ax instanceof OWLClassAssertionAxiom) {
+                    observations.add(dl);
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("[JSON EXPORT] Cannot load ontology: " + e.getMessage());
+        }
+    }
+
+    private String axiomToDL(OWLAxiom ax) {
+
+        if (ax instanceof OWLSubClassOfAxiom) {
+            OWLSubClassOfAxiom sub = (OWLSubClassOfAxiom) ax;
+
+            return classExprToDL(sub.getSubClass()) + " ⊑ " +
+                    classExprToDL(sub.getSuperClass());
+        }
+
+        if (ax instanceof OWLClassAssertionAxiom) {
+            OWLClassAssertionAxiom ass = (OWLClassAssertionAxiom) ax;
+
+            String ind = shortName(ass.getIndividual().asOWLNamedIndividual().getIRI());
+
+            return ind + " : " + classExprToDL(ass.getClassExpression());
+        }
+
+        return ax.toString();
+    }
+
+    private String classExprToDL(OWLClassExpression ce) {
+
+        if (ce instanceof OWLClass) {
+            OWLClass c = (OWLClass) ce;
+            return shortName(c.getIRI());
+        }
+
+        if (ce instanceof OWLObjectIntersectionOf) {
+            OWLObjectIntersectionOf inter = (OWLObjectIntersectionOf) ce;
+
+            List<String> parts = new ArrayList<>();
+            for (OWLClassExpression op : inter.getOperands()) {
+                parts.add(classExprToDL(op));
+            }
+
+            return String.join(" ⊓ ", parts);
+        }
+
+        if (ce instanceof OWLObjectComplementOf) {
+            OWLObjectComplementOf comp = (OWLObjectComplementOf) ce;
+            return "¬" + classExprToDL(comp.getOperand());
+        }
+
+        return ce.toString();
+    }
+
+    private String shortName(IRI iri){
+        String s = iri.toString();
+        int i = s.indexOf("#");
+        return (i >= 0) ? s.substring(i + 1) : s;
+    }
+
+
     // -----------------------
     //  PROCESSING_NODE
     // -----------------------
     // Prechádza pendingEdges a hľadá, ktoré hrany patrí tomuto uzlu
+    /*
+    //original
     private void handleProcessingNode(NodeEvent ev) {
         TreeNode node = ev.node;
         currentNode = node;
@@ -92,13 +204,42 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             }
         }
     }
+    */
+    private void handleProcessingNode(NodeEvent ev) {
+        TreeNode node = ev.node;
+        currentNode = node;
 
+        nodeIds.computeIfAbsent(node, k -> idCounter++);
+        addNodeIfNotExist(node);
+    }
+
+    /*
+    // original
     private void handleNodeCreated(NodeEvent ev) {
         TreeNode parent = ev.node;
         OWLAxiom label = lastCreatedEdge;
         if (label != null) {
             pendingEdges.add(new PendingEdge(parent, label));
         }
+        lastCreatedEdge = null;
+    }
+    */
+    private void handleNodeCreated(NodeEvent ev) {
+        TreeNode newNode = ev.node;
+
+        // Zaregistruj node ID, ak ešte neexistuje
+        nodeIds.computeIfAbsent(newNode, k -> idCounter++);
+
+        // pridaj nový uzol do JSON stromu
+        addNodeIfNotExist(newNode);
+
+        // Ak existuje label poslednej hrany, pripoj ho na "currentNode"
+        if (lastCreatedEdge != null && currentNode != null) {
+            createEdge(currentNode, newNode, lastCreatedEdge);
+        }
+
+        // Nový uzol sa stane aktuálnym
+        currentNode = newNode;
         lastCreatedEdge = null;
     }
     // vytvorenie nového uzla, 
@@ -200,6 +341,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         edgeObj.put("parent", nodeIds.get(parent));
         edgeObj.put("child", child == null ? null : nodeIds.get(child));
         edgeObj.put("label", label == null ? null : StringFactory.getRepresentation(label));
+        edgeObj.put("pruned", null);
         edges.add(edgeObj);
     }
 
@@ -213,6 +355,18 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return false;
     }
 
+    private void handleEdgePruned(TreeNode node, String reason) {
+        if (node == null) return;
+
+        Map<String, Object> edgeObj = new LinkedHashMap<>();
+        edgeObj.put("parent", nodeIds.get(node)); // rodič = aktuálny uzol
+        edgeObj.put("child", null);               // dieťa ešte neexistuje
+        edgeObj.put("label", lastCreatedEdge == null ? null : StringFactory.getRepresentation(lastCreatedEdge));
+        edgeObj.put("pruned", reason);            // text dôvodu prerezania
+
+        edges.add(edgeObj);
+    }
+
     // -----------------------
     // JSON export
     // -----------------------
@@ -220,6 +374,12 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private void writeJson() {
         try {
             Map<String, Object> root = new LinkedHashMap<>();
+            //root.put("ontology", ontologyAxioms);
+            Map<String, Object> ontology = new LinkedHashMap<>();
+            ontology.put("tbox", tbox);
+            ontology.put("observations", observations);
+
+            root.put("ontology", ontology);
             root.put("nodes", nodes);
             root.put("edges", edges);
 

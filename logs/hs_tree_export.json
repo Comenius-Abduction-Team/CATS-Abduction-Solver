@@ -1,0 +1,131 @@
+{
+  "ontology" : {
+    "tbox" : [ "Cavity ⊑ SensitiveTeeth", "DentalTrauma ⊑ Toothache", "DrankColdDrink ⊓ SensitiveTeeth ⊑ Toothache" ],
+    "observations" : [ "john : ¬Toothache" ]
+  },
+  "nodes" : [ {
+    "id" : 0,
+    "depth" : 1,
+    "path" : [ ],
+    "label" : [ "DrankColdDrink(john)", "DentalTrauma(john)", "Cavity(john)", "SensitiveTeeth(john)" ],
+    "isExplanation" : false,
+    "closed" : "closed"
+  }, {
+    "id" : 1,
+    "depth" : 2,
+    "path" : [ "DrankColdDrink(john)" ],
+    "label" : [ "¬DrankColdDrink(john)", "DentalTrauma(john)", "Cavity(john)", "SensitiveTeeth(john)" ],
+    "isExplanation" : false,
+    "closed" : "closed"
+  }, {
+    "id" : 2,
+    "depth" : 3,
+    "path" : [ "DentalTrauma(john)" ],
+    "label" : [ "DentalTrauma(john)" ],
+    "isExplanation" : true,
+    "closed" : "closed"
+  }, {
+    "id" : 3,
+    "depth" : 2,
+    "path" : [ "Cavity(john)" ],
+    "label" : [ "¬SensitiveTeeth(john)", "¬Cavity(john)", "DrankColdDrink(john)", "DentalTrauma(john)" ],
+    "isExplanation" : false,
+    "closed" : "closed"
+  }, {
+    "id" : 4,
+    "depth" : 2,
+    "path" : [ "SensitiveTeeth(john)" ],
+    "label" : [ "¬SensitiveTeeth(john)", "¬Cavity(john)", "DrankColdDrink(john)", "DentalTrauma(john)" ],
+    "isExplanation" : false,
+    "closed" : "none"
+  }, {
+    "id" : 5,
+    "depth" : 3,
+    "path" : [ "DrankColdDrink(john)", "Cavity(john)" ],
+    "label" : [ "DrankColdDrink(john)", "Cavity(john)" ],
+    "isExplanation" : true,
+    "closed" : "closed"
+  }, {
+    "id" : 6,
+    "depth" : 3,
+    "path" : [ "DrankColdDrink(john)", "SensitiveTeeth(john)" ],
+    "label" : [ "DrankColdDrink(john)", "SensitiveTeeth(john)" ],
+    "isExplanation" : true,
+    "closed" : "closed"
+  }, {
+    "id" : 7,
+    "depth" : 3,
+    "path" : [ "SensitiveTeeth(john)", "¬Cavity(john)" ],
+    "label" : [ "¬SensitiveTeeth(john)", "DrankColdDrink(john)", "DentalTrauma(john)", "Cavity(john)" ],
+    "isExplanation" : false,
+    "closed" : "none"
+  } ],
+  "edges" : [ {
+    "parent" : 0,
+    "child" : 1,
+    "label" : "DrankColdDrink(john)",
+    "pruned" : null
+  }, {
+    "parent" : 1,
+    "child" : 2,
+    "label" : "DentalTrauma(john)"
+  }, {
+    "parent" : 1,
+    "child" : 3,
+    "label" : "Cavity(john)",
+    "pruned" : null
+  }, {
+    "parent" : 3,
+    "child" : null,
+    "label" : "SensitiveTeeth(john)",
+    "pruned" : "Model was reused."
+  }, {
+    "parent" : 3,
+    "child" : 4,
+    "label" : "SensitiveTeeth(john)",
+    "pruned" : null
+  }, {
+    "parent" : 1,
+    "child" : null,
+    "label" : "¬DrankColdDrink(john)",
+    "pruned" : "INVALID PATH!"
+  }, {
+    "parent" : 1,
+    "child" : 5,
+    "label" : "Cavity(john)"
+  }, {
+    "parent" : 1,
+    "child" : 6,
+    "label" : "SensitiveTeeth(john)"
+  }, {
+    "parent" : 3,
+    "child" : null,
+    "label" : "¬SensitiveTeeth(john)",
+    "pruned" : "INCONSISTENT EXPLANATION:"
+  }, {
+    "parent" : 3,
+    "child" : null,
+    "label" : "¬Cavity(john)",
+    "pruned" : "INVALID PATH!"
+  }, {
+    "parent" : 4,
+    "child" : null,
+    "label" : "¬SensitiveTeeth(john)",
+    "pruned" : "INVALID PATH!"
+  }, {
+    "parent" : 4,
+    "child" : 7,
+    "label" : "¬Cavity(john)",
+    "pruned" : null
+  }, {
+    "parent" : 7,
+    "child" : null,
+    "label" : "¬SensitiveTeeth(john)",
+    "pruned" : "INVALID PATH!"
+  }, {
+    "parent" : 7,
+    "child" : null,
+    "label" : "Cavity(john)",
+    "pruned" : "INVALID PATH!"
+  } ]
+}
