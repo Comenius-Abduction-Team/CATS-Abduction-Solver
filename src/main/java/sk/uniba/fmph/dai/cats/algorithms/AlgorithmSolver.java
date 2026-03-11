@@ -2,6 +2,9 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.marco.MarcoNodeProcessor;
+import sk.uniba.fmph.dai.cats.algorithms.marco.MarcoTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.marco.SubsetMapManager;
 import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
@@ -59,7 +62,7 @@ public class AlgorithmSolver {
 
     protected AlgorithmSolver(Algorithm algorithm, Loader loader, ExplanationManager explanationManager,
                               ProgressManager progressManager, MetricsThread metricsThread) {
-
+        /*inicializacia novych instancii*/
         this.loader = loader;
 
         metrics = new MetricsManager(metricsThread);
@@ -88,7 +91,7 @@ public class AlgorithmSolver {
     }
 
     private void setOptimisations(Algorithm algorithm){
-
+        /*nastavenie nejakych optimalizacii*/
         if (Configuration.IGNORE_DEFAULT_OPTIMISATIONS)
             return;
 
@@ -102,7 +105,8 @@ public class AlgorithmSolver {
         Configuration.optimisations.addAll(Arrays.asList(optimisations));
     }
 
-    private void registerSubscribersFromConfiguration(){
+    private void registerSubscribersFromConfiguration() {
+        /*ci treba vypisat debug a zaznamenavat nejake statistiky*/
         if (Configuration.TRACKING_STATS)
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
         if (Configuration.DEBUG_PRINT)
@@ -110,7 +114,8 @@ public class AlgorithmSolver {
     }
 
     private void setAlgorithm(Algorithm algorithm){
-
+        /*nastavenie, ze aky nodeProcessor a treeBuilder je pouzity - podla algoritmu
+        * bude treba zakomponovat MARCO*/
         if (algorithm.usesMxp()){
             if (Configuration.NEGATION_ALLOWED && Configuration.optimisations.contains(Optimisation.TRIPLE_MXP))
                 nodeProcessor = new TripleMxpNodeProcessor(this);
@@ -120,8 +125,13 @@ public class AlgorithmSolver {
 
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
+        else if (algorithm.usesMarco()) { /*i added*/
+            SubsetMapManager map = new SubsetMapManager();
+            nodeProcessor = new MarcoNodeProcessor(this, map);
+            treeBuilder = new MarcoTreeBuilder(this);}
         else
             nodeProcessor = new ClassicNodeProcessor(this);
+
 
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
@@ -135,32 +145,32 @@ public class AlgorithmSolver {
 
     public void solve(){
 
-        printInfo();
+        printInfo();  /*vypise nejake uvodne info*/
 
-        addNegatedObservation();
+        addNegatedObservation(); /*prida negovane pozorovania*/
 
-        if (Configuration.PRINT_PROGRESS)
+        if (Configuration.PRINT_PROGRESS) /*k vypisu*/
             progressManager.updateProgress(0, "Initializing abducibles.");
         initializeAbducibles();
 
-        if (Configuration.PRINT_PROGRESS)
+        if (Configuration.PRINT_PROGRESS)/*k vypisu*/
             progressManager.updateProgress(0, "Initializing abduction.");
 
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
-
+        /*ci je ontologia konzistentna?*/
         Future<Void> future = null;
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
 
-            Callable<Void> task = this::startSolving;
-            future = executor.submit(task);
+            Callable<Void> task = this::startSolving; /*referencia na metodu startSolving, aby sa neskor ho bolo mozne volat*/
+            future = executor.submit(task); /*nevola startSolving hned, ale naplanuje jeho vykonanie na inom threade?*/
 
             if (Configuration.TIMEOUT > 0)
                 future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
             else
-                future.get();
-        }  catch (Throwable e) {
+                future.get(); /*caka, kym startSolving() je dokonceny*/
+        }  catch (Throwable e) { /*ak bol error, vypise*/
 
                 if (    (e.getClass() == ExecutionException.class &&
                         e.getCause().getClass() == TimeoutException.class)
@@ -188,18 +198,18 @@ public class AlgorithmSolver {
 
             executor.shutdown();
             if (currentLevel.finish < 0)
-                currentLevel.finish = metrics.getRunningTime();
+                currentLevel.finish = metrics.getRunningTime(); /*zaznamenanie dlzky runtomu*/
             if (currentLevel.memory == 0)
-                currentLevel.memory = metrics.measureAverageMemory();
+                currentLevel.memory = metrics.measureAverageMemory(); /*zaznamenanie memory*/
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
 
             stats.getFilteringStats().start = metrics.getRunningTime();
-            nodeProcessor.postProcessExplanations();
+            nodeProcessor.postProcessExplanations(); /*postprocessing v node-och?*/
             stats.getFilteringStats().finish = metrics.getRunningTime();
 
             metrics.setEndTime();
-            explanationManager.processExplanations(message, stats);
+            explanationManager.processExplanations(message, stats); /*processing vysvetleni?*/
 
             logger.logInfo(Configuration.getInfo(), message);
         }
@@ -230,51 +240,54 @@ public class AlgorithmSolver {
 
         metrics.setStartTime();
 
-        currentDepth = 0;
-        currentLevel = stats.getLevelStats(0);
+        currentDepth = 0; /*hlbka stromu je zatial 0*/
+        currentLevel = stats.getLevelStats(0); /*aktualny level podla nejakej funkcie*/
         currentLevel.start = metrics.getRunningTime();
 
-        TreeNode root = treeBuilder.createRoot();
+        TreeNode root = treeBuilder.createRoot(); /*vytvori root*/
         if (root == null) {
             EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
-        treeBuilder.addNodeToTree(root);
-        currentLevel.createdNodes = 1;
+        treeBuilder.addNodeToTree(root); /*prida root do stromu*/
+        currentLevel.createdNodes = 1; /**/
 
-        if(isTimeout()) {
+        if(isTimeout()) { /*ak je timeout, vyhodi error*/
             logger.addLevelToPartialLog(currentLevel);
             throw new TimeoutException();
         }
 
         while (!treeBuilder.isTreeClosed()) {
+            /*kym je strom otvoreny (asi kym su not processed nodes)?*/
 
-            TreeNode node = treeBuilder.getNextNodeFromTree();
+            TreeNode node = treeBuilder.getNextNodeFromTree(); /*ziska nasledujuci node zo stromu*/
 
             /*if (node == null){
                 StaticPrinter.debugPrint("[!!!] Null node!");
                 continue;
             }*/
 
-            assignLevelToNode(node);
+            assignLevelToNode(node); /*k nodu spaja level?*/
 
-            if (depthLimitReached()) {
+            if (depthLimitReached()) { /*max depyh error*/
                 EventPublisher.publishGenericEvent(this, EventType.MAX_DEPTH_REACHED);
                 break;
             }
 
-            if(isTimeout()){
+            if(isTimeout()){ /*timeout error*/
                 logger.addLevelToPartialLog(currentLevel);
                 throw new TimeoutException();
             }
 
             EventPublisher.publishNodeEvent(this, EventType.PROCESSING_NODE, node);
-
-            node.processed = true;
+            /*spracuje aktualny node*/
+            node.processed = true; /*aktualny node je spracovany*/
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
+            /*ci sa daju deti nodu iterovat*/
 
             if (!canIterateNodeChildren){
+                /*ak nie, zaznamenaj a continue na dalsi node*/
                 EventPublisher.publishNodeEvent(this, EventType.CHILDLESS_NODE, node);
                 continue;
             }
@@ -282,8 +295,8 @@ public class AlgorithmSolver {
             //StaticPrinter.debugPrint("[TREE] Iterating child edges");
 
             while (!treeBuilder.noChildrenLeft()){
-
-                OWLAxiom child = treeBuilder.getNextChild();
+                /*kym ma node deti*/
+                OWLAxiom child = treeBuilder.getNextChild(); /*get nasledujuce dieta*/
 
                 /*if (child == null) {
                     StaticPrinter.debugPrint("[!!!] NULL CHILD");
@@ -298,16 +311,19 @@ public class AlgorithmSolver {
                 }
 
                 if(isInvalidPath(node, child)){
+                    /*invalid path*/
                     EventPublisher.publishEdgeEvent(this, EventType.INVALID_PATH, child);
                     continue;
                 }
 
                 Explanation explanation = createPossibleExplanation(node, child);
+                /*vytvor possible explanation*/
 
-                path.clear();
-                path.addAll(explanation.getAxioms());
+                path.clear(); /*vymaz cestu*/
+                path.addAll(explanation.getAxioms()); /*pridaj explanations k ceste*/
 
                 boolean pruneThisChild = treeBuilder.shouldPruneChildBranch(node, explanation);
+                /*ci treba prune*/
 
                 if (pruneThisChild){
                     path.clear();
@@ -315,7 +331,7 @@ public class AlgorithmSolver {
                 }
 
                 boolean canReuseModel = Configuration.REUSE_OF_MODELS && modelManager.findReuseModelForPath(path);
-
+                /*ci sa da znovu pouzit model*/
                 if (!canReuseModel) {
 
                     if (isTimeout()){
@@ -326,8 +342,9 @@ public class AlgorithmSolver {
                     int explanationsFound = nodeProcessor.findExplanations(
                             explanation, treeBuilder.shouldExtractModel()
                         );
+                    /*kolko vysvetleni nasiel*/
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
-
+                    /*ci treba uzavriet node*/
                     if (shouldCloseNode){
                         EventPublisher.publishNodeEvent(this, EventType.CLOSING_NODE, node);
                         path.clear();
@@ -349,13 +366,14 @@ public class AlgorithmSolver {
                 treeBuilder.addNodeToTree(childNode);
                 EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
                 path.clear();
+                /*vytvor novy node a pridaj k stromu*/
 
             }
 
         }
 
         EventPublisher.publishGenericEvent(this, EventType.TREE_FINISHED);
-
+        /*presiel cely strom*/
         path.clear();
         treeBuilder.resetLevel();
         logger.addLevelToPartialLog(currentLevel);

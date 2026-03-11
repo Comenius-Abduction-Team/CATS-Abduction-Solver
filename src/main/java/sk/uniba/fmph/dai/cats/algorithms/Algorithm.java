@@ -88,6 +88,12 @@ public enum Algorithm {
         public boolean isRootOnly() {
             return true;
         }
+    },
+    MARCO{ /*i added*/
+        @Override
+        public boolean usesMarco() {
+            return true;
+        }
     };
 
     public boolean isRootOnly(){
@@ -106,6 +112,10 @@ public enum Algorithm {
     }
 
     public boolean usesQxp(){
+        return false;
+    }
+
+    public boolean usesMarco() {
         return false;
     }
 

@@ -20,7 +20,7 @@ import java.util.Set;
 public class Main {
 
     /** whether the solver is being run from an IDE*/
-    private static final boolean TESTING = false;
+    private static final boolean TESTING = true;
     /** whether the solver is being run from an IDE through the API*/
     private static final boolean API = false;
 
@@ -28,7 +28,7 @@ public class Main {
     private static final String FAMILY_MULTI = "in/multiple_obs/family.in";
     private static final String TOOTHACHE = "in/toothache.in";
 
-    private static final String INPUT_FILE = TOOTHACHE;
+    private static final String INPUT_FILE = "in/multiple_obs/family.in";
 
     public static void main(String[] args) throws Exception {
 
@@ -73,7 +73,7 @@ public class Main {
         observation = dataFactory.getOWLClassAssertionAxiom(toothache, john);
 
         CatsAbducer abducer = new CatsAbducer(backgroundKnowledge, observation);
-        abducer.setAlgorithm(Algorithm.MHS_MXP);
+        abducer.setAlgorithm(Algorithm.MARCO);
         abducer.solveAbduction();
         Set<IExplanation> explanations = abducer.getExplanations();
         explanations.forEach(System.out::println);
@@ -87,7 +87,9 @@ public class Main {
             ArgumentParser argumentParser = new ArgumentParser();
             argumentParser.parse(args);
 
-            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Configuration.ALGORITHM);
+
+            /*Configuration.ALGORITHM*/
+            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Algorithm.MARCO);
             solver.solve();
 
         } catch(Throwable e){
