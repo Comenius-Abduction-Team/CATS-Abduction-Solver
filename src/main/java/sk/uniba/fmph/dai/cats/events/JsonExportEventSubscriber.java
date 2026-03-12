@@ -225,23 +225,64 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     }
     */
     private void handleNodeCreated(NodeEvent ev) {
+
         TreeNode newNode = ev.node;
 
-        // Zaregistruj node ID, ak ešte neexistuje
         nodeIds.computeIfAbsent(newNode, k -> idCounter++);
-
-        // pridaj nový uzol do JSON stromu
         addNodeIfNotExist(newNode);
 
-        // Ak existuje label poslednej hrany, pripoj ho na "currentNode"
-        if (lastCreatedEdge != null && currentNode != null) {
-            createEdge(currentNode, newNode, lastCreatedEdge);
+        if (lastCreatedEdge != null) {
+
+            TreeNode parent = findParent(newNode);
+
+            if (parent != null) {
+                createEdge(parent, newNode, lastCreatedEdge);
+            }
         }
 
-        // Nový uzol sa stane aktuálnym
-        currentNode = newNode;
         lastCreatedEdge = null;
     }
+    private TreeNode findParent(TreeNode child) {
+
+        if (child.path == null || child.path.isEmpty())
+            return null;
+
+        int parentDepth = child.depth - 1;
+
+        for (TreeNode n : nodeIds.keySet()) {
+
+            if (n.depth != parentDepth)
+                continue;
+
+            if (isPrefix(n.path, child.path))
+                return n;
+        }
+
+        return null;
+    }
+    private boolean isPrefix(List<OWLAxiom> parent, List<OWLAxiom> child) {
+
+        if (parent == null)
+            return child == null || child.isEmpty();
+
+        if (child == null)
+            return false;
+
+        if (parent.size() + 1 != child.size())
+            return false;
+
+        for (int i = 0; i < parent.size(); i++) {
+
+            String p = StringFactory.getRepresentation(parent.get(i));
+            String c = StringFactory.getRepresentation(child.get(i));
+
+            if (!p.equals(c))
+                return false;
+        }
+
+        return true;
+    }
+
     // vytvorenie nového uzla, 
     private void handlePossibleExplanation(ExplanationEvent ev) {
         Explanation ex = ev.explanation;
@@ -375,6 +416,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         try {
             Map<String, Object> root = new LinkedHashMap<>();
             //root.put("ontology", ontologyAxioms);
+
             Map<String, Object> ontology = new LinkedHashMap<>();
             ontology.put("tbox", tbox);
             ontology.put("observations", observations);
