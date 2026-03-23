@@ -105,7 +105,6 @@ public class HsdagBuilder implements ITreeBuilder {
         node.depth = depth;
 
         Model modelToReuse = solver.findAndGetModelToReuse();
-        Set<OWLAxiom> a = modelToReuse.getNegatedData();
 
         if (modelToReuse == null)
             return null;

@@ -8,7 +8,6 @@ import java.util.*;
 
 public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
 
-    public Set<OWLAxiom> pathSet;
     public ArrayList<HsdagNode> children;
     final int id;
 
@@ -19,7 +18,7 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
     boolean currentlyRelabeled;
     int referenceCount;
 
-    public boolean modelWasNotReused;
+    //public boolean modelWasNotReused;
 
 
     HsdagNode parent;
@@ -28,8 +27,8 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
         this.id = id;
         this.currentlyRelabeled = false;
         referenceCount = 1;
-        children = new ArrayList<HsdagNode>();
-        childrenToProcess = new ArrayList<OWLAxiom>();
+        children = new ArrayList<>();
+        childrenToProcess = new ArrayList<>();
         positiveAxioms = new HashSet<>();
     }
 
@@ -43,7 +42,7 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
 
     @Override
     public int compareTo(HsdagNode other) {
-        if (this.depth != other.depth) {
+        if (!Objects.equals(this.depth, other.depth)) {
             return Integer.compare(this.depth, other.depth);
         }
         return Integer.compare(positiveAxioms.size(), other.positiveAxioms.size());
