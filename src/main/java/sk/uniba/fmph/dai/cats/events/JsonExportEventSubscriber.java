@@ -1,18 +1,16 @@
 package sk.uniba.fmph.dai.cats.events;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
@@ -20,7 +18,10 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public class JsonExportEventSubscriber implements IEventSubscriber {
     private final AlgorithmSolver solver;
-    public JsonExportEventSubscriber(AlgorithmSolver solver) { this.solver = solver; }
+    public JsonExportEventSubscriber(AlgorithmSolver solver) {
+        this.solver = solver;
+
+    }
 
     private final Map<TreeNode, Integer> nodeIds = new IdentityHashMap<>();
 
@@ -32,6 +33,11 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private final List<String> tbox = new ArrayList<>();
     private final List<String> observations = new ArrayList<>();
     private boolean ontologyLoaded = false;
+
+    private int stepCounter = 0;
+    private int nextStep() {
+        return ++stepCounter;
+    }
 
     // hrana ktorú ešte nemôžeme spojiť s dieťaťom
     // solver najpr vztvorí rodiča až potom pridáva dieťa keď vytvorí node
@@ -48,13 +54,12 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private TreeNode currentNode = null; // práve spracovávaný uzol
     private OWLAxiom lastCreatedEdge = null; // label poslednej hrany
     private int idCounter = 0;
-    private static final String OUTPUT = "logs/hs_tree_export.json";
 
     @Override
     public void processEvent(Event event) {
 
         if (!ontologyLoaded) { loadOntology(); ontologyLoaded = true; }
-
+        //System.out.println("test print: "+event.getEventType());
         switch (event.getEventType()) {
             case LEVEL_STARTED: break;
             case PROCESSING_NODE:
@@ -70,7 +75,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
                 handleEdgePruned(currentNode, "INVALID PATH!");
                 break;
             case MODEL_REUSE:
-                handleEdgePruned(currentNode, "Model was reused.");
+                //handleEdgePruned(currentNode, "Model was reused.");
                 break;
             case INCONSISTENT_EXPLANATION:
                 handleEdgePruned(currentNode, "INCONSISTENT EXPLANATION:");
@@ -87,8 +92,13 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             case POSSIBLE_EXPLANATION:
                 handlePossibleExplanation((ExplanationEvent) event);
                 break;
+            case NONMINIMAL_EXPLANATION:
+                handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!");
+                break;
             case TREE_FINISHED:
                 writeJson();
+                break;
+            case MXP_CALL:
                 break;
             default: break;
         }
@@ -99,18 +109,14 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     // --------------------------------------------------
 
     private void loadOntology() {
-
         try {
-
             OWLOntology ontology = solver.loader.getOntology();
-
             if (ontology == null) return;
 
-            for (OWLAxiom ax : ontology.getAxioms()) {
-                //ontologyAxioms.add(ax.toString());
-                //if (ax.isOfType(AxiomType.DECLARATION)) continue;
-                //ontologyAxioms.add(axiomToDL(ax));
+            tbox.clear();
+            observations.clear();
 
+            for (OWLAxiom ax : ontology.getAxioms()) {
                 String dl = axiomToDL(ax);
 
                 if (ax instanceof OWLSubClassOfAxiom) {
@@ -120,9 +126,8 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
                     observations.add(dl);
                 }
             }
-
         } catch (Exception e) {
-            System.err.println("[JSON EXPORT] Cannot load ontology: " + e.getMessage());
+            System.err.println("[JSON EXPORT] Cannot load original ontology snapshot: " + e.getMessage());
         }
     }
 
@@ -308,6 +313,33 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         exNode.put("isExplanation", true);
         exNode.put("closed", "closed");
 
+        // CONFLICT SET (len pre MHS-MXP)
+
+        if (Configuration.ALGORITHM.toString().contains("MXP")) {
+
+            List<String> conflictSet = new ArrayList<>();
+
+            if (currentNode != null && currentNode.path != null) {
+
+                Set<String> pathSet = new HashSet<>();
+                for (OWLAxiom ax : currentNode.path) {
+                    pathSet.add(StringFactory.getRepresentation(ax));
+                }
+
+                for (OWLAxiom ax : ex.getAxioms()) {
+                    String repr = StringFactory.getRepresentation(ax);
+                    if (!pathSet.contains(repr)) {
+                        conflictSet.add(repr);
+                    }
+                }
+            }
+
+            if (!conflictSet.isEmpty()) {
+                exNode.put("conflictSet", conflictSet);
+            }
+        }
+        // =========================
+
         nodes.add(exNode);
 
         if (currentNode != null) {
@@ -412,10 +444,34 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     // JSON export
     // -----------------------
 
+    private String buildExportPath() {
+        Algorithm  algorithm = Configuration.ALGORITHM;
+
+        String[] parts = Configuration.INPUT_ONT_FILE.split("[/\\\\]");
+        String ontology = parts[parts.length - 1].split("\\.")[0];
+
+        String input = Configuration.INPUT_FILE_NAME;
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+
+        String directoryPath = "exports"
+                + File.separator + algorithm
+                + File.separator + ontology
+                + File.separator + input;
+
+        new File(directoryPath).mkdirs();
+
+        String fileName = timestamp + "_" + input + "_HStree.json";
+
+        return directoryPath + File.separator + fileName;
+    }
+
     private void writeJson() {
         try {
             Map<String, Object> root = new LinkedHashMap<>();
             //root.put("ontology", ontologyAxioms);
+            Algorithm algorithm = Configuration.ALGORITHM;
+            Map<String, Object> algorithmName = new LinkedHashMap<>();
+            root.put("algorithm",algorithm);
 
             Map<String, Object> ontology = new LinkedHashMap<>();
             ontology.put("tbox", tbox);
@@ -427,9 +483,10 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            mapper.writeValue(new File(OUTPUT), root);
+            String exportPath = buildExportPath();
+            mapper.writeValue(new File(exportPath), root);
 
-            System.out.println("[JSON EXPORT] HS-tree exported to " + OUTPUT);
+            System.out.println("[JSON EXPORT] HS-tree exported to " + exportPath);
 
         } catch (Exception e) {
             System.err.println("[JSON EXPORT] Error: " + e.getMessage());
