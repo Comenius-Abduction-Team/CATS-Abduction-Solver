@@ -101,6 +101,8 @@ public class HsdagBuilder implements ITreeBuilder {
 
         if (label != null) {
             node.path = label.getAxioms();
+            node.labelAxiom = label.lastAxiom;
+            nodesAtCurrentDepth.put(label.getAxiomSet(),node);
         }
         node.depth = depth;
 
@@ -108,9 +110,8 @@ public class HsdagBuilder implements ITreeBuilder {
 
         if (modelToReuse == null)
             return null;
-
         node.model = solver.removePathAxiomsFromModel(modelToReuse);
-        node.labelAxiom = label.lastAxiom;
+
         node.parent = parent;
 
         ModelData axioms =  node.model.getNegatedData();
@@ -128,7 +129,6 @@ public class HsdagBuilder implements ITreeBuilder {
         if(parent != null) {
             parent.children.add(node);
         }
-        nodesAtCurrentDepth.put(label.getAxiomSet(),node);
 
         return node;
     }
@@ -160,9 +160,8 @@ public class HsdagBuilder implements ITreeBuilder {
 //          relabel();
 //        }
         relabel();
-        if (!currentNode.HaveParent() || currentNode.childrenToProcess.isEmpty()) return false;
         //iteratedChildren = new ArrayList<>(parentNode.model.getNegatedData());
-        return true;
+        return currentNode.HaveParent() && !currentNode.childrenToProcess.isEmpty();
     }
 
     public boolean noChildrenLeft(){
