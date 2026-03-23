@@ -36,6 +36,16 @@ public enum Algorithm {
 
     },
 
+    HSDAG{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean matchesName(String name) {
+            return super.matchesName(name)|| "HSDAG".equalsIgnoreCase(name) || "HS-DAG".equalsIgnoreCase(name);
+        }
+    },
+
     HST_MXP {
         @Override
         public boolean isHst() {
@@ -108,6 +118,8 @@ public enum Algorithm {
     public boolean usesQxp(){
         return false;
     }
+
+    public boolean isHsdag(){ return false; }
 
     public boolean matchesName(String name){
         return this.name().equals(name);
