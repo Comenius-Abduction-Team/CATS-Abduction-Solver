@@ -26,7 +26,8 @@ public class Main {
 
     // files often used for manual testing
     private static final String FAMILY_MULTI = "in/multiple_obs/family.in";
-    private static final String TOOTHACHE = "in/toothache.in";
+    //private static final String TOOTHACHE = "in/toothache.in";
+    private static final String TOOTHACHE = ";in/dl2025/S1/lubm-0_1_4_mhs_noneg.in";
 
     private static final String INPUT_FILE = TOOTHACHE;
 

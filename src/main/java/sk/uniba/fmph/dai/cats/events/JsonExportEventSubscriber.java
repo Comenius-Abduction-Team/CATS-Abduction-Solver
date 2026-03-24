@@ -38,6 +38,12 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private int nextStep() {
         return ++stepCounter;
     }
+    private Map<String, Object> makeStepEvent(String type) {
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("step", nextStep());
+        event.put("type", type);
+        return event;
+    }
 
     // hrana ktorú ešte nemôžeme spojiť s dieťaťom
     // solver najpr vztvorí rodiča až potom pridáva dieťa keď vytvorí node
@@ -69,19 +75,19 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
                 lastCreatedEdge = ((EdgeEvent) event).branchLabel;
                 break;
             case EDGE_PRUNED:
-                handleEdgePruned(currentNode, "PRUNED PATH!");
+                handleEdgePruned(currentNode, "PRUNED PATH!", "EDGE_PRUNED");
                 break;
             case INVALID_PATH:
-                handleEdgePruned(currentNode, "INVALID PATH!");
+                handleEdgePruned(currentNode, "INVALID PATH!", "INVALID_PATH");
                 break;
             case MODEL_REUSE:
                 //handleEdgePruned(currentNode, "Model was reused.");
                 break;
             case INCONSISTENT_EXPLANATION:
-                handleEdgePruned(currentNode, "INCONSISTENT EXPLANATION:");
+                handleEdgePruned(currentNode, "INCONSISTENT EXPLANATION:", "INCONSISTENT_EXPLANATION");
                 break;
             case IRELEVANT_EXPLANATION:
-                handleEdgePruned(currentNode, "IRRELEVANT EXPLANATION:");
+                handleEdgePruned(currentNode, "IRRELEVANT EXPLANATION:", "IRELEVANT_EXPLANATION");
                 break;
             case NODE_CREATED:
                 handleNodeCreated((NodeEvent) event);
@@ -93,7 +99,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
                 handlePossibleExplanation((ExplanationEvent) event);
                 break;
             case NONMINIMAL_EXPLANATION:
-                handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!");
+                handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!", "NONMINIMAL_EXPLANATION");
                 break;
             case TREE_FINISHED:
                 writeJson();
@@ -216,6 +222,18 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
         nodeIds.computeIfAbsent(node, k -> idCounter++);
         addNodeIfNotExist(node);
+
+        Integer id = nodeIds.get(node);
+        if (id == null) return;
+
+        for (Map<String, Object> jsonNode : nodes) {
+            if (((Integer) jsonNode.get("id")).intValue() == id.intValue()) {
+                if (!jsonNode.containsKey("processed")) {
+                    jsonNode.put("processed", makeStepEvent("PROCESSING_NODE"));
+                }
+                break;
+            }
+        }
     }
 
     /*
@@ -230,16 +248,25 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     }
     */
     private void handleNodeCreated(NodeEvent ev) {
-
         TreeNode newNode = ev.node;
 
         nodeIds.computeIfAbsent(newNode, k -> idCounter++);
         addNodeIfNotExist(newNode);
 
+        Integer id = nodeIds.get(newNode);
+        if (id != null) {
+            for (Map<String, Object> jsonNode : nodes) {
+                if (((Integer) jsonNode.get("id")).intValue() == id.intValue()) {
+                    if (!jsonNode.containsKey("created")) {
+                        jsonNode.put("created", makeStepEvent("NODE_CREATED"));
+                    }
+                    break;
+                }
+            }
+        }
+
         if (lastCreatedEdge != null) {
-
             TreeNode parent = findParent(newNode);
-
             if (parent != null) {
                 createEdge(parent, newNode, lastCreatedEdge);
             }
@@ -288,6 +315,34 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return true;
     }
 
+    private Map<String, Object> makeBooleanStepField(String fieldName, boolean value, String type) {
+        Map<String, Object> obj = new LinkedHashMap<>();
+        obj.put(fieldName, value);
+        obj.put("step", nextStep());
+        obj.put("type", type);
+        return obj;
+    }
+
+    private Map<String, Object> makeBooleanField(String fieldName, boolean value) {
+        Map<String, Object> obj = new LinkedHashMap<>();
+        obj.put(fieldName, value);
+        return obj;
+    }
+
+    private Map<String, Object> makeStringStepField(String fieldName, String value, String type) {
+        Map<String, Object> obj = new LinkedHashMap<>();
+        obj.put(fieldName, value);
+        obj.put("step", nextStep());
+        obj.put("type", type);
+        return obj;
+    }
+
+    private Map<String, Object> makeStringField(String fieldName, String value) {
+        Map<String, Object> obj = new LinkedHashMap<>();
+        obj.put(fieldName, value);
+        return obj;
+    }
+
     // vytvorenie nového uzla, 
     private void handlePossibleExplanation(ExplanationEvent ev) {
         Explanation ex = ev.explanation;
@@ -310,8 +365,10 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         // LABEL
         exNode.put("label", pathStrings);
 
-        exNode.put("isExplanation", true);
-        exNode.put("closed", "closed");
+        exNode.put("isExplanation",
+                makeBooleanStepField("isExplanation", true, "POSSIBLE_EXPLANATION"));
+        exNode.put("closed",
+                makeBooleanStepField("closed", true, "CLOSING_NODE"));
 
         // CONFLICT SET (len pre MHS-MXP)
 
@@ -348,6 +405,9 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             edgeObj.put("child", exId);
             OWLAxiom last = ex.lastAxiom;
             edgeObj.put("label", last == null ? null : StringFactory.getRepresentation(last));
+            edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
+            edgeObj.put("pruned", makeStringField("pruned", ""));
+
             edges.add(edgeObj);
         }
     }
@@ -375,7 +435,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         nodeObj.put("id", id);
         nodeObj.put("depth", n.depth);
 
-        // PATH H(n)
         List<String> pathStrings = new ArrayList<>();
         if (n.path != null) {
             for (OWLAxiom ax : n.path) {
@@ -384,7 +443,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         }
         nodeObj.put("path", pathStrings);
 
-        // LABEL S(n)
         List<String> modelStrings = new ArrayList<>();
         if (n.model != null && n.model.getNegatedData() != null) {
             n.model.getNegatedData().forEach(ax ->
@@ -393,8 +451,8 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         }
         nodeObj.put("label", modelStrings);
 
-        nodeObj.put("isExplanation", false);
-        nodeObj.put("closed", "none");
+        nodeObj.put("isExplanation", makeBooleanField("isExplanation", false));
+        nodeObj.put("closed", makeBooleanField("closed", false));
 
         nodes.add(nodeObj);
     }
@@ -402,9 +460,12 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private void markNodeClosed(TreeNode n, String type) {
         Integer id = nodeIds.get(n);
         if (id == null) return;
+
         for (Map<String, Object> jsonNode : nodes) {
             if (((Integer) jsonNode.get("id")).intValue() == id.intValue()) {
-                jsonNode.put("closed", type);
+                jsonNode.put("closed",
+                        makeBooleanStepField("closed", true, "CLOSING_NODE"));
+                break;
             }
         }
     }
@@ -414,7 +475,9 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         edgeObj.put("parent", nodeIds.get(parent));
         edgeObj.put("child", child == null ? null : nodeIds.get(child));
         edgeObj.put("label", label == null ? null : StringFactory.getRepresentation(label));
-        edgeObj.put("pruned", null);
+        edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
+        edgeObj.put("pruned", makeStringField("pruned", ""));
+
         edges.add(edgeObj);
     }
 
@@ -428,14 +491,14 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return false;
     }
 
-    private void handleEdgePruned(TreeNode node, String reason) {
+    private void handleEdgePruned(TreeNode node, String reason, String eventType) {
         if (node == null) return;
 
         Map<String, Object> edgeObj = new LinkedHashMap<>();
-        edgeObj.put("parent", nodeIds.get(node)); // rodič = aktuálny uzol
-        edgeObj.put("child", null);               // dieťa ešte neexistuje
+        edgeObj.put("parent", nodeIds.get(node));
+        edgeObj.put("child", null);
         edgeObj.put("label", lastCreatedEdge == null ? null : StringFactory.getRepresentation(lastCreatedEdge));
-        edgeObj.put("pruned", reason);            // text dôvodu prerezania
+        edgeObj.put("pruned", makeStringStepField("pruned", reason, eventType));
 
         edges.add(edgeObj);
     }
