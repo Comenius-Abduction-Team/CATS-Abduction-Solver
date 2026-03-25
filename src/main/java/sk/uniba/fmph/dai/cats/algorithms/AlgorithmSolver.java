@@ -369,10 +369,9 @@ public class AlgorithmSolver {
                     logger.addLevelToPartialLog(currentLevel);
                     throw new TimeoutException();
                 }
-                System.out.print("CHECkPOINT1");
+
                 TreeNode childNode = treeBuilder.createChildNode(node, explanation);
                 treeBuilder.addNodeToTree(childNode);
-                System.out.print("CHECkPOINT2");
                 EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
                 path.clear();
                 /*vytvor novy node a pridaj k stromu*/

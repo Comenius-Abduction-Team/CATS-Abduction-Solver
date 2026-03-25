@@ -26,7 +26,6 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     List<OWLAxiom> iteratedChildren;
     private List<OWLAxiom> orderedAbducibles;
-    public int lastIndex = -1;
 
     public MarcoTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
@@ -55,41 +54,20 @@ public class MarcoTreeBuilder implements ITreeBuilder {
     public TreeNode createRoot(){
         System.out.print("\ncalling Marco createRoot()");
 
-        //TreeNode root = new TreeNode();
-        //root.path = new ArrayList<>();
-        //root.depth = TreeNode.DEFAULT_DEPTH;
-
-        //return root;
-
-
-        MarcoNode root = new MarcoNode();
-
+        TreeNode root = new TreeNode();
         root.path = new ArrayList<>();
         root.depth = TreeNode.DEFAULT_DEPTH;
-        root.lastIndex = -1;
 
         return root;
-
     }
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-        //System.out.print("\ncalling Marco createChildNode()");
-        //TreeNode node = new TreeNode();
-
-        //node.path = new ArrayList<>(label.getAxioms());
-        //node.depth = parent.depth + 1;
-
-        //return node;
-        MarcoNode node = new MarcoNode();
+        System.out.print("\ncalling Marco createChildNode()");
+        TreeNode node = new TreeNode();
 
         node.path = new ArrayList<>(label.getAxioms());
         node.depth = parent.depth + 1;
-
-        MarcoNode parentMarco = (MarcoNode) parent;
-
-        OWLAxiom lastAdded = label.lastAxiom;
-        node.lastIndex = orderedAbducibles.indexOf(lastAdded);
 
         return node;
 
@@ -115,24 +93,20 @@ public class MarcoTreeBuilder implements ITreeBuilder {
     public boolean startIteratingNodeChildren(TreeNode node){
 
         parentNode = node;
+
         iteratedChildren = new ArrayList<>();
-        /*int startIndex = 0;
+
+        int startIndex = 0;
+
         if(node.path != null && !node.path.isEmpty()){
+
             OWLAxiom last = null;
+
             for(OWLAxiom ax : node.path)
                 last = ax;
+
             startIndex = orderedAbducibles.indexOf(last) + 1;
         }
-        for(int i = startIndex; i < orderedAbducibles.size(); i++){
-            iteratedChildren.add(orderedAbducibles.get(i));
-        }
-
-        return true;*/
-        MarcoNode marcoNode = (MarcoNode) node;
-
-        iteratedChildren = new ArrayList<>();
-
-        int startIndex = marcoNode.lastIndex + 1;
 
         for(int i = startIndex; i < orderedAbducibles.size(); i++){
             iteratedChildren.add(orderedAbducibles.get(i));
