@@ -25,6 +25,7 @@ public class MarcoTreeBuilder implements ITreeBuilder {
     TreeNode parentNode;
 
     List<OWLAxiom> iteratedChildren;
+    private List<OWLAxiom> orderedAbducibles;
 
     public MarcoTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
@@ -32,7 +33,11 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     @Override
     public IAbducibleAxioms createAbducibles(TransformedAbducibles abducibles) {
-        return new AxiomSetAbducibles(abducibles);
+        IAbducibleAxioms abd = new AxiomSetAbducibles(abducibles);
+
+        orderedAbducibles = new ArrayList<>(abd.getAxioms());
+
+        return abd;
     }
 
     @Override
@@ -47,6 +52,7 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createRoot(){
+        System.out.print("\ncalling Marco createRoot()");
 
         TreeNode root = new TreeNode();
         root.path = new ArrayList<>();
@@ -57,17 +63,19 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-
+        System.out.print("\ncalling Marco createChildNode()");
         TreeNode node = new TreeNode();
 
         node.path = new ArrayList<>(label.getAxioms());
         node.depth = parent.depth + 1;
 
         return node;
+
     }
 
     @Override
     public void addNodeToTree(TreeNode node){
+        System.out.print("\ncalling Marco addNodeToTree()");
         queue.add(node);
     }
 
@@ -86,9 +94,23 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
         parentNode = node;
 
-        iteratedChildren = new ArrayList<>((Collection) solver.abducibleAxioms);
+        iteratedChildren = new ArrayList<>();
 
-        iteratedChildren.removeAll(node.path);
+        int startIndex = 0;
+
+        if(node.path != null && !node.path.isEmpty()){
+
+            OWLAxiom last = null;
+
+            for(OWLAxiom ax : node.path)
+                last = ax;
+
+            startIndex = orderedAbducibles.indexOf(last) + 1;
+        }
+
+        for(int i = startIndex; i < orderedAbducibles.size(); i++){
+            iteratedChildren.add(orderedAbducibles.get(i));
+        }
 
         return true;
     }
@@ -100,7 +122,7 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     @Override
     public OWLAxiom getNextChild(){
-
+        System.out.print("\ncalling Marco getNextChild()");
         OWLAxiom ax = iteratedChildren.get(0);
 
         iteratedChildren.remove(0);

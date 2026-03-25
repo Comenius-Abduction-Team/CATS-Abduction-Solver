@@ -125,20 +125,23 @@ public class AlgorithmSolver {
 
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
-        else if (algorithm.usesMarco()) { /*i added*/
+        else if (algorithm.usesMarco()) {
+            System.out.print("Marco vetva");
             SubsetMapManager map = new SubsetMapManager();
             nodeProcessor = new MarcoNodeProcessor(this, map);
-            treeBuilder = new MarcoTreeBuilder(this);}
+        }
         else
             nodeProcessor = new ClassicNodeProcessor(this);
 
 
-        if (algorithm.isHst())
+        if (algorithm.isHst())  //tato cast prepise marcoTreebuilder - inam pridat marco
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);
         else if (algorithm.isRootOnly())
             treeBuilder = new RootOnlyTreeBuilder(this);
+        else if (algorithm.usesMarco())
+            treeBuilder = new MarcoTreeBuilder(this);
         else
             treeBuilder = new MhsTreeBuilder(this);
     }
@@ -245,12 +248,14 @@ public class AlgorithmSolver {
         currentLevel.start = metrics.getRunningTime();
 
         TreeNode root = treeBuilder.createRoot(); /*vytvori root*/
+
         if (root == null) {
             EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
         treeBuilder.addNodeToTree(root); /*prida root do stromu*/
         currentLevel.createdNodes = 1; /**/
+
 
         if(isTimeout()) { /*ak je timeout, vyhodi error*/
             logger.addLevelToPartialLog(currentLevel);
@@ -262,10 +267,11 @@ public class AlgorithmSolver {
 
             TreeNode node = treeBuilder.getNextNodeFromTree(); /*ziska nasledujuci node zo stromu*/
 
-            /*if (node == null){
+
+            if (node == null){
                 StaticPrinter.debugPrint("[!!!] Null node!");
                 continue;
-            }*/
+            }
 
             assignLevelToNode(node); /*k nodu spaja level?*/
 
@@ -342,6 +348,8 @@ public class AlgorithmSolver {
                     int explanationsFound = nodeProcessor.findExplanations(
                             explanation, treeBuilder.shouldExtractModel()
                         );
+                    System.out.print("Number of explanations found = ");
+                    System.out.print(explanationsFound);
                     /*kolko vysvetleni nasiel*/
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
                     /*ci treba uzavriet node*/

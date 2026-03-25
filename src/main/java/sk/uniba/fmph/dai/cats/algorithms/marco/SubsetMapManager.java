@@ -39,4 +39,14 @@ public class SubsetMapManager {
         return map.containsKey(set);
     }
 
+    public void printMapContents() {
+        map.forEach((axioms, status) -> {
+            System.out.println("Status: " + status);
+            axioms.forEach(ax -> System.out.println("  - " + ax));
+            System.out.println("-----");
+        });
+    }
+
+
+
 }
