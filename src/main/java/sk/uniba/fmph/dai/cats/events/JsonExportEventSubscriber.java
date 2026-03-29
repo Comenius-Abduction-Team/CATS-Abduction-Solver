@@ -18,9 +18,9 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public class JsonExportEventSubscriber implements IEventSubscriber {
     private final AlgorithmSolver solver;
+
     public JsonExportEventSubscriber(AlgorithmSolver solver) {
         this.solver = solver;
-
     }
 
     private final Map<TreeNode, Integer> nodeIds = new IdentityHashMap<>();
@@ -35,9 +35,11 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private boolean ontologyLoaded = false;
 
     private int stepCounter = 0;
+
     private int nextStep() {
         return ++stepCounter;
     }
+
     private Map<String, Object> makeStepEvent(String type) {
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("step", nextStep());
@@ -45,72 +47,92 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return event;
     }
 
-    // hrana ktorú ešte nemôžeme spojiť s dieťaťom
-    // solver najpr vztvorí rodiča až potom pridáva dieťa keď vytvorí node
+    // Pending edge už obsahuje AJ created event so správnym stepom
     private static class PendingEdge {
         final TreeNode parent;
         final OWLAxiom label;
-        PendingEdge(TreeNode parent, OWLAxiom label){
+        final Map<String, Object> createdEvent;
+
+        PendingEdge(TreeNode parent, OWLAxiom label, Map<String, Object> createdEvent) {
             this.parent = parent;
             this.label = label;
+            this.createdEvent = createdEvent;
         }
     }
+
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
 
-    private TreeNode currentNode = null; // práve spracovávaný uzol
-    private OWLAxiom lastCreatedEdge = null; // label poslednej hrany
+    private TreeNode currentNode = null;
+    private OWLAxiom lastCreatedEdge = null;
     private int idCounter = 0;
 
     @Override
     public void processEvent(Event event) {
+        if (!ontologyLoaded) {
+            loadOntology();
+            ontologyLoaded = true;
+        }
 
-        if (!ontologyLoaded) { loadOntology(); ontologyLoaded = true; }
-        //System.out.println("test print: "+event.getEventType());
         switch (event.getEventType()) {
-            case LEVEL_STARTED: break;
+            case LEVEL_STARTED:
+                break;
+
             case PROCESSING_NODE:
                 handleProcessingNode((NodeEvent) event);
                 break;
+
             case EDGE_CREATED:
-                lastCreatedEdge = ((EdgeEvent) event).branchLabel;
+                handleEdgeCreated((EdgeEvent) event);
                 break;
+
             case EDGE_PRUNED:
                 handleEdgePruned(currentNode, "PRUNED PATH!", "EDGE_PRUNED");
                 break;
+
             case INVALID_PATH:
                 handleEdgePruned(currentNode, "INVALID PATH!", "INVALID_PATH");
                 break;
+
             case MODEL_REUSE:
-                //handleEdgePruned(currentNode, "Model was reused.");
                 break;
+
             case INCONSISTENT_EXPLANATION:
                 handleEdgePruned(currentNode, "INCONSISTENT EXPLANATION:", "INCONSISTENT_EXPLANATION");
                 break;
+
             case IRELEVANT_EXPLANATION:
                 handleEdgePruned(currentNode, "IRRELEVANT EXPLANATION:", "IRELEVANT_EXPLANATION");
                 break;
+
             case NODE_CREATED:
                 handleNodeCreated((NodeEvent) event);
                 break;
+
             case CLOSING_NODE:
                 markNodeClosed(((NodeEvent) event).node, "closed");
                 break;
+
             case POSSIBLE_EXPLANATION:
                 handlePossibleExplanation((ExplanationEvent) event);
                 break;
+
             case NONMINIMAL_EXPLANATION:
                 handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!", "NONMINIMAL_EXPLANATION");
                 break;
+
             case TREE_FINISHED:
                 writeJson();
                 break;
+
             case MXP_CALL:
                 break;
-            default: break;
+
+            default:
+                break;
         }
     }
 
-// --------------------------------------------------
+    // --------------------------------------------------
     // ONTOLOGY LOADING
     // --------------------------------------------------
 
@@ -127,8 +149,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
                 if (ax instanceof OWLSubClassOfAxiom) {
                     tbox.add(dl);
-                }
-                else if (ax instanceof OWLClassAssertionAxiom) {
+                } else if (ax instanceof OWLClassAssertionAxiom) {
                     observations.add(dl);
                 }
             }
@@ -138,19 +159,14 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     }
 
     private String axiomToDL(OWLAxiom ax) {
-
         if (ax instanceof OWLSubClassOfAxiom) {
             OWLSubClassOfAxiom sub = (OWLSubClassOfAxiom) ax;
-
-            return classExprToDL(sub.getSubClass()) + " ⊑ " +
-                    classExprToDL(sub.getSuperClass());
+            return classExprToDL(sub.getSubClass()) + " ⊑ " + classExprToDL(sub.getSuperClass());
         }
 
         if (ax instanceof OWLClassAssertionAxiom) {
             OWLClassAssertionAxiom ass = (OWLClassAssertionAxiom) ax;
-
             String ind = shortName(ass.getIndividual().asOWLNamedIndividual().getIRI());
-
             return ind + " : " + classExprToDL(ass.getClassExpression());
         }
 
@@ -158,7 +174,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     }
 
     private String classExprToDL(OWLClassExpression ce) {
-
         if (ce instanceof OWLClass) {
             OWLClass c = (OWLClass) ce;
             return shortName(c.getIRI());
@@ -166,12 +181,10 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
         if (ce instanceof OWLObjectIntersectionOf) {
             OWLObjectIntersectionOf inter = (OWLObjectIntersectionOf) ce;
-
             List<String> parts = new ArrayList<>();
             for (OWLClassExpression op : inter.getOperands()) {
                 parts.add(classExprToDL(op));
             }
-
             return String.join(" ⊓ ", parts);
         }
 
@@ -183,39 +196,16 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return ce.toString();
     }
 
-    private String shortName(IRI iri){
+    private String shortName(IRI iri) {
         String s = iri.toString();
         int i = s.indexOf("#");
         return (i >= 0) ? s.substring(i + 1) : s;
     }
 
-
     // -----------------------
-    //  PROCESSING_NODE
+    // EVENT HANDLERS
     // -----------------------
-    // Prechádza pendingEdges a hľadá, ktoré hrany patrí tomuto uzlu
-    /*
-    //original
-    private void handleProcessingNode(NodeEvent ev) {
-        TreeNode node = ev.node;
-        currentNode = node;
 
-        nodeIds.computeIfAbsent(node, k -> idCounter++);
-        addNodeIfNotExist(node);
-
-        Iterator<PendingEdge> it = pendingEdges.iterator();
-        while (it.hasNext()) {
-            PendingEdge p = it.next();
-            if (p.parent == null) continue;
-            if (node.depth == p.parent.depth + 1) {
-                if (axInPath(node, p.label)) {
-                    createEdge(p.parent, node, p.label);
-                    it.remove();
-                }
-            }
-        }
-    }
-    */
     private void handleProcessingNode(NodeEvent ev) {
         TreeNode node = ev.node;
         currentNode = node;
@@ -236,17 +226,18 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         }
     }
 
-    /*
-    // original
-    private void handleNodeCreated(NodeEvent ev) {
-        TreeNode parent = ev.node;
-        OWLAxiom label = lastCreatedEdge;
-        if (label != null) {
-            pendingEdges.add(new PendingEdge(parent, label));
-        }
-        lastCreatedEdge = null;
+    private void handleEdgeCreated(EdgeEvent ev) {
+        lastCreatedEdge = ev.branchLabel;
+
+        PendingEdge pending = new PendingEdge(
+                currentNode,
+                ev.branchLabel,
+                makeStepEvent("EDGE_CREATED")
+        );
+
+        pendingEdges.add(pending);
     }
-    */
+
     private void handleNodeCreated(NodeEvent ev) {
         TreeNode newNode = ev.node;
 
@@ -265,35 +256,153 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             }
         }
 
-        if (lastCreatedEdge != null) {
-            TreeNode parent = findParent(newNode);
-            if (parent != null) {
-                createEdge(parent, newNode, lastCreatedEdge);
-            }
+        TreeNode parent = findParent(newNode);
+        OWLAxiom edgeLabel = getLastPathAxiom(newNode);
+
+        PendingEdge pending = consumePendingEdge(parent, edgeLabel);
+
+        if (pending != null) {
+            createEdge(parent, newNode, pending.label, pending.createdEvent);
+        } else if (parent != null && edgeLabel != null) {
+            // fallback len pre prípad, že solver/eventy prídu inak než čakáme
+            createEdge(parent, newNode, edgeLabel, makeStepEvent("EDGE_CREATED"));
         }
 
         lastCreatedEdge = null;
     }
-    private TreeNode findParent(TreeNode child) {
 
-        if (child.path == null || child.path.isEmpty())
-            return null;
+    private void handlePossibleExplanation(ExplanationEvent ev) {
+        Explanation ex = ev.explanation;
+        if (ex == null) return;
+
+        int exId = idCounter++;
+        Map<String, Object> exNode = new LinkedHashMap<>();
+        exNode.put("id", exId);
+
+        int depth = (currentNode == null) ? TreeNode.DEFAULT_DEPTH : (currentNode.depth + 1);
+        exNode.put("depth", depth);
+
+        List<String> pathStrings = new ArrayList<>();
+        for (OWLAxiom a : ex.getAxioms()) {
+            pathStrings.add(StringFactory.getRepresentation(a));
+        }
+        exNode.put("path", pathStrings);
+        exNode.put("label", pathStrings);
+
+        exNode.put("isExplanation",
+                makeBooleanStepField("isExplanation", true, "POSSIBLE_EXPLANATION"));
+        exNode.put("closed",
+                makeBooleanStepField("closed", true, "CLOSING_NODE"));
+
+        if (Configuration.ALGORITHM.toString().contains("MXP")) {
+            List<String> conflictSet = new ArrayList<>();
+
+            if (currentNode != null && currentNode.path != null) {
+                Set<String> pathSet = new HashSet<>();
+                for (OWLAxiom ax : currentNode.path) {
+                    pathSet.add(StringFactory.getRepresentation(ax));
+                }
+
+                for (OWLAxiom ax : ex.getAxioms()) {
+                    String repr = StringFactory.getRepresentation(ax);
+                    if (!pathSet.contains(repr)) {
+                        conflictSet.add(repr);
+                    }
+                }
+            }
+
+            if (!conflictSet.isEmpty()) {
+                exNode.put("conflictSet", conflictSet);
+            }
+        }
+
+        nodes.add(exNode);
+
+        if (currentNode != null) {
+            OWLAxiom last = ex.lastAxiom;
+            PendingEdge pending = consumePendingEdge(currentNode, last);
+
+            Map<String, Object> edgeObj = new LinkedHashMap<>();
+            edgeObj.put("parent", nodeIds.get(currentNode));
+            edgeObj.put("child", exId);
+            edgeObj.put("label", last == null ? null : StringFactory.getRepresentation(last));
+
+            if (pending != null) {
+                edgeObj.put("created", pending.createdEvent);
+            } else {
+                // fallback
+                edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
+            }
+
+            edgeObj.put("pruned", makeStringField("pruned", ""));
+            edges.add(edgeObj);
+        }
+
+        lastCreatedEdge = null;
+    }
+
+    private void handleEdgePruned(TreeNode node, String reason, String eventType) {
+        if (node == null) return;
+
+        PendingEdge pending = consumePendingEdge(node, lastCreatedEdge);
+
+        Map<String, Object> edgeObj = new LinkedHashMap<>();
+        edgeObj.put("parent", nodeIds.get(node));
+        edgeObj.put("child", null);
+        edgeObj.put("label", lastCreatedEdge == null ? null : StringFactory.getRepresentation(lastCreatedEdge));
+
+        if (pending != null) {
+            edgeObj.put("created", pending.createdEvent);
+        }
+
+        edgeObj.put("pruned", makeStringStepField("pruned", reason, eventType));
+        edges.add(edgeObj);
+
+        lastCreatedEdge = null;
+    }
+
+    // -----------------------
+    // Matching pending edges
+    // -----------------------
+
+    private PendingEdge consumePendingEdge(TreeNode parent, OWLAxiom label) {
+        for (int i = 0; i < pendingEdges.size(); i++) {
+            PendingEdge p = pendingEdges.get(i);
+
+            if (p.parent != parent) continue;
+            if (!sameAxiom(p.label, label)) continue;
+
+            pendingEdges.remove(i);
+            return p;
+        }
+        return null;
+    }
+
+    private boolean sameAxiom(OWLAxiom a, OWLAxiom b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return StringFactory.getRepresentation(a).equals(StringFactory.getRepresentation(b));
+    }
+
+    private OWLAxiom getLastPathAxiom(TreeNode node) {
+        if (node == null || node.path == null || node.path.isEmpty()) return null;
+        return node.path.get(node.path.size() - 1);
+    }
+
+    private TreeNode findParent(TreeNode child) {
+        if (child.path == null || child.path.isEmpty()) return null;
 
         int parentDepth = child.depth - 1;
 
         for (TreeNode n : nodeIds.keySet()) {
-
-            if (n.depth != parentDepth)
-                continue;
-
-            if (isPrefix(n.path, child.path))
-                return n;
+            if (n.depth != parentDepth) continue;
+            if (isPrefix(n.path, child.path)) return n;
         }
 
         return null;
     }
-    private boolean isPrefix(List<OWLAxiom> parent, List<OWLAxiom> child) {
 
+    private boolean isPrefix(List<OWLAxiom> parent, List<OWLAxiom> child) {
         if (parent == null)
             return child == null || child.isEmpty();
 
@@ -304,7 +413,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             return false;
 
         for (int i = 0; i < parent.size(); i++) {
-
             String p = StringFactory.getRepresentation(parent.get(i));
             String c = StringFactory.getRepresentation(child.get(i));
 
@@ -343,75 +451,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         return obj;
     }
 
-    // vytvorenie nového uzla, 
-    private void handlePossibleExplanation(ExplanationEvent ev) {
-        Explanation ex = ev.explanation;
-        if (ex == null) return;
-
-        int exId = idCounter++;
-        Map<String, Object> exNode = new LinkedHashMap<>();
-        exNode.put("id", exId);
-
-        int depth = (currentNode == null) ? TreeNode.DEFAULT_DEPTH : (currentNode.depth + 1);
-        exNode.put("depth", depth);
-
-        // explanation axioms
-        List<String> pathStrings = new ArrayList<>();
-        for (OWLAxiom a : ex.getAxioms()) {
-            pathStrings.add(StringFactory.getRepresentation(a));
-        }
-        exNode.put("path", pathStrings);
-
-        // LABEL
-        exNode.put("label", pathStrings);
-
-        exNode.put("isExplanation",
-                makeBooleanStepField("isExplanation", true, "POSSIBLE_EXPLANATION"));
-        exNode.put("closed",
-                makeBooleanStepField("closed", true, "CLOSING_NODE"));
-
-        // CONFLICT SET (len pre MHS-MXP)
-
-        if (Configuration.ALGORITHM.toString().contains("MXP")) {
-
-            List<String> conflictSet = new ArrayList<>();
-
-            if (currentNode != null && currentNode.path != null) {
-
-                Set<String> pathSet = new HashSet<>();
-                for (OWLAxiom ax : currentNode.path) {
-                    pathSet.add(StringFactory.getRepresentation(ax));
-                }
-
-                for (OWLAxiom ax : ex.getAxioms()) {
-                    String repr = StringFactory.getRepresentation(ax);
-                    if (!pathSet.contains(repr)) {
-                        conflictSet.add(repr);
-                    }
-                }
-            }
-
-            if (!conflictSet.isEmpty()) {
-                exNode.put("conflictSet", conflictSet);
-            }
-        }
-        // =========================
-
-        nodes.add(exNode);
-
-        if (currentNode != null) {
-            Map<String, Object> edgeObj = new LinkedHashMap<>();
-            edgeObj.put("parent", nodeIds.get(currentNode));
-            edgeObj.put("child", exId);
-            OWLAxiom last = ex.lastAxiom;
-            edgeObj.put("label", last == null ? null : StringFactory.getRepresentation(last));
-            edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
-            edgeObj.put("pruned", makeStringField("pruned", ""));
-
-            edges.add(edgeObj);
-        }
-    }
-
     // -----------------------
     // Node/edge functions
     // -----------------------
@@ -419,13 +458,13 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private boolean nodeExists(TreeNode n) {
         Integer id = nodeIds.get(n);
         if (id == null) return false;
+
         for (Map<String, Object> m : nodes) {
             if (((Integer) m.get("id")).intValue() == id.intValue()) return true;
         }
         return false;
     }
 
-    // Pridanie uzlu NODE do JSON
     private void addNodeIfNotExist(TreeNode n) {
         if (nodeExists(n)) return;
 
@@ -470,36 +509,13 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         }
     }
 
-    private void createEdge(TreeNode parent, TreeNode child, OWLAxiom label) {
+    private void createEdge(TreeNode parent, TreeNode child, OWLAxiom label, Map<String, Object> createdEvent) {
         Map<String, Object> edgeObj = new LinkedHashMap<>();
         edgeObj.put("parent", nodeIds.get(parent));
         edgeObj.put("child", child == null ? null : nodeIds.get(child));
         edgeObj.put("label", label == null ? null : StringFactory.getRepresentation(label));
-        edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
+        edgeObj.put("created", createdEvent);
         edgeObj.put("pruned", makeStringField("pruned", ""));
-
-        edges.add(edgeObj);
-    }
-
-    // Kontrola či je axiom prítomný v node.path
-    private boolean axInPath(TreeNode node, OWLAxiom ax) {
-        if (node == null || node.path == null || ax == null) return false;
-        String target = StringFactory.getRepresentation(ax);
-        for (OWLAxiom p : node.path) {
-            if (target.equals(StringFactory.getRepresentation(p))) return true;
-        }
-        return false;
-    }
-
-    private void handleEdgePruned(TreeNode node, String reason, String eventType) {
-        if (node == null) return;
-
-        Map<String, Object> edgeObj = new LinkedHashMap<>();
-        edgeObj.put("parent", nodeIds.get(node));
-        edgeObj.put("child", null);
-        edgeObj.put("label", lastCreatedEdge == null ? null : StringFactory.getRepresentation(lastCreatedEdge));
-        edgeObj.put("pruned", makeStringStepField("pruned", reason, eventType));
-
         edges.add(edgeObj);
     }
 
@@ -508,7 +524,7 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     // -----------------------
 
     private String buildExportPath() {
-        Algorithm  algorithm = Configuration.ALGORITHM;
+        Algorithm algorithm = Configuration.ALGORITHM;
 
         String[] parts = Configuration.INPUT_ONT_FILE.split("[/\\\\]");
         String ontology = parts[parts.length - 1].split("\\.")[0];
@@ -531,10 +547,8 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
     private void writeJson() {
         try {
             Map<String, Object> root = new LinkedHashMap<>();
-            //root.put("ontology", ontologyAxioms);
             Algorithm algorithm = Configuration.ALGORITHM;
-            Map<String, Object> algorithmName = new LinkedHashMap<>();
-            root.put("algorithm",algorithm);
+            root.put("algorithm", algorithm);
 
             Map<String, Object> ontology = new LinkedHashMap<>();
             ontology.put("tbox", tbox);
