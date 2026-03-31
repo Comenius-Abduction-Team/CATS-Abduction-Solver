@@ -1,8 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms.hsdag;
 
-import org.semanticweb.owlapi.model.ClassExpressionType;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -21,6 +19,7 @@ public class HsdagBuilder implements ITreeBuilder {
     final INodeProcessor nodeProcessor;
     final Queue<HsdagNode> queue = new PriorityQueue<>();
     public int idToAssign = 0;
+
 
     HsdagNode currentNode;
     HashMap<Set<OWLAxiom>, HsdagNode> nodesAtCurrentDepth = new HashMap<>();
@@ -48,7 +47,6 @@ public class HsdagBuilder implements ITreeBuilder {
         if(mergeable(explanation)){
             return true;
         }
-
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -80,12 +78,7 @@ public class HsdagBuilder implements ITreeBuilder {
         root = new HsdagNode(getAndIncreaseId());
 
         root.model = modelToReuse;
-
-        ModelData axioms = root.model.getNegatedData();
-        root.childrenToProcess.addAll(axioms);
-        root.positiveAxioms.addAll(filterNegations(axioms));
-
-
+        root.childrenToProcess.addAll(root.model.getNegatedData());
         return root;
     }
 
@@ -114,10 +107,7 @@ public class HsdagBuilder implements ITreeBuilder {
 
         node.parent = parent;
 
-        ModelData axioms =  node.model.getNegatedData();
-
-        node.childrenToProcess.addAll(axioms);
-        node.positiveAxioms.addAll(filterNegations(axioms));
+        node.childrenToProcess.addAll(node.model.getNegatedData());
 
 //        if (solver.currentLevel.reusedModels > currentLevelReusedModels) {
 //            node.modelWasNotReused = false;
@@ -158,9 +148,10 @@ public class HsdagBuilder implements ITreeBuilder {
         currentNode = (HsdagNode) node;
 //        if(currentNode.modelWasNotReused) {
 //          relabel();
-//        }
+//          node.assignedLevel.relabeledCalls ++;
+//       }
         relabel();
-        //iteratedChildren = new ArrayList<>(parentNode.model.getNegatedData());
+        node.assignedLevel.relabeledCalls ++;
         return currentNode.HaveParent() && !currentNode.childrenToProcess.isEmpty();
     }
 
@@ -179,7 +170,7 @@ public class HsdagBuilder implements ITreeBuilder {
         nodesAtCurrentDepth.clear();
         currentLevelReusedModels ++;
     }
-
+    // check if node have same path and merge them
     public boolean mergeable(Explanation label) {
 
         Set<OWLAxiom> candidateSet = label.getAxiomSet();
@@ -191,7 +182,6 @@ public class HsdagBuilder implements ITreeBuilder {
             currentNode.assignedLevel.mergedNodes ++;
 
             StaticPrinter.debugPrint("[MERGING] Path already exists in history.");
-
 
             return true;
         }
@@ -208,7 +198,6 @@ public class HsdagBuilder implements ITreeBuilder {
         Queue<HsdagNode> localQueue = new ArrayDeque<>();
         localQueue.add(root);
 
-
         List<HsdagNode> relabeledNodes = new ArrayList<>();
 
         while (!localQueue.isEmpty()){
@@ -217,7 +206,7 @@ public class HsdagBuilder implements ITreeBuilder {
             if (polledNode == currentNode){
                 continue;
             }
-
+            // avoid redundant processing of shared nodes during a single relabeling update
             if(polledNode.currentlyRelabeled){
                 continue;
             }
@@ -225,17 +214,22 @@ public class HsdagBuilder implements ITreeBuilder {
             polledNode.currentlyRelabeled = true;
             relabeledNodes.add(polledNode);
 
+            // nodes n' labeled with some Cj from CS such that Ci C Cj
             if(currentNode.isSubsetOf(polledNode)){
                 StaticPrinter.debugPrint("[HS-DAG] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;
+                Model Cj = polledNode.model;
 
-                Set<OWLAxiom> difference = new HashSet<>(polledNode.positiveAxioms);
-                difference.removeAll(currentNode.positiveAxioms);
-
+                // Cj\Ci
+                Set<OWLAxiom> difference = new HashSet<>(Cj.getNegatedData());
+                difference.removeAll(Ci.getNegatedData());
                 StaticPrinter.debugPrint("[HS-DAG] Relabelling " + polledNode + " with " + Ci);
+
+                // Relabel n' with Ci
                 polledNode.model = Ci;
-                polledNode.positiveAxioms = currentNode.positiveAxioms;
+
+                polledNode.childrenToProcess.removeAll(difference);
 
                 List<HsdagNode> children = new ArrayList<>(polledNode.children);
 
@@ -262,10 +256,12 @@ public class HsdagBuilder implements ITreeBuilder {
             HsdagNode polledNode = localQueue.poll();
             polledNode.referenceCount --;
 
+            // decrease referenceCount if  pollednode has more than 1 parent
             if(polledNode.HaveParent()){
                 continue;
             }
 
+            // delete node from structure
             queue.remove(polledNode);
             localQueue.addAll(polledNode.children);
             polledNode.children.clear();
@@ -281,26 +277,11 @@ public class HsdagBuilder implements ITreeBuilder {
         }
 
     }
-
+    // after relabel reset all nodes for next relabeling
     private void resetCurrentlyRelabeled(List<HsdagNode> relabeledNodes){
         for (HsdagNode node : relabeledNodes){
             node.currentlyRelabeled = false;
         }
-    }
-
-    private Set<OWLAxiom> filterNegations(Collection<OWLAxiom> axioms) {
-        Set<OWLAxiom> filtered = new HashSet<>();
-
-        for (OWLAxiom ax : axioms) {
-            if (ax instanceof OWLClassAssertionAxiom) {
-                OWLClassAssertionAxiom classAssertion = (OWLClassAssertionAxiom) ax;
-
-                if (classAssertion.getClassExpression().getClassExpressionType() != ClassExpressionType.OBJECT_COMPLEMENT_OF) {
-                    filtered.add(ax);
-                }
-            }
-        }
-        return filtered;
     }
 
 }

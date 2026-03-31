@@ -16,10 +16,11 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
     Set<OWLAxiom> positiveAxioms;
 
     boolean currentlyRelabeled;
+
+    // number of parents this node currently has
     int referenceCount;
 
     //public boolean modelWasNotReused;
-
 
     HsdagNode parent;
 
@@ -35,9 +36,9 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
     boolean isSubsetOf(HsdagNode other){
         if (this == other)
             return false;
-        if (positiveAxioms.size() >= other.positiveAxioms.size())
+        if (model.getNegatedData().size() >= other.model.getNegatedData().size())
             return false;
-        return other.positiveAxioms.containsAll(positiveAxioms);
+        return other.model.getNegatedData().containsAll(model.getNegatedData());
     }
 
     @Override
@@ -45,7 +46,7 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
         if (!Objects.equals(this.depth, other.depth)) {
             return Integer.compare(this.depth, other.depth);
         }
-        return Integer.compare(positiveAxioms.size(), other.positiveAxioms.size());
+        return Integer.compare(model.getNegatedData().size(), other.model.getNegatedData().size());
     }
 
     @Override
