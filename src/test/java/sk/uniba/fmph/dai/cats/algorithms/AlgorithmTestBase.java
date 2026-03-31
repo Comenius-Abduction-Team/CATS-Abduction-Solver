@@ -164,7 +164,7 @@ public abstract class AlgorithmTestBase {
     private void setMxp(){
         abducer.setAlgorithm(Algorithm.MXP);
     }
-    
+
     private void setMhs(){
         abducer.setAlgorithm(Algorithm.MHS);
     }
@@ -188,7 +188,13 @@ public abstract class AlgorithmTestBase {
     private void setRctMxp(){
         abducer.setAlgorithm(Algorithm.RCT_MXP);
     }
-    
+
+    private void setHsdag(){
+        abducer.setAlgorithm(Algorithm.HSDAG);
+    }
+
+    private void setHsdagMxp(){abducer.setAlgorithm(Algorithm.HSDAG_MXP);}
+
     private void setNoNeg(){
         Configuration.INPUT_FILE_NAME += "NoNeg"; // set up artifically to change the file path of created logs
         abducer.setExplanationConfigurator(noNeg);
@@ -198,7 +204,7 @@ public abstract class AlgorithmTestBase {
         Configuration.INPUT_FILE_NAME += "SymbolAbd";
         abducer.setAbducibles(symbolAbd);
     }
-    
+
     private void setSymbolAbdNoNeg(){
         setSymbolAbd();
         setNoNeg();
@@ -224,7 +230,7 @@ public abstract class AlgorithmTestBase {
     }
 
     // ------- MHS -------
-    
+
     void mhs(){
         setMhs();
     }
@@ -368,41 +374,85 @@ public abstract class AlgorithmTestBase {
         setSymbolAbdNoNeg();
     }
 
-    
+    // ------- HS-DAG -------
 
-    
+    void hsdag(){
+        setHsdag();
+    }
 
-    
+    void hsdagNoNeg(){
+        setHsdag();
+        setNoNeg();
+    }
 
-    
+    void hsdagSymbolAbd(){
+        setHsdag();
+        setSymbolAbd();
+    }
+
+    void hsdagSymbolAbdNoNeg(){
+        setHsdag();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- HS-DAG-MXP -------
+
+    void hsdagMxp(){
+        setHsdagMxp();
+    }
+
+    void hsdagMxpNoNeg(){
+        setHsdagMxp();
+        setNoNeg();
+    }
+
+    void hsdagMxpSymbolAbd(){
+        setHsdagMxp();
+        setSymbolAbd();
+    }
+
+    void hsdagMxpSymbolAbdNoNeg(){
+        setHsdagMxp();
+        setSymbolAbdNoNeg();
+    }
 
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
