@@ -45,6 +45,21 @@ public enum Algorithm {
             return super.matchesName(name)|| "HSDAG".equalsIgnoreCase(name) || "HS-DAG".equalsIgnoreCase(name);
         }
     },
+    HSDAG_MXP{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean usesMxp() {
+            return true;
+        }
+
+        @Override
+        public boolean matchesName(String name) {
+            return super.matchesName(name) || "HSDAG-MXP".equals(name) || "HSDAGMXP".equals(name);
+        }
+
+    },
 
     HST_MXP {
         @Override
