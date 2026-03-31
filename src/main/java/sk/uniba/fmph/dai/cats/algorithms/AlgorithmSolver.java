@@ -348,8 +348,8 @@ public class AlgorithmSolver {
                     int explanationsFound = nodeProcessor.findExplanations(
                             explanation, treeBuilder.shouldExtractModel()
                         );
-                    System.out.print("Number of explanations found = ");
-                    System.out.print(explanationsFound);
+                    //System.out.print("Number of explanations found = ");
+                    //System.out.print(explanationsFound);
                     /*kolko vysvetleni nasiel*/
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
                     /*ci treba uzavriet node*/
@@ -369,10 +369,10 @@ public class AlgorithmSolver {
                     logger.addLevelToPartialLog(currentLevel);
                     throw new TimeoutException();
                 }
-                System.out.print("CHECkPOINT1");
+                //System.out.print("CHECkPOINT1");
                 TreeNode childNode = treeBuilder.createChildNode(node, explanation);
                 treeBuilder.addNodeToTree(childNode);
-                System.out.print("CHECkPOINT2");
+                //System.out.print("CHECkPOINT2");
                 EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
                 path.clear();
                 /*vytvor novy node a pridaj k stromu*/

@@ -25,7 +25,7 @@ public class MarcoNodeProcessor implements INodeProcessor {
 
     @Override
     public boolean canCreateRoot(boolean extractModel) {
-        System.out.print("\ncalling Marco canCreateRoot()");
+        //System.out.print("\ncalling Marco canCreateRoot()");
 
         return solver.consistencyChecker.checkOntologyConsistency(extractModel);
 
@@ -38,8 +38,10 @@ public class MarcoNodeProcessor implements INodeProcessor {
 
     @Override
     public int findExplanations(Explanation explanation, boolean extractModel) {
-        System.out.print("\ncalling Marco findExplanations()");
+        //System.out.print("\ncalling Marco findExplanations()");
         Set<OWLAxiom> S = new HashSet<>(explanation.getAxioms());
+
+        //System.out.println("MAP SIZE: " + map.size());
 
         if(map.isKnown(S)){
             return 0;
@@ -50,15 +52,15 @@ public class MarcoNodeProcessor implements INodeProcessor {
 
         if(consistent){
             map.markConsistent(S);
-            System.out.print("Current map:");
-            map.printMapContents();
+            //System.out.print("Current map:");
+            //map.printMapContents();
             return 0;
         }
         else{
             map.markInconsistent(S);
-            System.out.print("|||||found inconsistent||||");
-            System.out.print("Current map:");
-            map.printMapContents();
+            //System.out.print("|||||found inconsistent||||");
+            //System.out.print("Current map:");
+            //map.printMapContents();
             solver.explanationManager.addPossibleExplanation(explanation);
             return 1;
         }
@@ -71,10 +73,7 @@ public class MarcoNodeProcessor implements INodeProcessor {
 
     @Override
     public void postProcessExplanations() {
-        System.out.print("\ncalling Marco postProcessExplanations()");
-        //explanationManager.finalisePossibleExplanations();
-        //explanationManager.filterToMinimalRelevantExplanations();
-        //explanationManager.groupFinalExplanationsBySize();
+        //System.out.print("\ncalling Marco postProcessExplanations()");
         explanationManager.readyExplanationsToProcess();
         explanationManager.filterToConsistentExplanations();
         explanationManager.filterToMinimalRelevantExplanations();

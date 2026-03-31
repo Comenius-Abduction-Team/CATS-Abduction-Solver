@@ -26,6 +26,12 @@ public class SubsetMapManager {
     public Status getStatus(Set<OWLAxiom> set){
         return map.getOrDefault(set, Status.UNKNOWN);
     }
+    public int size(){
+        return map.size();
+    }
+    public boolean isDuplicate(Set<OWLAxiom> set){
+        return map.containsKey(set);
+    }
 
     public void markConsistent(Set<OWLAxiom> set){
         map.put(new HashSet<>(set), Status.CONSISTENT);
