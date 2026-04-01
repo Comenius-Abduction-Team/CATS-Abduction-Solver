@@ -28,7 +28,7 @@ public class Main {
     private static final String FAMILY_MULTI = "in/multiple_obs/family.in";
     private static final String TOOTHACHE = "in/toothache.in";
 
-    private static final String INPUT_FILE = "in/toothache.in";
+    private static final String INPUT_FILE = "in/multiple_obs/tom.in";
 
     public static void main(String[] args) throws Exception {
 
@@ -89,8 +89,8 @@ public class Main {
 
 
             /*Configuration.ALGORITHM*/
-            Configuration.ALGORITHM =Algorithm.MARCO;
-            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Algorithm.MARCO);
+            //Configuration.ALGORITHM =Algorithm.MARCO;
+            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Algorithm.MHS_MXP);
             System.out.println(Configuration.ALGORITHM);
             solver.solve();
 
