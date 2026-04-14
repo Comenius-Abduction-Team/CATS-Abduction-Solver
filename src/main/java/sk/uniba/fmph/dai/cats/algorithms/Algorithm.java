@@ -42,7 +42,7 @@ public enum Algorithm {
 
         @Override
         public boolean matchesName(String name) {
-            return super.matchesName(name)|| "HSDAG".equalsIgnoreCase(name) || "HS-DAG".equalsIgnoreCase(name);
+            return "HS-DAG".equals(name) || "HS_DAG".equals(name);
         }
     },
     HSDAG_MXP{
@@ -56,7 +56,7 @@ public enum Algorithm {
 
         @Override
         public boolean matchesName(String name) {
-            return super.matchesName(name) || "HSDAG-MXP".equals(name) || "HSDAGMXP".equals(name);
+            return  "HSDAG-MXP".equals(name) || "HSDAGMXP".equals(name);
         }
 
     },

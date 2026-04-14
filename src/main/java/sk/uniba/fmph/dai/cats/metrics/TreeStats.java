@@ -82,7 +82,7 @@ public class TreeStats {
     public static String getCsvHeader(boolean addCommas){
         return StringFactory.buildCsvRow(addCommas,
                 "level",
-                "processed nodes", "childless nodes", "(RCT/HS-DAG) repeated node processing", "(RCT/HS-DAG) deleted processed nodes",
+                "processed nodes", "childless nodes", "(RCT) repeated node processing", "(RCT/HS-DAG) deleted processed nodes",
                 "created edges", "pruned edges", "(HS-DAG) merged nodes", "explanation edges", "created nodes", "(RCT) deleted created nodes",
                 "reused models", "model extractions", "stored models", "consistency checks", "QXP calls", "MXP calls",
                 "(HST) largest unassigned index",

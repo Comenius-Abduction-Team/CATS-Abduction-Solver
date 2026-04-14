@@ -126,7 +126,7 @@ public class AlgorithmSolver {
 
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
-        else if(algorithm.isHsdag())
+        else if (algorithm.isHsdag())
             treeBuilder = new HsdagBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);

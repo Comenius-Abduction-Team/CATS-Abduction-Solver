@@ -8,14 +8,10 @@ import java.util.*;
 
 public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
 
-    public ArrayList<HsdagNode> children;
+    public List<HsdagNode> children;
     final int id;
 
     OWLAxiom labelAxiom;
-    List<OWLAxiom> childrenToProcess;
-    Set<OWLAxiom> positiveAxioms;
-
-    boolean currentlyRelabeled;
 
     // number of parents this node currently has
     int referenceCount;
@@ -26,11 +22,8 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
 
     public HsdagNode(int id) {
         this.id = id;
-        this.currentlyRelabeled = false;
         referenceCount = 1;
         children = new ArrayList<>();
-        childrenToProcess = new ArrayList<>();
-        positiveAxioms = new HashSet<>();
     }
 
     boolean isSubsetOf(HsdagNode other){
@@ -50,14 +43,6 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
-        HsdagNode that = (HsdagNode) other;
-         return id == that.id;
-    }
-
-    @Override
     public String toString() {
         if (labelAxiom == null)
             return id + "." + StringFactory.getRepresentation(model.getNegatedData());
@@ -65,14 +50,8 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
                 StringFactory.getRepresentation(model.getNegatedData());
     }
 
-    public boolean HaveParent(){
+    public boolean hasParent(){
         return referenceCount  > 0;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
 
 }

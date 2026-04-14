@@ -8,31 +8,26 @@ import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.model.ModelData;
-import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.*;
 
 public class HsdagBuilder implements ITreeBuilder {
     final AlgorithmSolver solver;
-    final Loader loader;
     final INodeProcessor nodeProcessor;
     final Queue<HsdagNode> queue = new PriorityQueue<>();
     public int idToAssign = 0;
 
 
     HsdagNode currentNode;
-    HashMap<Set<OWLAxiom>, HsdagNode> nodesAtCurrentDepth = new HashMap<>();
+    Map<Set<OWLAxiom>, HsdagNode> nodesAtCurrentDepth = new HashMap<>();
     HsdagNode root;
 
     int currentLevelReusedModels = 0;
 
-
-    //List<OWLAxiom> iteratedChildren;
+    List<OWLAxiom> iteratedChildren;
 
     public HsdagBuilder(AlgorithmSolver solver){
         this.solver = solver;
-        this.loader = solver.loader;
         this.nodeProcessor = solver.nodeProcessor;
     }
 
@@ -44,9 +39,8 @@ public class HsdagBuilder implements ITreeBuilder {
     @Override
     public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
-        if(mergeable(explanation)){
+        if (mergeIfPossible(explanation))
             return true;
-        }
 
         RuleChecker ruleChecker = solver.ruleChecker;
         ExplanationManager explanationManager = solver.explanationManager;
@@ -78,7 +72,6 @@ public class HsdagBuilder implements ITreeBuilder {
         root = new HsdagNode(getAndIncreaseId());
 
         root.model = modelToReuse;
-        root.childrenToProcess.addAll(root.model.getNegatedData());
         return root;
     }
 
@@ -88,26 +81,25 @@ public class HsdagBuilder implements ITreeBuilder {
         return createNode(label, parent.depth + 1, (HsdagNode) parent);
     }
 
-    private TreeNode createNode(Explanation label, Integer depth, HsdagNode parent){
-
-        HsdagNode node = new HsdagNode(getAndIncreaseId());
-
-        if (label != null) {
-            node.path = label.getAxioms();
-            node.labelAxiom = label.lastAxiom;
-            nodesAtCurrentDepth.put(label.getAxiomSet(),node);
-        }
-        node.depth = depth;
+    private TreeNode createNode(Explanation path, Integer depth, HsdagNode parent){
 
         Model modelToReuse = solver.findAndGetModelToReuse();
 
         if (modelToReuse == null)
             return null;
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
 
+        HsdagNode node = new HsdagNode(getAndIncreaseId());
+
+
+        node.path = path.getAxioms();
+        node.labelAxiom = path.lastAxiom;
+        nodesAtCurrentDepth.put(path.getAxiomSet(),node);
+        node.depth = depth;
+        node.model = solver.removePathAxiomsFromModel(modelToReuse);
         node.parent = parent;
 
-        node.childrenToProcess.addAll(node.model.getNegatedData());
+        parent.children.add(node);
+
 
 //        if (solver.currentLevel.reusedModels > currentLevelReusedModels) {
 //            node.modelWasNotReused = false;
@@ -116,9 +108,6 @@ public class HsdagBuilder implements ITreeBuilder {
 //            node.modelWasNotReused = true;
 //        }
 
-        if(parent != null) {
-            parent.children.add(node);
-        }
 
         return node;
     }
@@ -146,22 +135,22 @@ public class HsdagBuilder implements ITreeBuilder {
 
     public boolean startIteratingNodeChildren(TreeNode node){
         currentNode = (HsdagNode) node;
+        iteratedChildren = new ArrayList<>(currentNode.model.getNegatedData());
 //        if(currentNode.modelWasNotReused) {
 //          relabel();
 //          node.assignedLevel.relabeledCalls ++;
 //       }
-        relabel();
-        node.assignedLevel.relabeledCalls ++;
-        return currentNode.HaveParent() && !currentNode.childrenToProcess.isEmpty();
+        pruneTree();
+        return currentNode.hasParent();
     }
 
     public boolean noChildrenLeft(){
-        return currentNode.childrenToProcess.isEmpty();
+        return iteratedChildren.isEmpty();
     }
 
     public OWLAxiom getNextChild(){
-        OWLAxiom child = currentNode.childrenToProcess.get(0);
-        currentNode.childrenToProcess.remove(0);
+        OWLAxiom child = iteratedChildren.get(0);
+       iteratedChildren.remove(0);
         return child;
     }
 
@@ -171,7 +160,7 @@ public class HsdagBuilder implements ITreeBuilder {
         currentLevelReusedModels ++;
     }
     // check if node have same path and merge them
-    public boolean mergeable(Explanation label) {
+    public boolean mergeIfPossible(Explanation label) {
 
         Set<OWLAxiom> candidateSet = label.getAxiomSet();
 
@@ -179,9 +168,8 @@ public class HsdagBuilder implements ITreeBuilder {
             HsdagNode child = nodesAtCurrentDepth.get(candidateSet);
             currentNode.children.add(child);
             child.referenceCount ++;
-            currentNode.assignedLevel.mergedNodes ++;
 
-            StaticPrinter.debugPrint("[MERGING] Path already exists in history.");
+            EventPublisher.publishNodeEvent(solver, EventType.MERGING_NODE, currentNode);
 
             return true;
         }
@@ -194,11 +182,11 @@ public class HsdagBuilder implements ITreeBuilder {
         return oldIndex;
     }
 
-    private void relabel(){
+    private void pruneTree(){
         Queue<HsdagNode> localQueue = new ArrayDeque<>();
         localQueue.add(root);
 
-        List<HsdagNode> relabeledNodes = new ArrayList<>();
+        Set<HsdagNode> relabeledNodes = new HashSet<>();
 
         while (!localQueue.isEmpty()){
             HsdagNode polledNode = localQueue.poll();
@@ -206,16 +194,16 @@ public class HsdagBuilder implements ITreeBuilder {
             if (polledNode == currentNode){
                 continue;
             }
-            // avoid redundant processing of shared nodes during a single relabeling update
-            if(polledNode.currentlyRelabeled){
+
+            // avoid redundant processing of shared nodes during a single pruneTree update
+            if (relabeledNodes.contains(polledNode)){
                 continue;
             }
 
-            polledNode.currentlyRelabeled = true;
             relabeledNodes.add(polledNode);
 
             // nodes n' labeled with some Cj from CS such that Ci C Cj
-            if(currentNode.isSubsetOf(polledNode)){
+            if (currentNode.isSubsetOf(polledNode)){
                 StaticPrinter.debugPrint("[HS-DAG] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;
@@ -229,20 +217,18 @@ public class HsdagBuilder implements ITreeBuilder {
                 // Relabel n' with Ci
                 polledNode.model = Ci;
 
-                polledNode.childrenToProcess.removeAll(difference);
-
                 List<HsdagNode> children = new ArrayList<>(polledNode.children);
 
                 for (HsdagNode child : children) {
-                    if(difference.contains(child.labelAxiom)){
+                    if (difference.contains(child.labelAxiom)){
                         deleteNode(polledNode, child);
                     }
 
                 }
             }
+
                 localQueue.addAll(polledNode.children);
         }
-        resetCurrentlyRelabeled(relabeledNodes);
     }
     private void deleteNode(HsdagNode parent, HsdagNode child){
 
@@ -256,8 +242,8 @@ public class HsdagBuilder implements ITreeBuilder {
             HsdagNode polledNode = localQueue.poll();
             polledNode.referenceCount --;
 
-            // decrease referenceCount if  pollednode has more than 1 parent
-            if(polledNode.HaveParent()){
+            // decrease referenceCount if  polledNode has more than 1 parent
+            if(polledNode.hasParent()){
                 continue;
             }
 
@@ -266,22 +252,13 @@ public class HsdagBuilder implements ITreeBuilder {
             localQueue.addAll(polledNode.children);
             polledNode.children.clear();
 
-
-            StaticPrinter.debugPrint("[HS-DAG] Deleting node: " + polledNode);
-
             if (polledNode.processed)
-                polledNode.assignedLevel.deletedProcessed += 1;
+                EventPublisher.publishNodeEvent(solver, EventType.DELETED_PROCESSED_NODE, polledNode);
             else {
-                polledNode.parent.assignedLevel.deletedCreated += 1;
+                EventPublisher.publishNodeEvent(solver, EventType.DELETED_UNPROCESSED_NODE, polledNode);
             }
         }
 
-    }
-    // after relabel reset all nodes for next relabeling
-    private void resetCurrentlyRelabeled(List<HsdagNode> relabeledNodes){
-        for (HsdagNode node : relabeledNodes){
-            node.currentlyRelabeled = false;
-        }
     }
 
 }

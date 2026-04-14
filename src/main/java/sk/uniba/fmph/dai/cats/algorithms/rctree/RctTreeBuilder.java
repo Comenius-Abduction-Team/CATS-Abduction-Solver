@@ -6,6 +6,8 @@ import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 
@@ -43,6 +45,7 @@ public class RctTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
+            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, originalNode);
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
