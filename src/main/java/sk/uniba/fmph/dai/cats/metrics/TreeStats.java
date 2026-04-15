@@ -83,7 +83,7 @@ public class TreeStats {
         return StringFactory.buildCsvRow(addCommas,
                 "level",
                 "processed nodes", "childless nodes", "(RCT) repeated node processing", "(RCT/HS-DAG) deleted processed nodes",
-                "created edges", "pruned edges", "(HS-DAG) merged nodes", "explanation edges", "created nodes", "(RCT) deleted created nodes",
+                "created edges", "pruned edges", "(HS-DAG) merged nodes", "explanation edges", "created nodes", "(RCT/HS-DAG) deleted created nodes",
                 "reused models", "model extractions", "stored models", "consistency checks", "QXP calls", "MXP calls",
                 "(HST) largest unassigned index",
                 "explanations", "filtered explanations", "final explanations",
