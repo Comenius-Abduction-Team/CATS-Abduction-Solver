@@ -32,14 +32,6 @@ public class ModelManager {
         this.extractor = extractor;
     }
 
-    public Model getReusableModel(){
-        return modelToReuse;
-    }
-
-    public boolean canReuseModel(){
-        return modelToReuse != null;
-    }
-
     private void setModelToReuse(Model model){
         modelToReuse = model;
     }
@@ -86,6 +78,19 @@ public class ModelManager {
             add(model);
             setModelToReuse(model);
         }
+    }
+
+    public Model findAndGetModelToReuse(Set<OWLAxiom> path){
+        if (modelToReuse == null)
+            findReuseModelForPath(path);
+
+        return modelToReuse;
+    }
+
+    public Model getModelWithoutAxioms(Model model, Collection<OWLAxiom> axioms){
+        Model copy = new Model(model);
+        copy.getNegatedData().removeAll(axioms);
+        return copy;
     }
 
 }

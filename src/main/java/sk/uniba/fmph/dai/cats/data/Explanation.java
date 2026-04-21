@@ -19,10 +19,6 @@ public class Explanation implements IExplanation {
 
     public Level level;
 
-    /*public Explanation(List<OWLAxiom> axioms) {
-        this.axioms = axioms;
-    }*/
-
     public Explanation(Collection<OWLAxiom> axioms, Level level, double acquireTime) {
         if (level == null){
             System.out.println();

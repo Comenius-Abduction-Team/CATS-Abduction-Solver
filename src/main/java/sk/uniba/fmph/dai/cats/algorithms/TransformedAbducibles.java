@@ -15,7 +15,8 @@ import java.util.Set;
 
 
 /**
- * Helper object that extracts collections of axioms from the Abducible object that was created from user input.
+ * Helper object that serves to extract collections of axioms from the initial {@link InputAbducibles} object
+ * and convert them to an {@link IAbducibleAxioms} instance.
  */
 public class TransformedAbducibles {
 

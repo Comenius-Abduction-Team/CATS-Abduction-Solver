@@ -186,11 +186,11 @@ public abstract class ExplanationManager {
         return filterExplanationsBySize(possibleExplanations, size);
     }
 
-    public void finalisePossibleExplanations(){
+    public void makePossibleExplanationsFinal(){
         finalExplanations.addAll(possibleExplanations);
     }
 
-    public void readyExplanationsToProcess(){
+    public void prepareExplanationsToProcess(){
         explanationsToProcess.addAll(possibleExplanations);
     }
 

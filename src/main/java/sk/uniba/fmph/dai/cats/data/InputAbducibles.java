@@ -4,6 +4,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -11,13 +12,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class encapsulating all the DL symbols passed to -abd input parameters in the input file.
+ */
 public class InputAbducibles {
+
+    private final Loader loader;
 
     private Set<OWLNamedIndividual> individuals;
     private Set<OWLClass> classes = new HashSet<>();
     private Set<OWLObjectProperty> roles = new HashSet<>();
     private Set<OWLAxiom> axioms = new HashSet<>();
-    private Loader loader;
     private Set<OWLAxiom> axiomBasedAbducibles = new HashSet<>();
 
     public InputAbducibles(Loader loader) {
@@ -36,10 +41,11 @@ public class InputAbducibles {
         this.axiomBasedAbducibles = axiomBasedAbducibles;
     }
 
-    public InputAbducibles(Loader loader, Set<OWLNamedIndividual> ind, Set<OWLClass> cl, Set<OWLObjectProperty> op) {
-        this.individuals = ind;
-        this.classes = cl;
-        this.roles = op;
+    public InputAbducibles(Loader loader, Set<OWLNamedIndividual> individuals, Set<OWLClass> classes,
+                           Set<OWLObjectProperty> roles) {
+        this.individuals = individuals;
+        this.classes = classes;
+        this.roles = roles;
         this.loader = loader;
     }
 

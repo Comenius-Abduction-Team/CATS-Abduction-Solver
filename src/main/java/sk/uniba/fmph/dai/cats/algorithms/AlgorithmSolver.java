@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
 
+/**
+ * The central class of the solver performing the solving itself.
+ */
 public class AlgorithmSolver {
 
     public Loader loader;
@@ -87,6 +90,9 @@ public class AlgorithmSolver {
 
     }
 
+    /**
+     * Sets the default optimisations if they are allowed.
+     */
     private void setOptimisations(Algorithm algorithm){
 
         if (Configuration.IGNORE_DEFAULT_OPTIMISATIONS)
@@ -111,18 +117,19 @@ public class AlgorithmSolver {
 
     private void setAlgorithm(Algorithm algorithm){
 
+        // NodeProcessor
         if (algorithm.usesMxp()){
             if (Configuration.NEGATION_ALLOWED && Configuration.optimisations.contains(Optimisation.TRIPLE_MXP))
                 nodeProcessor = new TripleMxpNodeProcessor(this);
             else
                 nodeProcessor = new MxpNodeProcessor(this);
         }
-
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
         else
             nodeProcessor = new ClassicNodeProcessor(this);
 
+        // TreeBuilder
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isRcTree())
@@ -146,6 +153,7 @@ public class AlgorithmSolver {
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(0, "Initializing abduction.");
 
+        // nobody know why this line is here or what it does, but it must be here or the solver doesn't work ;)
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
 
         Future<Void> future = null;
@@ -234,11 +242,17 @@ public class AlgorithmSolver {
         currentLevel = stats.getLevelStats(0);
         currentLevel.start = metrics.getRunningTime();
 
-        TreeNode root = treeBuilder.createRoot();
+        TreeNode root = null;
+
+        boolean shouldExtractModel = treeBuilder.shouldExtractModel();
+        if (nodeProcessor.canCreateRoot(shouldExtractModel)) {
+            root = treeBuilder.createRoot();
+        }
         if (root == null) {
             EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
+
         treeBuilder.addNodeToTree(root);
         currentLevel.createdNodes = 1;
 
@@ -250,11 +264,6 @@ public class AlgorithmSolver {
         while (!treeBuilder.isTreeClosed()) {
 
             TreeNode node = treeBuilder.getNextNodeFromTree();
-
-            /*if (node == null){
-                StaticPrinter.debugPrint("[!!!] Null node!");
-                continue;
-            }*/
 
             assignLevelToNode(node);
 
@@ -419,16 +428,11 @@ public class AlgorithmSolver {
     }
 
     public Model findAndGetModelToReuse(){
-        if (!modelManager.canReuseModel())
-            modelManager.findReuseModelForPath(path);
-
-        return modelManager.getReusableModel();
+        return modelManager.findAndGetModelToReuse(path);
     }
 
-    public Model removePathAxiomsFromModel(Model model){
-        Model copy = new Model(model);
-        copy.getNegatedData().removeAll(path);
-        return copy;
+    public Model getModelWithoutPathAxioms(Model model){
+        return modelManager.getModelWithoutAxioms(model, path);
     }
 
     public void updateProgress(){
