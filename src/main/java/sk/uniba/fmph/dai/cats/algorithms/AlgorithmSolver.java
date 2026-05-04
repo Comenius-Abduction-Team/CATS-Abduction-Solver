@@ -121,7 +121,9 @@ public class AlgorithmSolver {
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
         if (Configuration.DEBUG_PRINT){
             EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
-        EventPublisher.registerSubscriber(this, new JsonExportEventSubscriber());
+        }
+        if (Configuration.JSON_EXPORT){
+            EventPublisher.registerSubscriber(this, new JsonExportEventSubscriber(this));
         }
     }
 
@@ -361,8 +363,9 @@ public class AlgorithmSolver {
                     throw new TimeoutException();
                 }
 
-                treeBuilder.addNodeToTree(treeBuilder.createChildNode(node, explanation));
-                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, node);
+                TreeNode childNode = treeBuilder.createChildNode(node, explanation);
+                treeBuilder.addNodeToTree(childNode);
+                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
                 path.clear();
 
             }

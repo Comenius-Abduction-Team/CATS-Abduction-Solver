@@ -218,6 +218,14 @@ public class ArgumentParser {
                         System.err.println("Wrong 'debug' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
+                case "-json:":
+                case "-json":
+                    if (silentTrue || next.equals("true")){
+                        Configuration.JSON_EXPORT = true;
+                    } else if (!next.equals("false")) {
+                        System.err.println("Wrong 'json' value: " + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
                 case "-opt:":
                 case "-opt":
                     if (next.contains("1")){

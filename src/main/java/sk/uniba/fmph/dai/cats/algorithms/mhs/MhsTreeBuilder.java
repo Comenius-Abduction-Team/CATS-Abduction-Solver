@@ -5,6 +5,8 @@ import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -38,6 +40,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (pathsInCurrentLevel.contains(solver.path)){
             StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
+            EventPublisher.publishEdgeEvent(solver, EventType.EDGE_PRUNED, explanation.lastAxiom);
             return true;
         }
 
@@ -48,6 +51,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
             return true;
         }
 
