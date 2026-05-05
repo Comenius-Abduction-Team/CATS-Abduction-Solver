@@ -15,6 +15,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.data.Observation;
 
 public class JsonExportEventSubscriber implements IEventSubscriber {
     private final AlgorithmSolver solver;
@@ -138,19 +139,27 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
     private void loadOntology() {
         try {
-            OWLOntology ontology = solver.loader.getOntology();
+            OWLOntology ontology = solver.loader.getInitialOntology();
             if (ontology == null) return;
 
             tbox.clear();
             observations.clear();
 
             for (OWLAxiom ax : ontology.getAxioms()) {
-                String dl = axiomToDL(ax);
-
                 if (ax instanceof OWLSubClassOfAxiom) {
-                    tbox.add(dl);
-                } else if (ax instanceof OWLClassAssertionAxiom) {
-                    observations.add(dl);
+                    tbox.add(axiomToDL(ax));
+                }
+            }
+
+            Observation obs = solver.loader.getObservation();
+            if (obs != null) {
+                List<OWLAxiom> obsAxioms = obs.getAxiomsInMultipleObservations();
+                if (obsAxioms != null && !obsAxioms.isEmpty()) {
+                    for (OWLAxiom ax : obsAxioms) {
+                        observations.add(axiomToDL(ax));
+                    }
+                } else if (obs.getOwlAxiom() != null) {
+                    observations.add(axiomToDL(obs.getOwlAxiom()));
                 }
             }
         } catch (Exception e) {
@@ -170,30 +179,71 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             return ind + " : " + classExprToDL(ass.getClassExpression());
         }
 
+        if (ax instanceof OWLObjectPropertyAssertionAxiom) {
+            OWLObjectPropertyAssertionAxiom prop = (OWLObjectPropertyAssertionAxiom) ax;
+            String subj = shortName(prop.getSubject().asOWLNamedIndividual().getIRI());
+            String obj  = shortName(prop.getObject().asOWLNamedIndividual().getIRI());
+            return "(" + subj + ", " + obj + ") : " + propToDL(prop.getProperty());
+        }
+
+        if (ax instanceof OWLNegativeObjectPropertyAssertionAxiom) {
+            OWLNegativeObjectPropertyAssertionAxiom prop = (OWLNegativeObjectPropertyAssertionAxiom) ax;
+            String subj = shortName(prop.getSubject().asOWLNamedIndividual().getIRI());
+            String obj  = shortName(prop.getObject().asOWLNamedIndividual().getIRI());
+            return "¬(" + subj + ", " + obj + ") : " + propToDL(prop.getProperty());
+        }
+
         return ax.toString();
     }
 
     private String classExprToDL(OWLClassExpression ce) {
         if (ce instanceof OWLClass) {
-            OWLClass c = (OWLClass) ce;
-            return shortName(c.getIRI());
+            return shortName(((OWLClass) ce).getIRI());
         }
 
         if (ce instanceof OWLObjectIntersectionOf) {
-            OWLObjectIntersectionOf inter = (OWLObjectIntersectionOf) ce;
             List<String> parts = new ArrayList<>();
-            for (OWLClassExpression op : inter.getOperands()) {
+            for (OWLClassExpression op : ((OWLObjectIntersectionOf) ce).getOperands()) {
                 parts.add(classExprToDL(op));
             }
             return String.join(" ⊓ ", parts);
         }
 
+        if (ce instanceof OWLObjectUnionOf) {
+            List<String> parts = new ArrayList<>();
+            for (OWLClassExpression op : ((OWLObjectUnionOf) ce).getOperands()) {
+                parts.add(classExprToDL(op));
+            }
+            return String.join(" ⊔ ", parts);
+        }
+
         if (ce instanceof OWLObjectComplementOf) {
-            OWLObjectComplementOf comp = (OWLObjectComplementOf) ce;
-            return "¬" + classExprToDL(comp.getOperand());
+            return "¬" + classExprToDL(((OWLObjectComplementOf) ce).getOperand());
+        }
+
+        if (ce instanceof OWLObjectSomeValuesFrom) {
+            OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom) ce;
+            return "∃" + propToDL(some.getProperty()) + "." + classExprToDL(some.getFiller());
+        }
+
+        if (ce instanceof OWLObjectAllValuesFrom) {
+            OWLObjectAllValuesFrom all = (OWLObjectAllValuesFrom) ce;
+            return "∀" + propToDL(all.getProperty()) + "." + classExprToDL(all.getFiller());
+        }
+
+        if (ce instanceof OWLObjectHasValue) {
+            OWLObjectHasValue hv = (OWLObjectHasValue) ce;
+            return "∃" + propToDL(hv.getProperty()) + ".{" + shortName(hv.getFiller().asOWLNamedIndividual().getIRI()) + "}";
         }
 
         return ce.toString();
+    }
+
+    private String propToDL(OWLObjectPropertyExpression prop) {
+        if (prop instanceof OWLObjectProperty) {
+            return shortName(((OWLObjectProperty) prop).getIRI());
+        }
+        return prop.toString();
     }
 
     private String shortName(IRI iri) {
@@ -264,7 +314,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
         if (pending != null) {
             createEdge(parent, newNode, pending.label, pending.createdEvent);
         } else if (parent != null && edgeLabel != null) {
-            // fallback len pre prípad, že solver/eventy prídu inak než čakáme
             createEdge(parent, newNode, edgeLabel, makeStepEvent("EDGE_CREATED"));
         }
 
@@ -330,7 +379,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
             if (pending != null) {
                 edgeObj.put("created", pending.createdEvent);
             } else {
-                // fallback
                 edgeObj.put("created", makeStepEvent("EDGE_CREATED"));
             }
 
