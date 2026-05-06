@@ -50,6 +50,7 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 * *-l: \<boolean\>* allows assertions of form $i, i: R$ in explanations, i.e. individual $i$ can be in role $R$ with itself (it is also called *looping*).  
 
 #### Output:
+* *-json: \<boolean\>* whether a json file containing information for HS-tree Visualizer should be created. *false* by default.
 * *-log: \<boolean\>* whether any output log files should be created. *true* by default.
 * *-partial: \<boolean\>* whether partial log files (see section Output) should be created. *true* by default. If set to *false*, the run may be faster, bu there are no level data in the case of a crash.
 * *-stats: \<boolean\>* whether stats for the level log should be tracked. *true* by default. If set to *false*, the run may be a bit faster, but no data is stored in the level logs. 
