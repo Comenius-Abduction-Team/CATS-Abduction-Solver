@@ -32,6 +32,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+
         if (TESTING){
             if (API){
                 runApiTestingMain();
@@ -90,8 +91,9 @@ public class Main {
 
             /*Configuration.ALGORITHM*/
             //Configuration.ALGORITHM =Algorithm.MARCO;
-            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Algorithm.MHS_MXP);
-            System.out.println(Configuration.ALGORITHM);
+            AlgorithmSolver solver = AlgorithmSolverFactory.createConsoleSolver(metrics, Algorithm.MARCO);
+            Configuration.ALGORITHM =Algorithm.MARCO;
+            System.out.println(Configuration.ALGORITHM); //vzdy vypise MHS-MXP
             solver.solve();
 
         } catch(Throwable e){

@@ -359,4 +359,44 @@ public class ToothacheTest extends AlgorithmTestBase {
 
     }
 
+    @Test
+    @Override
+    void marco() {
+
+        super.marco();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void marcoNoNeg() {
+
+        super.marcoNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbd() {
+
+        super.marcoSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbdNoNeg() {
+
+        super.marcoSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
 }

@@ -188,6 +188,10 @@ public abstract class AlgorithmTestBase {
     private void setRctMxp(){
         abducer.setAlgorithm(Algorithm.RCT_MXP);
     }
+
+    private void setMarco(){
+        abducer.setAlgorithm(Algorithm.MARCO);
+    }
     
     private void setNoNeg(){
         Configuration.INPUT_FILE_NAME += "NoNeg"; // set up artifically to change the file path of created logs
@@ -365,6 +369,27 @@ public abstract class AlgorithmTestBase {
 
     void rctMxpSymbolAbdNoNeg(){
         setRctMxp();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- MARCO -------
+
+    void marco(){
+        setMarco();
+    }
+
+    void marcoNoNeg(){
+        setMarco();
+        setNoNeg();
+    }
+
+    void marcoSymbolAbd(){
+        setMarco();
+        setSymbolAbd();
+    }
+
+    void marcoSymbolAbdNoNeg(){
+        setMarco();
         setSymbolAbdNoNeg();
     }
 

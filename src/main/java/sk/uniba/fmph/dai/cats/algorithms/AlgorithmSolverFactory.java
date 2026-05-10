@@ -15,7 +15,6 @@ import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 public class AlgorithmSolverFactory {
 
     public static AlgorithmSolver createConsoleSolver(MetricsThread metrics, Algorithm algorithm) {
-
         StaticPrinter.setPrinter(new ConsolePrinter());
 
         Loader loader = new ConsoleLoader();

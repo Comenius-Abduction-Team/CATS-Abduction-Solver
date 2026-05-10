@@ -361,4 +361,45 @@ public class ExtractingModel91Test extends AlgorithmTestBase {
 
     }
 
+
+    @Test
+    @Override
+    void marco() {
+
+        super.marco();
+        solve();
+        testExplanationsFound(7);
+
+    }
+
+    @Test
+    @Override
+    void marcoNoNeg() {
+
+        super.marcoNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbd() {
+
+        super.marcoSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbdNoNeg() {
+
+        super.marcoSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
 }

@@ -305,6 +305,7 @@ public class ArgumentParser {
         if (chosenAlg == null)
             throw new RuntimeException("Invalid algorithm name! " + argument);
 
+
         Configuration.ALGORITHM = chosenAlg;
     }
 

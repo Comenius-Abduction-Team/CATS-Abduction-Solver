@@ -26,12 +26,14 @@ public class MarcoTreeBuilder implements ITreeBuilder {
     TreeNode parentNode;
 
     List<OWLAxiom> iteratedChildren;
+    final MarcoNodeProcessor nodeProcessor;
 
 
     private MapArrayNumberedAxioms numberedAbducibles;
 
-    public MarcoTreeBuilder(AlgorithmSolver solver){
+    public MarcoTreeBuilder(AlgorithmSolver solver, MarcoNodeProcessor nodeProcessor){
         this.solver = solver;
+        this.nodeProcessor = nodeProcessor;
     }
 
     @Override
@@ -100,7 +102,7 @@ public class MarcoTreeBuilder implements ITreeBuilder {
 
     @Override
     public boolean startIteratingNodeChildren(TreeNode node){
-
+        /*
         parentNode = node;
 
         iteratedChildren = new ArrayList<>();
@@ -122,6 +124,42 @@ public class MarcoTreeBuilder implements ITreeBuilder {
                 iteratedChildren.add(ax);
                 }
             }
+
+        return true;*/
+        parentNode = node;
+        iteratedChildren = new ArrayList<>();
+
+        int lastIndex = 0;
+
+        if (node.path != null && !node.path.isEmpty()) {
+            for (OWLAxiom ax : node.path) {
+                int idx = numberedAbducibles.getIndex(ax);
+                if (idx > lastIndex) {
+                    lastIndex = idx;
+                }
+            }
+        }
+
+        // generates children, but prunes them before adding
+        for (int i = lastIndex + 1; i <= numberedAbducibles.size(); i++) {
+
+            OWLAxiom ax = numberedAbducibles.getAxiomByIndex(i);
+            if (ax == null) continue;
+
+            // builds the potential explanation for this child
+            Set<OWLAxiom> newSet = new HashSet<>(node.path);
+            newSet.add(ax);
+            BitSet mask = nodeProcessor.toMask(newSet);
+
+            // pruning
+            if (nodeProcessor.map.isKnown(mask)) continue;
+            if (nodeProcessor.map.hasInconsistentSubset(mask)) continue;
+            if (nodeProcessor.map.hasConsistentSuperset(mask)) continue;
+
+
+            // only adds children that survive pruning
+            iteratedChildren.add(ax);
+        }
 
         return true;
 

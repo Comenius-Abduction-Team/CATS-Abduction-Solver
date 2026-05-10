@@ -10,6 +10,7 @@ public class ReasonerManager {
 
     private final Loader loader;
 
+
     ReasonerManager(Loader loader) {
         this.loader = loader;
     }

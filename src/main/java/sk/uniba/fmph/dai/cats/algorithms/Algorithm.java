@@ -89,9 +89,9 @@ public enum Algorithm {
             return true;
         }
     },
-    MARCO{ /*i added*/
+    MARCO{
         @Override
-        public boolean usesMarco() {
+        public boolean isMarco() {
             return true;
         }
     };
@@ -107,15 +107,15 @@ public enum Algorithm {
         return false;
     }
 
+    public boolean isMarco() {
+        return false;
+    }
+
     public boolean usesMxp(){
         return false;
     }
 
     public boolean usesQxp(){
-        return false;
-    }
-
-    public boolean usesMarco() {
         return false;
     }
 

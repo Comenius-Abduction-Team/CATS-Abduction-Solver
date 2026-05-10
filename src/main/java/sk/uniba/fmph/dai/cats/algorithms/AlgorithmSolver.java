@@ -114,8 +114,6 @@ public class AlgorithmSolver {
     }
 
     private void setAlgorithm(Algorithm algorithm){
-        /*nastavenie, ze aky nodeProcessor a treeBuilder je pouzity - podla algoritmu
-        * bude treba zakomponovat MARCO*/
         if (algorithm.usesMxp()){
             if (Configuration.NEGATION_ALLOWED && Configuration.optimisations.contains(Optimisation.TRIPLE_MXP))
                 nodeProcessor = new TripleMxpNodeProcessor(this);
@@ -125,34 +123,32 @@ public class AlgorithmSolver {
 
         else if (algorithm.usesQxp())
             nodeProcessor = new QxpNodeProcessor(this);
-        else if (algorithm.usesMarco()) {
-            System.out.print("Marco vetva");
-            SubsetMapManager map = new SubsetMapManager();
-            nodeProcessor = new MarcoNodeProcessor(this, map);
+        else if (algorithm.isMarco()) {
+            nodeProcessor = new MarcoNodeProcessor(this);
         }
         else
             nodeProcessor = new ClassicNodeProcessor(this);
 
 
-        if (algorithm.isHst())  //tato cast prepise marcoTreebuilder - inam pridat marco
+        if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);
         else if (algorithm.isRootOnly())
             treeBuilder = new RootOnlyTreeBuilder(this);
-        else if (algorithm.usesMarco())
-            treeBuilder = new MarcoTreeBuilder(this);
+        else if (algorithm.isMarco())
+            treeBuilder = new MarcoTreeBuilder(this, (MarcoNodeProcessor) nodeProcessor);
         else
             treeBuilder = new MhsTreeBuilder(this);
     }
 
     public void solve(){
 
-        printInfo();  /*vypise nejake uvodne info*/
+        printInfo();
 
-        addNegatedObservation(); /*prida negovane pozorovania*/
+        addNegatedObservation();
 
-        if (Configuration.PRINT_PROGRESS) /*k vypisu*/
+        if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(0, "Initializing abducibles.");
         initializeAbducibles();
 

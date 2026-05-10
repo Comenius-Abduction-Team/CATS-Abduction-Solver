@@ -370,5 +370,50 @@ public class FamilyTest extends AlgorithmTestBase {
     }
 
 
+    // ------- MARCO -------
+
+
+    /*@Test
+    @Override
+    void marco() {
+
+        super.marco();
+        solve();
+        testExplanationsFound(1);
+
+    }*/
+    //TIMEOUT- viac ako 10 min
+
+    @Test
+    @Override
+    void marcoNoNeg() {
+
+        super.marcoNoNeg();
+        solve();
+        testExplanationsFound(4);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbd() {
+
+        super.marcoSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void marcoSymbolAbdNoNeg() {
+
+        super.marcoSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+
 
 }
