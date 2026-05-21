@@ -19,6 +19,7 @@ public class ModelExtractor {
     private final Loader loader;
     private final InputAbducibles inputAbducibles;
     private final Set<OWLAxiom> abducibleAxioms;
+    private final List<OWLNamedIndividual> abdIndividuals;
 
     private final List<OWLAxiom> assertionAxioms;
     private final List<OWLAxiom> negAssertionAxioms;
@@ -37,40 +38,27 @@ public class ModelExtractor {
         assertionAxioms = abducibleAxioms.getAssertionAxioms();
         negAssertionAxioms = abducibleAxioms.getNegatedAssertionAxioms();
 
+        this.abdIndividuals = getAbdIndividuals(this.abducibleAxioms);
+
         this.ontologyManager = OWLManager.createOWLOntologyManager();
     }
 
     public Model extractModel() {
-
         Model model = new Model();
-        ArrayList<OWLNamedIndividual> individualArray;
-
-        if(loader.isAxiomBasedAbduciblesOnInput()){
-            individualArray = new ArrayList<>(loader.getOntology().getIndividualsInSignature());
-        } else {
-            individualArray = new ArrayList<>(loader.getAbducibles().getIndividuals());
-        }
 
         OWLDataFactory dfactory = ontologyManager.getOWLDataFactory();
 
-        for (OWLNamedIndividual ind : individualArray) {
+        for (OWLNamedIndividual ind : abdIndividuals) {
             assignTypesToIndividual(dfactory, ind, model);
         }
+
         if (Configuration.ROLES_IN_EXPLANATIONS_ALLOWED) {
-            for (OWLNamedIndividual ind : individualArray) {
-                assignRolesToIndividual(dfactory, ind, individualArray, model);
+            for (OWLNamedIndividual ind : abdIndividuals) {
+                assignRolesToIndividual(dfactory, ind, abdIndividuals, model);
             }
         }
 
-        if(loader.isAxiomBasedAbduciblesOnInput()){
-
-            model.getData().retainAll(inputAbducibles.getAxiomBasedAbducibles());
-            model.getNegatedData().retainAll(inputAbducibles.getAxiomBasedAbducibles());
-
-        }
-
         return model;
-
     }
 
     public void assignTypesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, Model model){
@@ -98,7 +86,7 @@ public class ModelExtractor {
         addAxiomsToModelsAccordingTypes(dfactory, model, foundTypes, newNotTypes, ind);
     }
 
-    public void assignRolesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, ArrayList<OWLNamedIndividual> individuals, Model model) {
+    public void assignRolesToIndividual(OWLDataFactory dfactory, OWLNamedIndividual ind, List<OWLNamedIndividual> individuals, Model model) {
         Set<OWLAxiom> ontologyPropertyAxioms = originalOntology.axioms()
                 .filter(a -> a.isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION)
                         && ((OWLObjectPropertyAssertionAxiom)a).getSubject() == ind)
@@ -147,6 +135,19 @@ public class ModelExtractor {
         newNot.removeAll(found);
         found.removeAll(known);
         addAxiomsToModelsAccordingTypes(model, found, newNot);
+    }
+
+    private List<OWLNamedIndividual> getAbdIndividuals(Set<OWLAxiom> axioms) {
+        if (!loader.isAxiomBasedAbduciblesOnInput()) {
+            return new ArrayList<>(inputAbducibles.getIndividuals());
+        }
+
+        Set<OWLNamedIndividual> individuals = new HashSet<>();
+        for (OWLAxiom axiom : axioms) {
+            individuals.addAll(axiom.getIndividualsInSignature());
+        }
+
+        return new ArrayList<>(individuals);
     }
 
     private Set<OWLAxiom> getAllRolesAssertionWithIndividual(OWLNamedIndividual individual) {
@@ -225,7 +226,6 @@ public class ModelExtractor {
                     continue;
                 }
             }
-
 
             OWLAxiom axiom = factory.getOWLClassAssertionAxiom(classExpression, ind);
             axiom = getFromAbducibles(axiom);

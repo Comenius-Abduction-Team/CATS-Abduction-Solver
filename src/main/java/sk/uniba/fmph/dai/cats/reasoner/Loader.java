@@ -66,22 +66,26 @@ public abstract class Loader {
 
     protected abstract void setupOntology() throws OWLOntologyCreationException;
 
-    protected OWLOntology filterOntology(OWLOntology ontology){
+    protected OWLOntology filterOntology(OWLOntology ontology, OWLOntologyManager ontologyManager){
         Set<OWLAxiom> axioms = ontology.getAxioms();
         Set<OWLAxiom> filteredAxioms = new HashSet<>();
         for (OWLAxiom axiom : axioms){
             if (axiom.isOfType(
-                    AxiomType.DATA_PROPERTY_ASSERTION, AxiomType.DATA_PROPERTY_DOMAIN,
-                    AxiomType.DATA_PROPERTY_RANGE, AxiomType.DATATYPE_DEFINITION,
-                    AxiomType.SUB_DATA_PROPERTY, AxiomType.DISJOINT_DATA_PROPERTIES,
-                    AxiomType.EQUIVALENT_DATA_PROPERTIES, AxiomType.NEGATIVE_DATA_PROPERTY_ASSERTION,
-                    AxiomType.FUNCTIONAL_DATA_PROPERTY)
+                    AxiomType.DATA_PROPERTY_ASSERTION,
+                    AxiomType.DATA_PROPERTY_DOMAIN,
+                    AxiomType.DATA_PROPERTY_RANGE,
+                    AxiomType.DATATYPE_DEFINITION,
+                    AxiomType.SUB_DATA_PROPERTY,
+                    AxiomType.DISJOINT_DATA_PROPERTIES,
+                    AxiomType.EQUIVALENT_DATA_PROPERTIES,
+                    AxiomType.NEGATIVE_DATA_PROPERTY_ASSERTION,
+                    AxiomType.FUNCTIONAL_DATA_PROPERTY
+                    )
             ) continue;
             filteredAxioms.add(axiom);
         }
 
-        try{
-            ontologyManager = OWLManager.createOWLOntologyManager();
+        try {
             return ontologyManager.createOntology(filteredAxioms);
         } catch (OWLOntologyCreationException e){
             throw new RuntimeException(e.getMessage());

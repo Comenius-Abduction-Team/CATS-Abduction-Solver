@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.reasoner;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.parser.AbduciblesParser;
@@ -28,9 +29,15 @@ public class ConsoleLoader extends Loader {
     protected void setupOntology() throws OWLOntologyCreationException {
         File ontologyFile = new File(Configuration.INPUT_ONT_FILE);
         ontology = ontologyManager.loadOntologyFromOntologyDocument(ontologyFile);
-        ontology = filterOntology(ontology);
-        originalOntology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(ontologyFile);
-        initialOntology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(ontologyFile);
+        ontology = filterOntology(ontology, ontologyManager);
+
+        OWLOntologyManager originalOntologyManager = OWLManager.createOWLOntologyManager();
+        originalOntology = originalOntologyManager.loadOntologyFromOntologyDocument(ontologyFile);
+        originalOntology = filterOntology(originalOntology, originalOntologyManager);
+
+        OWLOntologyManager initialOntologyManager = OWLManager.createOWLOntologyManager();
+        initialOntology = initialOntologyManager.loadOntologyFromOntologyDocument(ontologyFile);
+        initialOntology = filterOntology(initialOntology, initialOntologyManager);
     }
 
     @Override
