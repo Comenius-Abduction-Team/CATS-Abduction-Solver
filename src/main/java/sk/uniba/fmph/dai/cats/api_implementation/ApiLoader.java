@@ -32,7 +32,7 @@ public class ApiLoader extends Loader {
 
         ontology = this.Abducer.getBackgroundKnowledge();
         ontologyManager = ontology.getOWLOntologyManager();
-        ontology = filterOntology(ontology);
+        ontology = filterOntology(ontology, ontologyManager);
 
         observationOntologyFormat = ontology.getFormat();
         ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
