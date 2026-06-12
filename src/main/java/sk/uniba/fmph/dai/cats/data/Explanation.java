@@ -90,7 +90,7 @@ public class Explanation implements IExplanation {
     public boolean equals(Object obj) {
         if (obj instanceof Explanation) {
             Explanation exp = (Explanation) obj;
-            return exp.getAxioms().equals(axioms);
+            return exp.getAxiomSet().equals(this.getAxiomSet());
         }
 
         return false;

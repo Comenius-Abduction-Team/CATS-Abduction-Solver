@@ -31,8 +31,10 @@ public abstract class ExplanationManager {
     public ExplanationLogger logger;
 
     public void addPossibleExplanation(Explanation explanation){
-        possibleExplanations.add(explanation);
-        EventPublisher.publishExplanationEvent(solver, EventType.POSSIBLE_EXPLANATION, explanation);
+        if (!possibleExplanations.contains(explanation)) {
+            possibleExplanations.add(explanation);
+            EventPublisher.publishExplanationEvent(solver, EventType.POSSIBLE_EXPLANATION, explanation);
+        }
     }
 
     abstract public void processExplanations(String message, TreeStats stats);
