@@ -199,7 +199,13 @@ public abstract class AlgorithmTestBase {
     private void setRctMxp(){
         abducer.setAlgorithm(Algorithm.RCT_MXP);
     }
-    
+
+    private void setHsdag(){
+        abducer.setAlgorithm(Algorithm.HSDAG);
+    }
+
+    private void setHsdagMxp(){abducer.setAlgorithm(Algorithm.HSDAG_MXP);}
+
     private void setNoNeg(){
         Configuration.INPUT_FILE_NAME += "NoNeg"; // set up artifically to change the file path of created logs
         abducer.setExplanationConfigurator(noNeg);
@@ -224,7 +230,7 @@ public abstract class AlgorithmTestBase {
     // In the overriden method, call super() to set up the configuration as defined here,
     // then run the solver and test the results. (See existing AlgorithmTestBase extensions as examples)
     //
-    // 
+    //
 
     // ------- QXP -------
 
@@ -387,6 +393,48 @@ public abstract class AlgorithmTestBase {
 
     void rctMxpSymbolAbdNoNeg(){
         setRctMxp();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- HS-DAG -------
+
+    void hsdag(){
+        setHsdag();
+    }
+
+    void hsdagNoNeg(){
+        setHsdag();
+        setNoNeg();
+    }
+
+    void hsdagSymbolAbd(){
+        setHsdag();
+        setSymbolAbd();
+    }
+
+    void hsdagSymbolAbdNoNeg(){
+        setHsdag();
+        setSymbolAbdNoNeg();
+    }
+
+    // ------- HS-DAG-MXP -------
+
+    void hsdagMxp(){
+        setHsdagMxp();
+    }
+
+    void hsdagMxpNoNeg(){
+        setHsdagMxp();
+        setNoNeg();
+    }
+
+    void hsdagMxpSymbolAbd(){
+        setHsdagMxp();
+        setSymbolAbd();
+    }
+
+    void hsdagMxpSymbolAbdNoNeg(){
+        setHsdagMxp();
         setSymbolAbdNoNeg();
     }
 

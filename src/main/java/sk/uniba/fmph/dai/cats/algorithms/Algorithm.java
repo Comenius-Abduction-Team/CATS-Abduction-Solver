@@ -37,6 +37,31 @@ public enum Algorithm {
 
     },
 
+    HSDAG{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean matchesName(String name) {
+            return "HS-DAG".equals(name) || "HS_DAG".equals(name);
+        }
+    },
+    HSDAG_MXP{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean usesMxp() {
+            return true;
+        }
+
+        @Override
+        public boolean matchesName(String name) {
+            return  "HSDAG-MXP".equals(name) || "HSDAGMXP".equals(name);
+        }
+
+    },
+
     HST_MXP {
         @Override
         public boolean isHst() {
@@ -111,6 +136,8 @@ public enum Algorithm {
     public boolean usesQxp(){
         return false;
     }
+
+    public boolean isHsdag(){ return false; }
 
     /**
      * Decides which strings can be used as the value for the -alg input parameter to identify the given algorithm.
