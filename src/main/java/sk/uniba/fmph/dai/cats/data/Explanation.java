@@ -19,10 +19,6 @@ public class Explanation implements IExplanation {
 
     public Level level;
 
-    /*public Explanation(List<OWLAxiom> axioms) {
-        this.axioms = axioms;
-    }*/
-
     public Explanation(Collection<OWLAxiom> axioms, Level level, double acquireTime) {
         if (level == null){
             System.out.println();
@@ -87,14 +83,14 @@ public class Explanation implements IExplanation {
 
     @Override
     public int hashCode() {
-        return axioms.hashCode();
+        return getAxiomSet().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Explanation) {
             Explanation exp = (Explanation) obj;
-            return exp.getAxioms().equals(axioms);
+            return exp.getAxiomSet().equals(this.getAxiomSet());
         }
 
         return false;

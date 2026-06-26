@@ -12,7 +12,6 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
-import sk.uniba.fmph.dai.cats.events.Event;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -112,7 +111,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
 
     @Override
     public void postProcessExplanations() {
-        explanationManager.readyExplanationsToProcess();
+        explanationManager.prepareExplanationsToProcess();
         explanationManager.filterToConsistentExplanations();
         explanationManager.filterToMinimalRelevantExplanations();
     }

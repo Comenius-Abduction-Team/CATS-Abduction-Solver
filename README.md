@@ -66,34 +66,52 @@ In the case where observation consists of multiple assertions (also called multi
 * *-sR: \<boolean\>* whether strict relevance should be used. Set to *true* by default.  
 
 ### Abducibles
+
+Abducibles are used to limit the search space of the abduction problem.
+With a set of abducible axioms given, the explanations are constricted to contain only axioms from the set and no others.
+
 #### Defining abducibles using <ins>entities</ins> they can contain:
 
-* *-aI: \<IRI of an individual\>* defines individual that is used in abducibles. We can define more abducible individuals by writing multiple *-aI* switches. By default, all individuals from $K$ and $O$ are used.
-* *-aC: \<IRI of a class\>* defines class that is used in abducibles. We can define more classes by writing multiple *-aC* switches. By default, all classes from $K$ and $O$ are used.
-* *-aR: \<IRI of an object property\>* defines object property that is used in abducibles. We can define more object properties by writing multiple *-aR* switches. By default, all object properties from $K$ and $O$ are used.
+* *-aI: \<IRI of an individual\>* defines individual that is used in abducibles. By default, all individuals from $K$ and $O$ are used.
+* *-aC: \<IRI of a class\>* defines class that is used in abducibles. By default, all classes from $K$ and $O$ are used.
+* *-aR: \<IRI of an object property\>* defines object property that is used in abducibles. By default, all object properties from $K$ and $O$ are used.
 
-There is also another way by which it is possible to define a list of individuals in one *-aI* switch. The list is wrapped in curly braces and each individual is in one line.
+Multiple individuals/classes/object properties can be defined in two ways (the example uses *-aI*, but the same can be done with *-aC* and *-aR*):
+
+##### Repeating the switch
+
+*-aI: \<IRI of an individual 1\>*  
+*-aI: \<IRI of an individual 2\>*
+
+##### Multi-line value
 
 *-aI: {*  
 *\<IRI of an individual 1\>*  
 *\<IRI of an individual 2\>*  
 *}*
 
-The same can be done with *-aC* (defining a list of classes) and *-aR* (defining a list of object properties).
-
 #### Defining abducibles directly by enumerating <ins>assertions</ins>:
 * *-abd: \<ontology\>* a complete ontology (in any ontology syntax), which has to be written in one line.
 
-Another way is to list only assertions. In this case, *Manchester Syntax* needs to be used. 
+Another way is to list only assertions. In this case, the *Manchester Syntax* needs to be used. 
 
 *-abd: {*  
 *\<assertion 1\>*  
 *\<assertion 2\>*  
 *}* 
     
-* *-abdF: \<string\>* a relative path to the ontology file, assertions from the ontology will be used as abducibles.
+* *-abdF: \<string\>* a relative path to an ontology file. Assertions from the ontology will be used as abducibles.
 
 Abducibles cannot be defined by combining different definition types. Either they are defined using entities (*-aI*, *-aC*, *-aR*), using an ontology or list of assertions (*-abd*), or from the ontology file (*-abdF*).
+
+### Optimisations configuration
+
+The solver contains several modifications that could, in theory, optimise the effectivity of the algorithms (see later section Optimisations for more details).
+Some of them are highly experimental and/or tied to the fine details of the algorithms, so we *do not recommend to configure them for basic usage*.
+However, there is an option to do so using the following parameters:
+
+* *-defOpt: \<boolean\>*  allows default optimisations. Set to *true*, by default.
+* *-opt: \<string\>* turns on optimisations whose char IDs are listed in the given string. E.g., *-opt: 123* activates opts. 1, 2 and 3. The order of the chars or other symbols in the string that are not opt. IDs have no effect. If the default optimisations are active (*-defOpt* is not set to *false*), the listed opts. are added to the default ones. 
 
 ## Output
 As an output for a given input, the solver produces several log files. Time in the logs is given in seconds. The time in file names is in Unix time format.
@@ -143,6 +161,39 @@ Partial log is a temporary version of the level log, updated after each level of
 * partial log with the same structure as **level log**
 * may contain undesired explonations
 * if the run successfully finished, the log is deleted
+
+## Optimisations
+
+### List of optimisations
+
+| ID | Name                           | Description                                                                                                                                                                                                                            |
+|----|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1  | Reduced consistency checks     | Greatly reduces the number of redundant consistency checks.                                                                                                                                                                            |
+| 2  | Model sorting                  | When reusing model labels, the smallest one is always chosen, decreasing the number of potential branches.                                                                                                                             |
+| 3  | Removed negated path           | (Only with negations) When MXP is called, negations of the axioms on the current tree path are moved from MXP's input. This decreases the number of conflicting axioms in MXP, improving the chance to find some explanations.         |
+| 4  | Triple MXP                     | (Only with negations) When MXP should be called, it is called thrice: with all axioms on its input, with only positive axioms and only negative axioms. This increases the chance of finding explanations with conflicting abducibles. |
+| 5  | Fully random set division      | When QXP divides its input set into two, the division is fully random instead of deterministic.                                                                                                                                        |
+| 6  | Equal size random set division | Same as the previous one, but the input set is divided in two halves of the same size if possible.                                                                                                                                     |
+
+### Default optimisations
+
+The default optimisations have been chosen based on an empirical evaluation.
+Each algorithm uses a combination of optimisations that lead to the best average results on the testing dataset, with extra focus on problems with longer solving time. 
+
+#### Without negations (*-n: false*)
+
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
+|----------------------------|-----------|-----------|-----------|
+| Reduced consistency checks | ✓         | ✓         | ✗         |
+| Model sorting              | ✓         | ✗         | ✓         |
+
+#### With negations (*-n: true*)
+
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
+|----------------------------|-----------|-----------|-----------|
+| Reduced consistency checks | ✓         | ✓         | ✓         |
+| Model sorting              | ✓         | ✗         | ✗         |
+| Triple MXP                 | ✓         | ✓         | ✓         |
 
 # License
 

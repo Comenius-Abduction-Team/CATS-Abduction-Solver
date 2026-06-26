@@ -88,7 +88,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+        node.model = solver.getModelWithoutPathAxioms(modelToReuse);
 
         return node;
     }

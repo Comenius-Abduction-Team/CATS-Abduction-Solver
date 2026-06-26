@@ -19,13 +19,23 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * The type Algorithm test base.
+ * Base class for tests that run the algorithms and check the explanations found.
+ *
+ * Each test class extending this one represents tests over a single ontology/abduction problem.
+ *
+ * Each test case in an extending class represents a run of the solver over the same abduction problem (the same
+ * as all the other test cases in that class), but with different settings (algorithm, abducibles,...).
+ *
  */
 public abstract class AlgorithmTestBase {
 
-    private final boolean CREATE_LOGS = false;
-    private final boolean DEBUG_PRINTING = false;
+    /** Whether each test should print the explanations found into the console. */
     private final boolean PRINT_EXPLANATIONS = true;
+    /** Whether the tests should create logs. */
+    private final boolean CREATE_LOGS = false;
+    /** Whether the tests should print the debugging prints. */
+    private final boolean DEBUG_PRINTING = false;
+
 
     /** Path to the file containing the background knowledge ontology. */
     protected String ONTOLOGY_FILE;
@@ -39,26 +49,13 @@ public abstract class AlgorithmTestBase {
     /** The observation extracted from the string. */
     protected Set<OWLAxiom> observation;
 
-    /**
-     * The Data factory.
-     */
     protected OWLDataFactory dataFactory;
-    /**
-     * The Prefix manager.
-     */
     protected PrefixManager prefixManager;
 
-    /**
-     * The Manager.
-     */
     protected CatsAbducer abducer;
-    /**
-     * The No neg.
-     */
+    /** Configurator to be used for runs with disabled negations. */
     protected CatsExplanationConfigurator noNeg;
-    /**
-     * The Symbol abd.
-     */
+    /** Configurator to be used for runs with symbol abducibles. */
     protected CatsSymbolAbducibles symbolAbd;
 
     /**
@@ -67,7 +64,7 @@ public abstract class AlgorithmTestBase {
      * @throws OWLOntologyCreationException internal OWL API error
      * @throws IOException                  in case of wrong file path
      */
-    public AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
+    protected AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
         setOntologyName(name);
         setUpInput();
         setUpHelperObjects();
@@ -79,7 +76,10 @@ public abstract class AlgorithmTestBase {
         Configuration.INPUT_FILE_NAME = "";
     }
 
-    /** Method that should be overwritten by the test to set its BK, observation and prefix to be used in all test cases. */
+    /**
+     * Method that should be overwritten by the specific test classes to set the BK, the observation and the prefix
+     * to be used in all test cases in that class.
+     * */
     protected abstract void setUpInput();
 
     /**
@@ -102,12 +102,13 @@ public abstract class AlgorithmTestBase {
 
     }
 
-    /** Method that should be overriden by the specific test to set up abducibles used in the abducible test cases. */
+    /**
+     * Method that should be overriden by the specific test classes to set up the abducibles
+     * to be used in all test cases in that class.
+     * */
     protected abstract void setUpAbducibles();
 
-    /**
-     * Instantiates an abduction manager before each test case.
-     */
+    /** Instantiates the abducer before each test case. */
     @BeforeEach
     void setUp() {
         Configuration.DEBUG_PRINT = DEBUG_PRINTING;
@@ -123,7 +124,7 @@ public abstract class AlgorithmTestBase {
      * @throws IOException                  in case of wrong file
      * @throws OWLOntologyCreationException internal OWL API error
      */
-    public OWLOntology parseOntologyFromFile(String filepath) throws IOException, OWLOntologyCreationException {
+    private OWLOntology parseOntologyFromFile(String filepath) throws IOException, OWLOntologyCreationException {
         File file = new File(filepath);
         if (!file.exists())
             throw new IOException("File '" + filepath + "' wasn't found!");
@@ -138,25 +139,35 @@ public abstract class AlgorithmTestBase {
      * @return set of OWL axioms
      * @throws OWLOntologyCreationException internal OWL API error
      */
-    public Set<OWLAxiom> parseAxiomsFromString(String string) throws OWLOntologyCreationException {
+    protected Set<OWLAxiom> parseAxiomsFromString(String string) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology observationOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(string));
         return observationOntology.getAxioms();
     }
 
-    public void testExplanationsFound(int expectedCount){
+    /**
+     * Asserts that the last run of the solver has found the given number of explanations.
+     * This should be used in tests to verify the expected results.
+     *
+     * @param expectedCount the expected number of explanations found
+     */
+    protected void testExplanationsFound(int expectedCount){
         Collection<IExplanation> explanations = abducer.getExplanations();
         if (PRINT_EXPLANATIONS)
             System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
     }
 
-    public void solve(){
+    /** Runs the solver. * */
+    protected void solve(){
         abducer.solveAbduction();
         if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty()) {
             System.err.println(abducer.getOutputMessage());
         }
     }
+
+    // The following private methods are meant as shorthands to set the solver's configuration options
+    // in the test cases.
 
     private void setQxp(){
         abducer.setAlgorithm(Algorithm.QXP);
@@ -164,7 +175,7 @@ public abstract class AlgorithmTestBase {
     private void setMxp(){
         abducer.setAlgorithm(Algorithm.MXP);
     }
-
+    
     private void setMhs(){
         abducer.setAlgorithm(Algorithm.MHS);
     }
@@ -204,11 +215,22 @@ public abstract class AlgorithmTestBase {
         Configuration.INPUT_FILE_NAME += "SymbolAbd";
         abducer.setAbducibles(symbolAbd);
     }
-
+    
     private void setSymbolAbdNoNeg(){
         setSymbolAbd();
         setNoNeg();
     }
+
+    // The following set of methods each represent a type of test case to be tested:
+    // more specifically, each test case is some combination of an algorithm and various configuration options
+    // (such as negations and abducibles being used or not).
+    // The test cases should cover every possible combination of configurations (which is currently not true).
+    //
+    // !!! Every test class extending AlgorithmTestBase should override each of these methods. !!!
+    // In the overriden method, call super() to set up the configuration as defined here,
+    // then run the solver and test the results. (See existing AlgorithmTestBase extensions as examples)
+    //
+    //
 
     // ------- QXP -------
 
@@ -230,7 +252,7 @@ public abstract class AlgorithmTestBase {
     }
 
     // ------- MHS -------
-
+    
     void mhs(){
         setMhs();
     }
@@ -415,44 +437,5 @@ public abstract class AlgorithmTestBase {
         setHsdagMxp();
         setSymbolAbdNoNeg();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

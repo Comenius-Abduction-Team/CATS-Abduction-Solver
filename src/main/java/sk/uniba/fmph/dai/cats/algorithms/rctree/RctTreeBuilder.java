@@ -91,7 +91,7 @@ public class RctTreeBuilder implements ITreeBuilder {
             return null;
 
         RctNode node = new RctNode(getAndIncreaseId());
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+        node.model = solver.getModelWithoutPathAxioms(modelToReuse);
         node.path = path.getAxioms();
         node.depth = depth;
 
