@@ -83,7 +83,7 @@ public class Explanation implements IExplanation {
 
     @Override
     public int hashCode() {
-        return axioms.hashCode();
+        return getAxiomSet().hashCode();
     }
 
     @Override
