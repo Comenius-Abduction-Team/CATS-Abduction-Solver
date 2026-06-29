@@ -11,7 +11,7 @@ public class Level {
     public int depth;
 
     public int processedNodes, childlessNodes, repeatedProcessing, deletedProcessed;
-    public int createdEdges, prunedEdges, explanationEdges, createdNodes, deletedCreated;
+    public int createdEdges,mergedNodes, prunedEdges, explanationEdges, createdNodes, deletedCreated;
     public int reusedModels, modelExtractions, storedModels, consistencyChecks;
 
     public int qxpCalls, mxpCalls;
@@ -47,6 +47,7 @@ public class Level {
                 ", rct_retrospectively_deleted_nodes=" + deletedProcessed +
                 ", edges=" + createdEdges +
                 ", pruned_edges=" + prunedEdges +
+                ", merged_nodes=" + mergedNodes +
                 ", explanation_edges=" + explanationEdges +
                 ", created_nodes=" + createdNodes +
                 ", reused_model_labels=" + reusedModels +
@@ -68,7 +69,7 @@ public class Level {
     public void buildCsvRow(StringBuilder builder, boolean addCommas){
         StringFactory.buildCsvRow(builder, addCommas,
                 processedNodes, childlessNodes, repeatedProcessing, deletedProcessed,
-                createdEdges, prunedEdges-explanationEdges, explanationEdges, createdNodes, deletedCreated,
+                createdEdges, prunedEdges-explanationEdges, mergedNodes, explanationEdges, createdNodes, deletedCreated,
                 reusedModels, modelExtractions, storedModels, consistencyChecks, qxpCalls, mxpCalls,
                 hstGlobalMin,
                 originalExplanations, filteredExplanations, finalExplanations,

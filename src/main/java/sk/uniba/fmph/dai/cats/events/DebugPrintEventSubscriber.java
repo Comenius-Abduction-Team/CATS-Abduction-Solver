@@ -62,6 +62,14 @@ public class DebugPrintEventSubscriber implements IEventSubscriber {
             case LEVEL_STARTED:
                 StaticPrinter.debugPrint("[TREE] entering depth " + solver.currentLevel.depth);
                 break;
+            case MERGING_NODE:
+                StaticPrinter.debugPrint("[MERGING] Path already exists in history.");
+            case DELETED_PROCESSED_NODE:
+                StaticPrinter.debugPrint("[HS-DAG] Deleting processed node: " + ((NodeEvent)event).node);
+                break;
+            case DELETED_UNPROCESSED_NODE:
+                StaticPrinter.debugPrint("[HS-DAG] Deleting not processed node: " + ((NodeEvent)event).node);
+                break;
         }
 
     }

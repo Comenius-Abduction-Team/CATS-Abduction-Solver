@@ -5,6 +5,8 @@ import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -13,7 +15,6 @@ import java.util.*;
 public class MhsTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
-    final Loader loader;
     final INodeProcessor nodeProcessor;
     final Queue<TreeNode> queue = new ArrayDeque<>();
 
@@ -24,7 +25,6 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     public MhsTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
-        this.loader = solver.loader;
         this.nodeProcessor = solver.nodeProcessor;
     }
 
@@ -38,6 +38,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (pathsInCurrentLevel.contains(solver.path)){
             StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
+            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }
 
@@ -48,10 +49,12 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
+            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
+            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }
         return false;

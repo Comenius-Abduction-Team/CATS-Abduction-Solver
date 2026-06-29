@@ -369,6 +369,85 @@ public class FamilyTest extends AlgorithmTestBase {
 
     }
 
+    // ------- HS-DAG -------
+
+    @Test
+    @Override
+    void hsdag() {
+        super.hsdag();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+    }
+
+    @Test
+    @Override
+    void hsdagNoNeg() {
+        super.hsdagNoNeg();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbd() {
+        super.hsdagSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbdNoNeg() {
+        super.hsdagSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+
+    // ------- HS-DAG-MXP -------
+
+    @Test
+    @Override
+    void hsdagMxp() {
+        super.hsdagMxp();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+    }
+
+    @Test
+    @Override
+    void hsdagMxpNoNeg() {
+        super.hsdagMxpNoNeg();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbd() {
+        super.hsdagMxpSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbdNoNeg() {
+        super.hsdagMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
 
 
 }

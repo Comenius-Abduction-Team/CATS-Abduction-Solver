@@ -73,6 +73,15 @@ public class StatEventSubscriber implements IEventSubscriber {
             case MODEL_EXTRACTION:
                 solver.stats.getCurrentLevelStats().modelExtractions += 1;
                 break;
+            case MERGING_NODE:
+                solver.currentLevel.mergedNodes += 1;
+                break;
+            case DELETED_PROCESSED_NODE:
+                solver.currentLevel.deletedProcessed += 1;
+                break;
+            case DELETED_UNPROCESSED_NODE:
+                solver.currentLevel.deletedCreated += 1;
+                break;
         }
 
     }
