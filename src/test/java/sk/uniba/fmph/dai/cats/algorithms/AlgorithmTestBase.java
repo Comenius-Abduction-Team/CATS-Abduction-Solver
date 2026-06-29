@@ -10,13 +10,19 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsExplanationConfigurator;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsSymbolAbducibles;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class for tests that run the algorithms and check the explanations found.
@@ -66,9 +72,6 @@ public abstract class AlgorithmTestBase {
      */
     protected AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
         setOntologyName(name);
-        setUpInput();
-        setUpHelperObjects();
-        setUpAbducibles();
     }
 
     private void setOntologyName(String name){
@@ -115,6 +118,12 @@ public abstract class AlgorithmTestBase {
         abducer = new CatsAbducer(backgroundKnowledge,observation);
         abducer.setLogging(CREATE_LOGS);
     }
+    @BeforeEach
+    void init() throws OWLOntologyCreationException, IOException {
+        setUpInput();
+        setUpHelperObjects();
+        setUpAbducibles();
+    }
 
     /**
      * Parses ontology from an OWL file.
@@ -156,6 +165,110 @@ public abstract class AlgorithmTestBase {
         if (PRINT_EXPLANATIONS)
             System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
+    }
+
+    /**
+     * Asserts that the two sets of explanations are equal.
+     *
+     * This test should be used to compare the results of different algorithms,
+     * two versions of the same algorithm, or a result with the ground truth
+     * when we expect them to return the same set of explanations.
+     *
+     * @param explanations1 set of explanations
+     * @param explanations2 set of explanations
+     */
+    protected void compareExplanationsFound(Set<IExplanation> explanations1, Set<IExplanation> explanations2){
+
+        Map<String, IExplanation> map1 = explanations1.stream()
+                .collect(Collectors.toMap(
+                        this::normalize,
+                        Function.identity(),
+                        (a, b) -> a
+                ));
+
+        Map<String, IExplanation> map2 = explanations2.stream()
+                .collect(Collectors.toMap(
+                        this::normalize,
+                        Function.identity(),
+                        (a, b) -> a
+                ));
+
+        Set<String> onlyIn1 = difference(map1.keySet(), map2.keySet());
+        Set<String> onlyIn2 = difference(map2.keySet(), map1.keySet());
+
+        if (onlyIn1.size() != onlyIn2.size()) {
+            System.out.println("ALG1: " + onlyIn1.size());
+            System.out.println("ALG2: " + onlyIn2.size());
+
+            System.out.println("Only in ALG1: " + onlyIn1.size());
+            System.out.println("Only in ALG2: " + onlyIn2.size());
+        }
+
+        String onlyIn1String = onlyIn1.stream()
+                .map(map1::get)
+                .map(e -> StringFactory.getRepresentation(e.getAxiomSet()))
+                .collect(Collectors.joining("\n"));
+
+        String onlyIn2String = onlyIn2.stream()
+                .map(map2::get)
+                .map(e -> StringFactory.getRepresentation(e.getAxiomSet()))
+                .collect(Collectors.joining("\n"));
+
+
+        assertTrue(
+                onlyIn1.isEmpty() && onlyIn2.isEmpty(),
+                "\nOnly in ALG1:\n" + onlyIn1String +
+                        "\n\nOnly in ALG2:\n" + onlyIn2String
+        );
+
+    }
+
+    private static <T> Set<T> difference(Set<T> first, Set<T> second) {
+        Set<T> result = new HashSet<>(first);
+        result.removeAll(second);
+        return result;
+    }
+
+    /**
+     * Normalizes the explanation (into a unique string)
+     *
+     * @param explanation an explanation
+     */
+    private String normalize(IExplanation explanation) {
+
+        return explanation.getAxiomSet().stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining("|"));
+    }
+
+    /**
+     * Asserts that the set of explanations does not contain duplicates.
+     *
+     * @param explanations set of explanations
+     */
+    protected void testDuplicateExplanations(Set<IExplanation> explanations) {
+        System.out.println("Returned explanations: " + explanations.size());
+
+        Set<String> normalizedSet = explanations.stream()
+                .map(this::normalize)
+                .collect(Collectors.toSet());
+
+        System.out.println("Unique normalized explanations: "
+                + normalizedSet.size());
+
+        Set<String> unique = new HashSet<>();
+
+        for (IExplanation explanation : explanations) {
+            String normalized = normalize(explanation);
+
+            assertTrue(
+                    unique.add(normalized),
+                    "Duplicate explanation found: " + normalized
+            );
+        }
+
+        assertEquals(normalizedSet.size(), explanations.size());
     }
 
     /** Runs the solver. * */
