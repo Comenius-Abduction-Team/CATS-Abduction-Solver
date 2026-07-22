@@ -166,5 +166,4 @@ public class StringFactory {
     public static String formatTime(long time){
         return formatTimeByPattern(time, "HH:mm:ss");
     }
-
 }

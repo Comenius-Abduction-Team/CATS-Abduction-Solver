@@ -1,0 +1,9 @@
+{JournalArticle(a)}
+{TechnicalReport(a)}
+{Book(a)}
+{Article(a)}
+{Software(a)}
+{Manual(a)}
+{ConferencePaper(a)}
+{UnofficialPublication(a)}
+{Specification(a)}

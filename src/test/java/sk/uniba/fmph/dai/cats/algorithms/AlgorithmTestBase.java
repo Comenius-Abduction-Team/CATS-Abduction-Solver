@@ -168,59 +168,50 @@ public abstract class AlgorithmTestBase {
     }
 
     /**
-     * Asserts that the two sets of explanations are equal.
+     * Asserts that computed explanations correspond to expected explanations.
      *
-     * This test should be used to compare the results of different algorithms,
-     * two versions of the same algorithm, or a result with the ground truth
-     * when we expect them to return the same set of explanations.
-     *
-     * @param explanations1 set of explanations
-     * @param explanations2 set of explanations
+     * @param computedExplanations set of computed explanations
+     * @param expectedExplanations set of expected explanations
      */
-    protected void compareExplanationsFound(Set<IExplanation> explanations1, Set<IExplanation> explanations2){
+    protected void compareExplanations(Set<IExplanation> computedExplanations, Set<Set<String>> expectedExplanations){
 
-        Map<String, IExplanation> map1 = explanations1.stream()
-                .collect(Collectors.toMap(
-                        this::normalize,
-                        Function.identity(),
-                        (a, b) -> a
-                ));
+        Set<Set<String>> computed = computedExplanations.stream()
+                .map(this::getRepresentation)
+                .collect(Collectors.toSet());
 
-        Map<String, IExplanation> map2 = explanations2.stream()
-                .collect(Collectors.toMap(
-                        this::normalize,
-                        Function.identity(),
-                        (a, b) -> a
-                ));
+        Set<Set<String>> onlyInComputed = new HashSet<>(computed);
+        onlyInComputed.removeAll(expectedExplanations);
 
-        Set<String> onlyIn1 = difference(map1.keySet(), map2.keySet());
-        Set<String> onlyIn2 = difference(map2.keySet(), map1.keySet());
+        Set<Set<String>> onlyInExpected = new HashSet<>(expectedExplanations);
+        onlyInExpected.removeAll(computed);
 
-        if (onlyIn1.size() != onlyIn2.size()) {
-            System.out.println("ALG1: " + onlyIn1.size());
-            System.out.println("ALG2: " + onlyIn2.size());
-
-            System.out.println("Only in ALG1: " + onlyIn1.size());
-            System.out.println("Only in ALG2: " + onlyIn2.size());
-        }
-
-        String onlyIn1String = onlyIn1.stream()
-                .map(map1::get)
-                .map(e -> StringFactory.getRepresentation(e.getAxiomSet()))
-                .collect(Collectors.joining("\n"));
-
-        String onlyIn2String = onlyIn2.stream()
-                .map(map2::get)
-                .map(e -> StringFactory.getRepresentation(e.getAxiomSet()))
-                .collect(Collectors.joining("\n"));
-
+        System.out.println("Expected explanation count: " + expectedExplanations.size());
+        System.out.println("Computed explanation count: " + computed.size());
 
         assertTrue(
-                onlyIn1.isEmpty() && onlyIn2.isEmpty(),
-                "\nOnly in ALG1:\n" + onlyIn1String +
-                        "\n\nOnly in ALG2:\n" + onlyIn2String
+                onlyInComputed.isEmpty() && onlyInExpected.isEmpty(),
+                "\nOnly in computed (" + onlyInComputed.size() + "):\n"
+                        + formatExplanations(onlyInComputed) +
+                        "\n\nOnly in expected (" + onlyInExpected.size() + "):\n"
+                        + formatExplanations(onlyInExpected)
         );
 
+    }
+
+    private Set<String> getRepresentation(IExplanation e) {
+        return e.getAxiomSet()
+                .stream()
+                .map(StringFactory::getRepresentation)
+                .collect(Collectors.toSet());
+    }
+
+    private String formatExplanations(Set<Set<String>> explanations) {
+        return explanations.stream()
+                .map(set -> set.stream()
+                        .sorted()
+                        .collect(Collectors.joining(", ", "{", "}")))
+                .sorted()
+                .collect(Collectors.joining("\n"));
     }
 
     private static <T> Set<T> difference(Set<T> first, Set<T> second) {

@@ -17,7 +17,7 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
 
     private final Map<String, Set<Optimisation>> optimizationCombinations = new HashMap<>();
 
-    private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = false;
+    private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = true;
 
     public LubmCheckDuplicates(String name) throws OWLOntologyCreationException, IOException {
         super(name);
@@ -35,9 +35,9 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
         opt12.add(Optimisation.SORT_MODEL);
 
 //        optimizationCombinations.put("no-opt", new HashSet<>());
-        optimizationCombinations.put("opt1", opt1);
+//        optimizationCombinations.put("opt1", opt1);
 //        optimizationCombinations.put("opt2", opt2);
-//        optimizationCombinations.put("opt12", opt12);
+        optimizationCombinations.put("opt12", opt12);
     }
 
     protected void executeTest(LubmInput input,
@@ -68,6 +68,8 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
             Configuration.REUSE_OF_MODELS = false;
 
             solve();
+            printUsedOptimizations();
+
             testDuplicateExplanations(this.abducer.getExplanations());
 
 
@@ -107,6 +109,14 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
                 getDepthLimit());
     }
 
+//    @TestFactory
+//    public Collection<DynamicTest> multipleHsDagMxpNoNeg() {
+//        return generateDynamicTests(
+//                Algorithm.HSDAG_MXP,
+//                true,
+//                getDepthLimit());
+//    }
+//
 //    @TestFactory
 //    public Collection<DynamicTest> multipleRctMxpNoNeg() {
 //        return generateDynamicTests(

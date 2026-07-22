@@ -3,16 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.data;
 import java.util.Arrays;
 import java.util.List;
 
-public final class LubmS2Data {
+public final class LubmS2Data extends LubmData {
 
     private LubmS2Data() {}
 
-    private static final String ONT_PREFIX =
-            "Prefix: prefix0: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>\n";
-
     private static final String NAME_PREFIX = "lubm_0_2_";
-
-    public static final Integer DEPTH_LIMIT = 4;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -23,7 +18,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Employee " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Employee",
-                    159
+                    159,
+                    loadExpectedExplanations("2_0")
             ),
 
             new LubmInput(
@@ -33,7 +29,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Employee " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Employee",
-                    63
+                    63,
+                    loadExpectedExplanations("2_1")
             ),
 
             new LubmInput(
@@ -43,7 +40,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Article " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Person and prefix0:Article",
-                    83
+                    83,
+                    loadExpectedExplanations("2_2")
             ),
 
             new LubmInput(
@@ -53,7 +51,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Publication " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Publication",
-                    69
+                    69,
+                    loadExpectedExplanations("2_3")
             ),
 
             new LubmInput(
@@ -63,7 +62,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Faculty " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Faculty",
-                    99
+                    99,
+                    loadExpectedExplanations("2_4")
             ),
 
             new LubmInput(
@@ -73,7 +73,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Employee " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Employee",
-                    111
+                    111,
+                    loadExpectedExplanations("2_5")
             ),
 
             new LubmInput(
@@ -83,7 +84,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Faculty " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Faculty",
-                    69
+                    69,
+                    loadExpectedExplanations("2_6")
             ),
 
             new LubmInput(
@@ -93,7 +95,8 @@ public final class LubmS2Data {
                             "Class: prefix0:AdministrativeStaff " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Student and prefix0:AdministrativeStaff",
-                    8
+                    8,
+                    loadExpectedExplanations("2_7")
             ),
 
             new LubmInput(
@@ -103,7 +106,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Faculty " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Course and prefix0:Faculty",
-                    19
+                    19,
+                    loadExpectedExplanations("2_8")
             ),
 
             new LubmInput(
@@ -113,7 +117,8 @@ public final class LubmS2Data {
                             "Class: prefix0:Article " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Article",
-                    15
+                    15,
+                    loadExpectedExplanations("2_9")
             )
     );
 }

@@ -3,16 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.data;
 import java.util.Arrays;
 import java.util.List;
 
-public final class LubmS5Data {
+public final class LubmS5Data extends LubmData {
 
     private LubmS5Data() {}
 
-    private static final String ONT_PREFIX =
-            "Prefix: prefix0: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>\n";
-
     private static final String NAME_PREFIX = "lubm_0_5_";
-
-    public static final Integer DEPTH_LIMIT = 6;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -28,7 +23,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Employee " +
                             "and prefix0:Student and prefix0:Article " +
                             "and prefix0:Course",
-                    55
+                    2687,
+                    loadExpectedExplanations("5_0")
             ),
 
             new LubmInput(
@@ -43,7 +39,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Work " +
                             "and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
-                    64
+                    2519,
+                    loadExpectedExplanations("5_1")
             ),
 
             new LubmInput(
@@ -58,7 +55,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Work " +
                             "and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    66
+                    2351,
+                    loadExpectedExplanations("5_2")
             ),
 
             new LubmInput(
@@ -73,7 +71,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Article " +
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
-                    58
+                    1679,
+                    loadExpectedExplanations("5_3")
             ),
 
             new LubmInput(
@@ -88,7 +87,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Student " +
                             "and prefix0:Article and prefix0:Course " +
                             "and prefix0:Faculty",
-                    52
+                    1679,
+                    loadExpectedExplanations("5_4")
             ),
 
             new LubmInput(
@@ -103,7 +103,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Publication and prefix0:Work and " +
                             "prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
-                    71
+                    3599,
+                    loadExpectedExplanations("5_5")
             ),
 
             new LubmInput(
@@ -118,7 +119,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Article " +
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    40
+                    1175,
+                    loadExpectedExplanations("5_6")
             ),
 
             new LubmInput(
@@ -133,7 +135,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Publication " +
                             "and prefix0:Employee " +
                             "and prefix0:Student and prefix0:Course",
-                    84
+                    6719,
+                    loadExpectedExplanations("5_7")
             ),
 
             new LubmInput(
@@ -148,7 +151,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Organization and prefix0:Work " +
                             "and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
-                    104
+                    3359,
+                    loadExpectedExplanations("5_8")
             ),
 
             new LubmInput(
@@ -163,7 +167,8 @@ public final class LubmS5Data {
                             "Types: prefix0:Student and prefix0:Article " +
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    32
+                    503,
+                    loadExpectedExplanations("5_9")
             )
     );
 }

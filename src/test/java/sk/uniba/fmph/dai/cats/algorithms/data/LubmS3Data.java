@@ -3,16 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.data;
 import java.util.Arrays;
 import java.util.List;
 
-public final class LubmS3Data {
+public final class LubmS3Data extends LubmData {
 
     private LubmS3Data() {}
 
-    private static final String ONT_PREFIX =
-            "Prefix: prefix0: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>\n";
-
     private static final String NAME_PREFIX = "lubm_0_3_";
-
-    public static final Integer DEPTH_LIMIT = 5;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -25,7 +20,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and " +
                             "prefix0:Work and prefix0:Faculty",
-                    279
+                    279,
+                    loadExpectedExplanations("3_0")
             ),
 
             new LubmInput(
@@ -37,7 +33,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and " +
                             "prefix0:AdministrativeStaff and prefix0:Faculty",
-                    299
+                    299,
+                    loadExpectedExplanations("3_1")
             ),
 
             new LubmInput(
@@ -49,7 +46,9 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Student and " +
                             "prefix0:AdministrativeStaff and prefix0:Professor",
-                    62
+                    62,
+                    loadExpectedExplanations("3_2")
+
             ),
 
             new LubmInput(
@@ -61,7 +60,9 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and " +
                             "prefix0:AdministrativeStaff and prefix0:Professor",
-                    146
+                    146,
+                    loadExpectedExplanations("3_3")
+
             ),
 
             new LubmInput(
@@ -73,7 +74,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and " +
                             "prefix0:Course and prefix0:Faculty",
-                    139
+                    139,
+                    loadExpectedExplanations("3_4")
             ),
 
             new LubmInput(
@@ -85,7 +87,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and " +
                             "prefix0:Employee and prefix0:Student",
-                    479
+                    479,
+                    loadExpectedExplanations("3_5")
             ),
 
             new LubmInput(
@@ -97,7 +100,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Article and " +
                             "prefix0:AdministrativeStaff",
-                    47
+                    47,
+                    loadExpectedExplanations("3_6")
             ),
 
             new LubmInput(
@@ -109,7 +113,9 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Employee and " +
                             "prefix0:Article",
-                    255
+                    255,
+                    loadExpectedExplanations("3_7")
+
             ),
 
             new LubmInput(
@@ -121,7 +127,9 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and " +
                             "prefix0:Publication and prefix0:Student",
-                    209
+                    209,
+                    loadExpectedExplanations("3_8")
+
             ),
 
             new LubmInput(
@@ -133,7 +141,8 @@ public final class LubmS3Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and " +
                             "prefix0:AdministrativeStaff and prefix0:Faculty",
-                    209
+                    209,
+                    loadExpectedExplanations("3_9")
             )
     );
 }

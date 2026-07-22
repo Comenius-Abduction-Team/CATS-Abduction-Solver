@@ -434,10 +434,6 @@ public class AlgorithmSolver {
         return modelManager.findAndGetModelToReuse(path);
     }
 
-    public Model getModelWithoutPathAxioms(Model model){
-        return modelManager.getModelWithoutAxioms(model, path);
-    }
-
     public void updateProgress(){
         progressManager.updateProgress(currentDepth, metrics.getRunningTime());
     }

@@ -95,7 +95,7 @@ public class HsdagBuilder implements ITreeBuilder {
         node.labelAxiom = path.lastAxiom;
         nodesAtCurrentDepth.put(path.getAxiomSet(),node);
         node.depth = depth;
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+        node.model = modelToReuse;
         node.parent = parent;
 
         parent.children.add(node);

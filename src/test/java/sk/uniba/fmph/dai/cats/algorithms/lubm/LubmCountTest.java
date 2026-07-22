@@ -15,7 +15,7 @@ import java.util.*;
 public abstract class LubmCountTest extends LubmTestBase {
     private final Map<String, Set<Optimisation>> optimizationCombinations = new HashMap<>();
 
-    private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = false;
+    private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = true;
 
     public LubmCountTest(String name) throws OWLOntologyCreationException, IOException {
         super(name);
@@ -26,24 +26,16 @@ public abstract class LubmCountTest extends LubmTestBase {
         Set<Optimisation> opt1 = new HashSet<>();
         Set<Optimisation> opt2 = new HashSet<>();
         Set<Optimisation> opt12 = new HashSet<>();
-        Set<Optimisation> opt13 = new HashSet<>();
 
         opt1.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
         opt2.add(Optimisation.SORT_MODEL);
         opt12.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
         opt12.add(Optimisation.SORT_MODEL);
 
-        opt13.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
-        opt13.add(Optimisation.TRIPLE_MXP);
-
 //        optimizationCombinations.put("no-opt", new HashSet<>());
 //        optimizationCombinations.put("opt1", opt1);
 //        optimizationCombinations.put("opt2", opt2);
-//        optimizationCombinations.put("opt12", opt12);
-//        optimizationCombinations.put("opt12", opt12);
-
-        optimizationCombinations.put("opt1", opt1);
-        optimizationCombinations.put("opt13", opt13);
+        optimizationCombinations.put("opt12", opt12);
     }
 
     protected void executeTest(LubmInput input,
@@ -72,6 +64,8 @@ public abstract class LubmCountTest extends LubmTestBase {
             }
 
             solve();
+            printUsedOptimizations();
+
             testExplanationsFound(input.getExpectedExplanationCount());
 
         } catch (OWLOntologyCreationException e) {
@@ -102,10 +96,18 @@ public abstract class LubmCountTest extends LubmTestBase {
         return dynamicTests;
     }
 
+//    @TestFactory
+//    public Collection<DynamicTest> multipleMhsMxpNoNeg() {
+//        return generateDynamicTests(
+//                Algorithm.MHS_MXP,
+//                true,
+//                getDepthLimit());
+//    }
+
     @TestFactory
-    public Collection<DynamicTest> multipleMhsMxpNoNeg() {
+    public Collection<DynamicTest> multipleHsDagMxpNoNeg() {
         return generateDynamicTests(
-                Algorithm.MHS_MXP,
+                Algorithm.HSDAG_MXP,
                 true,
                 getDepthLimit());
     }

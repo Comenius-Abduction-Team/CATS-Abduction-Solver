@@ -54,6 +54,7 @@ public class MetricsThread extends Thread {
         final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
         final long[] ids = bean.getAllThreadIds();
 
+        // TODO prechadzame thready a potom scitavame ich cas, cize ak napr. nejake 2 thready robia paralelne 30s, zaratame to ako 60... doteraz asi nic nepouzivalo paralelizmus, tak to nevadilo
         for (long id : ids) {
 
             if (id == thisThreadId) {
@@ -88,7 +89,7 @@ public class MetricsThread extends Thread {
     /**
      * Get total user time so far in nanoseconds.
      */
-    long getTotalUserTime() {
+    private long getTotalUserTime() {
         final Collection<TimeRecord> hist = records.values();
         long time = 0L;
 

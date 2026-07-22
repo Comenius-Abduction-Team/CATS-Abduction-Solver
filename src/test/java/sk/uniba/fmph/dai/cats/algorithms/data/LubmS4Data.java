@@ -3,16 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.data;
 import java.util.Arrays;
 import java.util.List;
 
-public final class LubmS4Data {
+public final class LubmS4Data extends LubmData {
 
     private LubmS4Data() {}
 
-    private static final String ONT_PREFIX =
-            "Prefix: prefix0: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>\n";
-
     private static final String NAME_PREFIX = "lubm_0_4_";
-
-    public static final Integer DEPTH_LIMIT = 6;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -26,7 +21,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Student " +
                             "and prefix0:Course and prefix0:Professor",
-                    293 //old eval: 63
+                    293,
+                    loadExpectedExplanations("4_0")
             ),
 
             new LubmInput(
@@ -39,7 +35,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Work " +
                             "and prefix0:Student and prefix0:AdministrativeStaff",
-                    359 //old eval: 81
+                    359,
+                    loadExpectedExplanations("4_1")
             ),
 
             new LubmInput(
@@ -52,7 +49,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Work " +
                             "and prefix0:Student and prefix0:AdministrativeStaff",
-                    251 //old eval: 75
+                    251,
+                    loadExpectedExplanations("4_2")
             ),
 
             new LubmInput(
@@ -65,7 +63,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Work " +
                             "and prefix0:Student and prefix0:Professor",
-                    839 //old eval: 129
+                    839,
+                    loadExpectedExplanations("4_3")
             ),
 
             new LubmInput(
@@ -78,7 +77,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    419 //old eval: 111
+                    419,
+                    loadExpectedExplanations("4_4")
             ),
 
             new LubmInput(
@@ -91,7 +91,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    251 //old eval: 69
+                    251,
+                    loadExpectedExplanations("4_5")
             ),
 
             new LubmInput(
@@ -104,7 +105,9 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Employee and prefix0:Student " +
                             "and prefix0:Article and prefix0:Course",
-                    383 //old eval: 67
+                    383,
+                    loadExpectedExplanations("4_6")
+
             ),
 
             new LubmInput(
@@ -117,7 +120,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Article and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    167 //old eval: 74
+                    167,
+                    loadExpectedExplanations("4_7")
             ),
 
             new LubmInput(
@@ -130,7 +134,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    587 //old eval: 101
+                    587,
+                    loadExpectedExplanations("4_8")
             ),
 
             new LubmInput(
@@ -143,7 +148,8 @@ public final class LubmS4Data {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
-                    629 //old eval: 130
+                    629,
+                    loadExpectedExplanations("4_9")
             )
     );
 }

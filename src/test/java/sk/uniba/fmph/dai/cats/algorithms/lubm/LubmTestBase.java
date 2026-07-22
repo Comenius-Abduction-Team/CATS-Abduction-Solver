@@ -6,10 +6,12 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmTestBase;
 import sk.uniba.fmph.dai.cats.algorithms.data.LubmInput;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class LubmTestBase extends AlgorithmTestBase {
 
@@ -23,7 +25,7 @@ public abstract class LubmTestBase extends AlgorithmTestBase {
 
     @Override
     protected void setUpInput() {
-        ONTOLOGY_FILE = "ont/lubm-0.owl";
+        ONTOLOGY_FILE = "ont/lubm.owl";
         ABDUCIBLE_PREFIX =
                 "http://swat.cse.lehigh.edu/onto/univ-bench.owl#";
 
@@ -32,5 +34,14 @@ public abstract class LubmTestBase extends AlgorithmTestBase {
 
     @Override
     protected void setUpAbducibles() {}
+
+    protected static void printUsedOptimizations() {
+        System.out.println(
+                "OPTIMIZATIONS: " +
+                        Configuration.optimisations.stream()
+                                .map(opt -> opt.name().toLowerCase())
+                                .collect(Collectors.joining(", "))
+        );
+    }
 
 }

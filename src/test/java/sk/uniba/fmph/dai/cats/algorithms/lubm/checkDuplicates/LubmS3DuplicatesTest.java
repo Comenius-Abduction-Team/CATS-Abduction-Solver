@@ -22,7 +22,7 @@ public class LubmS3DuplicatesTest extends LubmCheckDuplicates {
 
     @Override
     protected Integer getDepthLimit() {
-        return LubmS3Data.DEPTH_LIMIT;
+        return 4;
     }
 
 }

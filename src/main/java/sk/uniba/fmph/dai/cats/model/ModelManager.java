@@ -32,19 +32,16 @@ public class ModelManager {
         this.extractor = extractor;
     }
 
-    private void setModelToReuse(Model model){
-        modelToReuse = model;
-    }
-
     private void add(Model model){
         models.add(model);
         EventPublisher.publishGenericEvent(solver, EventType.MODEL_STORED);
     }
 
     protected boolean findReusableModel(Model model){
+        List<Model> modelList = (List<Model>) models;
 
         for (int i = models.size() - 1; i >= 0; i--) {
-            Model storedModel = ((List<Model>)models).get(i);
+            Model storedModel = modelList.get(i);
             if (storedModel.equals(model)){
                 modelToReuse = storedModel;
                 return true;
@@ -54,9 +51,10 @@ public class ModelManager {
     }
 
     public boolean findReuseModelForPath(Set<OWLAxiom> path){
+        List<Model> modelList = (List<Model>) models;
 
         for (int i = models.size() - 1; i >= 0; i--) {
-            Model model = ((List<Model>)models).get(i);
+            Model model =  modelList.get(i);
             if (model.getData().containsAll(path)){
                 modelToReuse = model;
                 return true;
@@ -71,26 +69,22 @@ public class ModelManager {
 
         Model model = extractor.extractModel();
 
+        //TODO no tu je len, ze sa ma returnut, ak je model prazdny!
+        // chceli by sme terminovat???
+        // ale pri abd(M) alebo abd(-M) ... tu kontrolujeme ci oboje (asi presne ta podmienka)
         if (model.isEmpty())
             return;
 
         if (!findReusableModel(model)) {
             add(model);
-            setModelToReuse(model);
+            modelToReuse = model;
         }
     }
 
     public Model findAndGetModelToReuse(Set<OWLAxiom> path){
-        if (modelToReuse == null)
+        if (modelToReuse == null || !modelToReuse.getData().containsAll(path))
             findReuseModelForPath(path);
 
         return modelToReuse;
     }
-
-    public Model getModelWithoutAxioms(Model model, Collection<OWLAxiom> axioms){
-        Model copy = new Model(model);
-        copy.getNegatedData().removeAll(axioms);
-        return copy;
-    }
-
 }

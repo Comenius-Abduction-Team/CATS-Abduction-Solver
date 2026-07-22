@@ -22,7 +22,7 @@ public class LubmS5DuplicatesTest extends LubmCheckDuplicates {
 
     @Override
     protected Integer getDepthLimit() {
-        return LubmS5Data.DEPTH_LIMIT;
+        return 6;
     }
 
 }

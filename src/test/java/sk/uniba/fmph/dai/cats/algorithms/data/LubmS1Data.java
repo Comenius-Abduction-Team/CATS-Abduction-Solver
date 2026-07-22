@@ -3,16 +3,11 @@ package sk.uniba.fmph.dai.cats.algorithms.data;
 import java.util.Arrays;
 import java.util.List;
 
-public final class LubmS1Data {
+public final class LubmS1Data extends LubmData {
 
     private LubmS1Data() {}
 
-    private static final String ONT_PREFIX =
-            "Prefix: prefix0: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>\n";
-
     private static final String NAME_PREFIX = "lubm_0_1_";
-
-    public static final Integer DEPTH_LIMIT = 3;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -22,7 +17,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Article " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Article",
-                    3
+                    3,
+                    loadExpectedExplanations("1_0")
             ),
 
             new LubmInput(
@@ -31,7 +27,8 @@ public final class LubmS1Data {
                             "Class: prefix0:AdministrativeStaff " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:AdministrativeStaff",
-                    2
+                    2,
+                    loadExpectedExplanations("1_1")
             ),
 
             new LubmInput(
@@ -40,7 +37,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Person " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Person",
-                    20
+                    20,
+                    loadExpectedExplanations("1_2")
             ),
 
             new LubmInput(
@@ -49,7 +47,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Professor " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Professor",
-                    6
+                    6,
+                    loadExpectedExplanations("1_3")
             ),
 
             new LubmInput(
@@ -58,7 +57,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Employee " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Employee",
-                    15
+                    15,
+                    loadExpectedExplanations("1_4")
             ),
 
             new LubmInput(
@@ -67,7 +67,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Student " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Student",
-                    2
+                    2,
+                    loadExpectedExplanations("1_5")
             ),
 
             new LubmInput(
@@ -76,7 +77,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Publication " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication",
-                    9
+                    9,
+                    loadExpectedExplanations("1_6")
             ),
 
             new LubmInput(
@@ -85,7 +87,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Work " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work",
-                    3
+                    3,
+                    loadExpectedExplanations("1_7")
             ),
 
             new LubmInput(
@@ -94,7 +97,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Faculty " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Faculty",
-                    9
+                    9,
+                    loadExpectedExplanations("1_8")
             ),
 
             new LubmInput(
@@ -103,7 +107,8 @@ public final class LubmS1Data {
                             "Class: prefix0:Course " +
                             "Individual: prefix0:a " +
                             "Types: prefix0:Course",
-                    1
+                    1,
+                    loadExpectedExplanations("1_9")
             )
     );
 }

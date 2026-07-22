@@ -1,0 +1,15 @@
+{Article(a),GraduateCourse(a)}
+{TechnicalReport(a),Work(a)}
+{JournalArticle(a),GraduateCourse(a)}
+{Article(a),Research(a)}
+{ConferencePaper(a),GraduateCourse(a)}
+{JournalArticle(a),Research(a)}
+{ConferencePaper(a),Work(a)}
+{Course(a),ConferencePaper(a)}
+{TechnicalReport(a),GraduateCourse(a)}
+{TechnicalReport(a),Research(a)}
+{JournalArticle(a),Work(a)}
+{JournalArticle(a),Course(a)}
+{ConferencePaper(a),Research(a)}
+{TechnicalReport(a),Course(a)}
+{Article(a),Course(a)}

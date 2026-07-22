@@ -21,7 +21,7 @@ public class LubmS5CountTest extends LubmCountTest {
 
     @Override
     protected Integer getDepthLimit() {
-        return LubmS5Data.DEPTH_LIMIT;
+        return 5;
     }
 
 }
