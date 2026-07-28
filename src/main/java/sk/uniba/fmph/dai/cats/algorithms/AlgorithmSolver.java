@@ -9,7 +9,9 @@ import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.TripleMxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -232,6 +234,8 @@ public class AlgorithmSolver {
 
     protected void initializeAbducibles() {
         TransformedAbducibles transformedAbduciblesFromInput = new TransformedAbducibles(loader);
+        transformedAbduciblesFromInput.filterAxiomsThatCannotBeInExplanations(loader);
+
         abducibleAxioms = treeBuilder.createAbducibles(transformedAbduciblesFromInput);
         modelManager.setExtractor(new ModelExtractor(loader, abducibleAxioms));
         nodeProcessor.storeAbduciblesIfNeeded(abducibleAxioms);
@@ -246,12 +250,20 @@ public class AlgorithmSolver {
         currentLevel.start = metrics.getRunningTime();
 
         TreeNode root = null;
+        boolean emptyModel = false;
 
         boolean shouldExtractModel = treeBuilder.shouldExtractModel();
-        if (nodeProcessor.canCreateRoot(shouldExtractModel)) {
-            root = treeBuilder.createRoot();
+        try {
+            if (nodeProcessor.canCreateRoot(shouldExtractModel)) {
+                root = treeBuilder.createRoot();
+            }
+        } catch (EmptyModelException e) {
+            emptyModel = true;
+            message = e.getMessage();
+            currentLevel.message = "empty model found";
         }
-        if (root == null) {
+
+        if (root == null || emptyModel) {
             EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
@@ -335,9 +347,18 @@ public class AlgorithmSolver {
                         throw new TimeoutException();
                     }
 
-                    int explanationsFound = nodeProcessor.findExplanations(
-                            explanation, treeBuilder.shouldExtractModel()
+                    int explanationsFound = 0;
+
+                    try {
+                        explanationsFound = nodeProcessor.findExplanations(
+                                explanation, treeBuilder.shouldExtractModel()
                         );
+                    } catch (EmptyModelException e) {
+                        message = e.getMessage();
+                        currentLevel.message = "empty model found";
+                        return null;
+                    }
+
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
 
                     if (shouldCloseNode){

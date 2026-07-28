@@ -16,8 +16,8 @@ import java.util.*;
 public abstract class LubmCheckDuplicates extends LubmTestBase {
 
     private final Map<String, Set<Optimisation>> optimizationCombinations = new HashMap<>();
-
     private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = true;
+    private final boolean NO_NEG = true;
 
     public LubmCheckDuplicates(String name) throws OWLOntologyCreationException, IOException {
         super(name);
@@ -41,10 +41,7 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
     }
 
     protected void executeTest(LubmInput input,
-                               Algorithm algorithm,
-                               boolean useNoNeg,
-                               Integer customDepth,
-                               Set<Optimisation> optimisations) {
+                               AlgorithmConfiguration algorithmConfiguration) {
 
         try {
 
@@ -52,20 +49,19 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
 
             this.abducer = new CatsAbducer(backgroundKnowledge, this.observation);
             this.abducer.setLogging(false);
-            this.abducer.setIgnoreDefaultOptimizations(IGNORE_DEFAULT_OPTIMIZATIONS);
-            this.abducer.addOptimisations(optimisations);
-            this.abducer.setAlgorithm(algorithm);
+            this.abducer.setIgnoreDefaultOptimizations(
+                    algorithmConfiguration.ignoreDefaultOptimisations
+            );
+            this.abducer.addOptimisations(algorithmConfiguration.optimisations);
+            this.abducer.setAlgorithm(algorithmConfiguration.algorithm);
 
-            if (useNoNeg) {
+            if (algorithmConfiguration.noNeg) {
                 Configuration.INPUT_FILE_NAME += "NoNeg";
                 this.abducer.setExplanationConfigurator(noNeg);
             }
 
-            if (customDepth != null) {
-                this.abducer.setDepth(customDepth);
-            }
-
-            Configuration.REUSE_OF_MODELS = false;
+            this.abducer.setDepth(input.getRequiredDepthLimit());
+            //Configuration.REUSE_OF_MODELS = false;
 
             solve();
             printUsedOptimizations();
@@ -78,10 +74,7 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
         }
     }
 
-    protected Collection<DynamicTest> generateDynamicTests(
-            Algorithm algorithm,
-            boolean useNoNeg,
-            Integer customDepth) {
+    protected Collection<DynamicTest> generateDynamicTests(Algorithm algorithm) {
 
         List<DynamicTest> dynamicTests = new ArrayList<>();
 
@@ -90,10 +83,17 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
             for (String optIndex : optimizationCombinations.keySet()) {
                 String testName = input.getId() + "_" + optIndex;
 
+                AlgorithmConfiguration algorithmConfiguration = new AlgorithmConfiguration(
+                        algorithm,
+                        optimizationCombinations.get(optIndex),
+                        IGNORE_DEFAULT_OPTIMIZATIONS,
+                        NO_NEG
+                );
+
                 DynamicTest dTest = DynamicTest.dynamicTest(testName, () -> {
-                    executeTest(input, algorithm, useNoNeg, customDepth,
-                            optimizationCombinations.get(optIndex));
+                    executeTest(input, algorithmConfiguration);
                 });
+
                 dynamicTests.add(dTest);
             }
         }
@@ -103,34 +103,22 @@ public abstract class LubmCheckDuplicates extends LubmTestBase {
 
     @TestFactory
     public Collection<DynamicTest> multipleMhsMxpNoNeg() {
-        return generateDynamicTests(
-                Algorithm.MHS_MXP,
-                true,
-                getDepthLimit());
+        return generateDynamicTests(Algorithm.MHS_MXP);
+    }
+
+    @TestFactory
+    public Collection<DynamicTest> multipleHsDagMxpNoNeg() {
+        return generateDynamicTests(Algorithm.HSDAG_MXP);
+    }
+
+    @TestFactory
+    public Collection<DynamicTest> multipleRctMxpNoNeg() {
+        return generateDynamicTests(Algorithm.RCT_MXP);
     }
 
 //    @TestFactory
-//    public Collection<DynamicTest> multipleHsDagMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.HSDAG_MXP,
-//                true,
-//                getDepthLimit());
-//    }
-//
-//    @TestFactory
-//    public Collection<DynamicTest> multipleRctMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.RCT_MXP,
-//                true,
-//                getDepthLimit());
-//    }
-//
-//    @TestFactory
 //    public Collection<DynamicTest> multipleHstMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.HST_MXP,
-//                true,
-//                getDepthLimit());
+//        return generateDynamicTests(Algorithm.HST_MXP);
 //    }
 
 

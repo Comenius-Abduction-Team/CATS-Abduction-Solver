@@ -44,7 +44,6 @@ class ModelTest {
         model.add(PERSON_JOHN_AXIOM);
 
         assertTrue(model.getData().contains(PERSON_JOHN_AXIOM));
-        assertFalse(model.isEmpty());
     }
 
 
@@ -57,14 +56,12 @@ class ModelTest {
         assertFalse(model.isEmpty());
     }
 
-    //TODO ZAMYSLIET SA ako s tymto pracovat...
-    // mozno nechat toto celkove empty a urobit isNegDataEmpty a pouzit na danom mieste kde treba
     @Test
-    void shouldNotBeEmptyWhenOnlyPositiveDataExists() {
+    void shouldBeEmptyWhenOnlyPositiveDataExists() {
         Model model = new Model();
         model.add(PERSON_JOHN_AXIOM);
 
-        assertFalse(model.isEmpty());
+        assertTrue(model.isEmpty());
     }
 
 

@@ -8,6 +8,7 @@ public final class LubmS4Data extends LubmData {
     private LubmS4Data() {}
 
     private static final String NAME_PREFIX = "lubm_0_4_";
+    private static final int REQUIRED_DEPTH_LIMIT = 5;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -22,7 +23,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Organization and prefix0:Student " +
                             "and prefix0:Course and prefix0:Professor",
                     293,
-                    loadExpectedExplanations("4_0")
+                    loadExpectedExplanations("4_0"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -36,7 +38,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Publication and prefix0:Work " +
                             "and prefix0:Student and prefix0:AdministrativeStaff",
                     359,
-                    loadExpectedExplanations("4_1")
+                    loadExpectedExplanations("4_1"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -50,7 +53,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Organization and prefix0:Work " +
                             "and prefix0:Student and prefix0:AdministrativeStaff",
                     251,
-                    loadExpectedExplanations("4_2")
+                    loadExpectedExplanations("4_2"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -64,7 +68,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Publication and prefix0:Work " +
                             "and prefix0:Student and prefix0:Professor",
                     839,
-                    loadExpectedExplanations("4_3")
+                    loadExpectedExplanations("4_3"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -78,7 +83,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Publication and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     419,
-                    loadExpectedExplanations("4_4")
+                    loadExpectedExplanations("4_4"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -92,7 +98,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Work and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     251,
-                    loadExpectedExplanations("4_5")
+                    loadExpectedExplanations("4_5"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -106,7 +113,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Employee and prefix0:Student " +
                             "and prefix0:Article and prefix0:Course",
                     383,
-                    loadExpectedExplanations("4_6")
+                    loadExpectedExplanations("4_6"),
+                    REQUIRED_DEPTH_LIMIT
 
             ),
 
@@ -121,7 +129,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Article and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     167,
-                    loadExpectedExplanations("4_7")
+                    loadExpectedExplanations("4_7"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -135,7 +144,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Organization and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     587,
-                    loadExpectedExplanations("4_8")
+                    loadExpectedExplanations("4_8"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -149,7 +159,8 @@ public final class LubmS4Data extends LubmData {
                             "Types: prefix0:Publication and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     629,
-                    loadExpectedExplanations("4_9")
+                    loadExpectedExplanations("4_9"),
+                    REQUIRED_DEPTH_LIMIT
             )
     );
 }

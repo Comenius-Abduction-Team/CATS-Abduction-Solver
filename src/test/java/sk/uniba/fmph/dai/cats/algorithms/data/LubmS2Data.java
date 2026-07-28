@@ -8,6 +8,7 @@ public final class LubmS2Data extends LubmData {
     private LubmS2Data() {}
 
     private static final String NAME_PREFIX = "lubm_0_2_";
+    private static final int REQUIRED_DEPTH_LIMIT = 3;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -19,7 +20,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Employee",
                     159,
-                    loadExpectedExplanations("2_0")
+                    loadExpectedExplanations("2_0"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -30,7 +32,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Employee",
                     63,
-                    loadExpectedExplanations("2_1")
+                    loadExpectedExplanations("2_1"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -41,7 +44,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Person and prefix0:Article",
                     83,
-                    loadExpectedExplanations("2_2")
+                    loadExpectedExplanations("2_2"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -52,7 +56,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Publication",
                     69,
-                    loadExpectedExplanations("2_3")
+                    loadExpectedExplanations("2_3"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -63,7 +68,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication and prefix0:Faculty",
                     99,
-                    loadExpectedExplanations("2_4")
+                    loadExpectedExplanations("2_4"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -74,7 +80,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Employee",
                     111,
-                    loadExpectedExplanations("2_5")
+                    loadExpectedExplanations("2_5"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -85,7 +92,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Organization and prefix0:Faculty",
                     69,
-                    loadExpectedExplanations("2_6")
+                    loadExpectedExplanations("2_6"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -96,7 +104,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Student and prefix0:AdministrativeStaff",
                     8,
-                    loadExpectedExplanations("2_7")
+                    loadExpectedExplanations("2_7"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -107,7 +116,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Course and prefix0:Faculty",
                     19,
-                    loadExpectedExplanations("2_8")
+                    loadExpectedExplanations("2_8"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -118,7 +128,8 @@ public final class LubmS2Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work and prefix0:Article",
                     15,
-                    loadExpectedExplanations("2_9")
+                    loadExpectedExplanations("2_9"),
+                    REQUIRED_DEPTH_LIMIT
             )
     );
 }

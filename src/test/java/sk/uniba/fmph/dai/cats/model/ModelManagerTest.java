@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +52,7 @@ class ModelManagerTest {
     void shouldStoreNewModel() {
         Model model = new Model();
         model.add(PERSON_JOHN_AXIOM);
+        model.addNegated(PERSON_JANE_AXIOM);
 
         when(extractor.extractModel()).thenReturn(model);
 
@@ -68,8 +69,7 @@ class ModelManagerTest {
 
         when(extractor.extractModel()).thenReturn(model);
 
-        manager.storeModelFoundByConsistencyCheck();
-
+        assertThrows(EmptyModelException.class, () -> manager.storeModelFoundByConsistencyCheck());
         assertTrue(model.isEmpty());
         assertEquals(0, manager.models.size());
     }
@@ -118,6 +118,7 @@ class ModelManagerTest {
 
         Model second = new Model();
         second.add(PERSON_JOHN_AXIOM);
+        second.addNegated(PERSON_JANE_AXIOM);
 
         when(extractor.extractModel())
                 .thenReturn(first)
@@ -133,6 +134,7 @@ class ModelManagerTest {
     void shouldSetNewlyStoredModelAsModelToReuse() {
         Model model = new Model();
         model.add(PERSON_JOHN_AXIOM);
+        model.addNegated(PERSON_JANE_AXIOM);
 
         when(extractor.extractModel()).thenReturn(model);
 
@@ -453,43 +455,5 @@ class ModelManagerTest {
 
         assertNull(result);
     }
-
-//    @Test
-//    void shouldReturnModelWithoutSpecifiedNegatedAxioms() {
-//        Model original = new Model();
-//        original.add(PERSON_JOHN_AXIOM);
-//        original.addNegated(PERSON_MARY_AXIOM);
-//        original.addNegated(PERSON_JANE_AXIOM);
-//
-//        Collection<OWLAxiom> axiomsToRemove = new HashSet<>();
-//        axiomsToRemove.add(PERSON_MARY_AXIOM);
-//
-//        Model result = manager.getModelWithoutAxioms(
-//                original,
-//                axiomsToRemove
-//        );
-//
-//        assertFalse(result.getNegatedData().contains(PERSON_MARY_AXIOM));
-//        assertTrue(result.getNegatedData().contains(PERSON_JANE_AXIOM));
-//    }
-//
-//    @Test
-//    void shouldNotModifyOriginalModelWhenRemovingAxioms() {
-//        Model original = new Model();
-//        original.add(PERSON_JOHN_AXIOM);
-//        original.addNegated(PERSON_MARY_AXIOM);
-//        original.addNegated(PERSON_JANE_AXIOM);
-//
-//        Collection<OWLAxiom> axiomsToRemove = new HashSet<>();
-//        axiomsToRemove.add(PERSON_MARY_AXIOM);
-//
-//        Model result = manager.getModelWithoutAxioms(
-//                original,
-//                axiomsToRemove
-//        );
-//
-//        assertTrue(original.getNegatedData().contains(PERSON_MARY_AXIOM));
-//        assertFalse(result.getNegatedData().contains(PERSON_MARY_AXIOM));
-//    }
 
 }

@@ -2,6 +2,8 @@ package sk.uniba.fmph.dai.cats.model;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
+import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
 
@@ -65,15 +67,12 @@ public class ModelManager {
         return false;
     }
 
-    public void storeModelFoundByConsistencyCheck(){
+    public void storeModelFoundByConsistencyCheck() {
 
         Model model = extractor.extractModel();
 
-        //TODO no tu je len, ze sa ma returnut, ak je model prazdny!
-        // chceli by sme terminovat???
-        // ale pri abd(M) alebo abd(-M) ... tu kontrolujeme ci oboje (asi presne ta podmienka)
         if (model.isEmpty())
-            return;
+            throw new EmptyModelException(LogMessage.INFO_EMPTY_MODEL_FOUND_NO_EXPLANATIONS);
 
         if (!findReusableModel(model)) {
             add(model);

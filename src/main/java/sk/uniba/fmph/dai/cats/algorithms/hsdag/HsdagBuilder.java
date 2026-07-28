@@ -203,7 +203,7 @@ public class HsdagBuilder implements ITreeBuilder {
             relabeledNodes.add(polledNode);
 
             // nodes n' labeled with some Cj from CS such that Ci C Cj
-            if (currentNode.isSubsetOf(polledNode)){
+            if (currentNode.isProperSubsetOf(polledNode)){
                 StaticPrinter.debugPrint("[HS-DAG] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;

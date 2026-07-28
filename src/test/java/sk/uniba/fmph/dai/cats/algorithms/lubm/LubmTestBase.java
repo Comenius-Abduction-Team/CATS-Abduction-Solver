@@ -21,7 +21,6 @@ public abstract class LubmTestBase extends AlgorithmTestBase {
 
     protected abstract List<LubmInput> getInputs();
 
-    protected abstract Integer getDepthLimit();
 
     @Override
     protected void setUpInput() {

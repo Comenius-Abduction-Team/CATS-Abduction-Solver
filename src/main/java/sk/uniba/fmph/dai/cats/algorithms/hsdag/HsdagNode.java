@@ -26,7 +26,7 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
         children = new ArrayList<>();
     }
 
-    boolean isSubsetOf(HsdagNode other){
+    boolean isProperSubsetOf(HsdagNode other){
         if (this == other)
             return false;
         if (model.getNegatedData().size() >= other.model.getNegatedData().size())
@@ -36,10 +36,20 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
 
     @Override
     public int compareTo(HsdagNode other) {
-        if (!Objects.equals(this.depth, other.depth)) {
-            return Integer.compare(this.depth, other.depth);
-        }
-        return Integer.compare(model.getNegatedData().size(), other.model.getNegatedData().size());
+        int depthOrder = Integer.compare(depth, other.depth);
+        if (depthOrder != 0)
+            return depthOrder;
+
+        int negatedDataSizeOrder = Integer.compare(
+                model.getNegatedData().size(),
+                other.model.getNegatedData().size()
+        );
+        if (negatedDataSizeOrder != 0)
+            return negatedDataSizeOrder;
+
+        return Integer.compare(id, other.id);
+
+//        return Integer.compare(model.getNegatedData().size(), other.model.getNegatedData().size());
     }
 
     @Override

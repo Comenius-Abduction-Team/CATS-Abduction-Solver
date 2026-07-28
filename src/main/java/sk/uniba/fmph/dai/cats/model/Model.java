@@ -43,7 +43,7 @@ public class Model implements Comparable<Model>{
     }
 
     public boolean isEmpty(){
-        return negatedData.isEmpty() && data.isEmpty();
+        return negatedData.isEmpty();
     }
 
     @Override

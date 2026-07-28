@@ -19,9 +19,4 @@ public class LubmS1DuplicatesTest extends LubmCheckDuplicates {
         return LubmS1Data.LUBM_INPUTS;
     }
 
-    @Override
-    protected Integer getDepthLimit() {
-        return 1;
-    }
-
 }

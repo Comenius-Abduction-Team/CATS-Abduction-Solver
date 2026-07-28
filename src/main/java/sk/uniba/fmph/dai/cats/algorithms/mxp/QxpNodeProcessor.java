@@ -5,6 +5,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
 import sk.uniba.fmph.dai.cats.algorithms.IAbducibleAxioms;
 import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;

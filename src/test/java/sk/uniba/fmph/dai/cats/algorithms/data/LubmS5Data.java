@@ -8,6 +8,7 @@ public final class LubmS5Data extends LubmData {
     private LubmS5Data() {}
 
     private static final String NAME_PREFIX = "lubm_0_5_";
+    private static final int REQUIRED_DEPTH_LIMIT = 6;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -24,7 +25,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Student and prefix0:Article " +
                             "and prefix0:Course",
                     2687,
-                    loadExpectedExplanations("5_0")
+                    loadExpectedExplanations("5_0"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -40,7 +42,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
                     2519,
-                    loadExpectedExplanations("5_1")
+                    loadExpectedExplanations("5_1"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -56,7 +59,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     2351,
-                    loadExpectedExplanations("5_2")
+                    loadExpectedExplanations("5_2"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -72,7 +76,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
                     1679,
-                    loadExpectedExplanations("5_3")
+                    loadExpectedExplanations("5_3"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -88,7 +93,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Article and prefix0:Course " +
                             "and prefix0:Faculty",
                     1679,
-                    loadExpectedExplanations("5_4")
+                    loadExpectedExplanations("5_4"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -104,7 +110,8 @@ public final class LubmS5Data extends LubmData {
                             "prefix0:Student " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
                     3599,
-                    loadExpectedExplanations("5_5")
+                    loadExpectedExplanations("5_5"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -120,7 +127,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     1175,
-                    loadExpectedExplanations("5_6")
+                    loadExpectedExplanations("5_6"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -136,7 +144,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Employee " +
                             "and prefix0:Student and prefix0:Course",
                     6719,
-                    loadExpectedExplanations("5_7")
+                    loadExpectedExplanations("5_7"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -152,7 +161,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Article " +
                             "and prefix0:AdministrativeStaff and prefix0:Faculty",
                     3359,
-                    loadExpectedExplanations("5_8")
+                    loadExpectedExplanations("5_8"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -168,7 +178,8 @@ public final class LubmS5Data extends LubmData {
                             "and prefix0:Course " +
                             "and prefix0:AdministrativeStaff and prefix0:Professor",
                     503,
-                    loadExpectedExplanations("5_9")
+                    loadExpectedExplanations("5_9"),
+                    REQUIRED_DEPTH_LIMIT
             )
     );
 }

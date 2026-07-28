@@ -8,6 +8,7 @@ public final class LubmS3Data extends LubmData {
     private LubmS3Data() {}
 
     private static final String NAME_PREFIX = "lubm_0_3_";
+    private static final int REQUIRED_DEPTH_LIMIT = 4;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -21,7 +22,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Organization and " +
                             "prefix0:Work and prefix0:Faculty",
                     279,
-                    loadExpectedExplanations("3_0")
+                    loadExpectedExplanations("3_0"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -34,7 +36,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Publication and " +
                             "prefix0:AdministrativeStaff and prefix0:Faculty",
                     299,
-                    loadExpectedExplanations("3_1")
+                    loadExpectedExplanations("3_1"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -47,7 +50,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Student and " +
                             "prefix0:AdministrativeStaff and prefix0:Professor",
                     62,
-                    loadExpectedExplanations("3_2")
+                    loadExpectedExplanations("3_2"),
+                    REQUIRED_DEPTH_LIMIT
 
             ),
 
@@ -61,7 +65,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Organization and " +
                             "prefix0:AdministrativeStaff and prefix0:Professor",
                     146,
-                    loadExpectedExplanations("3_3")
+                    loadExpectedExplanations("3_3"),
+                    REQUIRED_DEPTH_LIMIT
 
             ),
 
@@ -75,7 +80,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Organization and " +
                             "prefix0:Course and prefix0:Faculty",
                     139,
-                    loadExpectedExplanations("3_4")
+                    loadExpectedExplanations("3_4"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -88,7 +94,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Publication and " +
                             "prefix0:Employee and prefix0:Student",
                     479,
-                    loadExpectedExplanations("3_5")
+                    loadExpectedExplanations("3_5"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -101,7 +108,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Work and prefix0:Article and " +
                             "prefix0:AdministrativeStaff",
                     47,
-                    loadExpectedExplanations("3_6")
+                    loadExpectedExplanations("3_6"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -114,7 +122,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Work and prefix0:Employee and " +
                             "prefix0:Article",
                     255,
-                    loadExpectedExplanations("3_7")
+                    loadExpectedExplanations("3_7"),
+                    REQUIRED_DEPTH_LIMIT
 
             ),
 
@@ -128,7 +137,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Organization and " +
                             "prefix0:Publication and prefix0:Student",
                     209,
-                    loadExpectedExplanations("3_8")
+                    loadExpectedExplanations("3_8"),
+                    REQUIRED_DEPTH_LIMIT
 
             ),
 
@@ -142,7 +152,8 @@ public final class LubmS3Data extends LubmData {
                             "Types: prefix0:Organization and " +
                             "prefix0:AdministrativeStaff and prefix0:Faculty",
                     209,
-                    loadExpectedExplanations("3_9")
+                    loadExpectedExplanations("3_9"),
+                    REQUIRED_DEPTH_LIMIT
             )
     );
 }

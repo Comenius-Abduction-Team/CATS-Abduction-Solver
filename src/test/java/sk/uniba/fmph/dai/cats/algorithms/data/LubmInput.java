@@ -1,10 +1,5 @@
 package sk.uniba.fmph.dai.cats.algorithms.data;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,37 +11,45 @@ public class LubmInput {
     private final String observation;
     private final int expectedExplanationCount;
 
+    private final int requiredDepthLimit;
+
     private final Set<Set<String>> expectedExplanations;
 
     public LubmInput(String id,
                      String observation,
-                     int expectedCount) {
+                     int expectedCount,
+                     int requiredDepthLimit) {
         this.id = id;
         this.observation = observation;
         this.expectedExplanationCount = expectedCount;
         this.expectedExplanations = new HashSet<>();
+        this.requiredDepthLimit = requiredDepthLimit;
     }
 
     public LubmInput(String id,
                      String observation,
                      int expectedCount,
-                     Set<Set<String>> expectedExplanations
+                     Set<Set<String>> expectedExplanations,
+                     int requiredDepthLimit
                      ) {
         this.id = id;
         this.observation = observation;
         this.expectedExplanationCount = expectedCount;
         this.expectedExplanations = expectedExplanations;
+        this.requiredDepthLimit = requiredDepthLimit;
     }
 
     public LubmInput(String id,
                      String observation,
                      int expectedCount,
-                     String expectedExplanations
+                     String expectedExplanations,
+                     int requiredDepthLimit
     ) {
         this.id = id;
         this.observation = observation;
         this.expectedExplanationCount = expectedCount;
         this.expectedExplanations = parseExpectedExplanations(expectedExplanations);
+        this.requiredDepthLimit = requiredDepthLimit;
     }
 
     public String getId() {
@@ -55,6 +58,10 @@ public class LubmInput {
 
     public String getObservation() {
         return observation;
+    }
+
+    public int getRequiredDepthLimit() {
+        return requiredDepthLimit;
     }
 
     public int getExpectedExplanationCount() {

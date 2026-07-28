@@ -8,6 +8,7 @@ public final class LubmS1Data extends LubmData {
     private LubmS1Data() {}
 
     private static final String NAME_PREFIX = "lubm_0_1_";
+    private static final int REQUIRED_DEPTH_LIMIT = 1;
 
     public static final List<LubmInput> LUBM_INPUTS = Arrays.asList(
 
@@ -18,7 +19,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Article",
                     3,
-                    loadExpectedExplanations("1_0")
+                    loadExpectedExplanations("1_0"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -28,7 +30,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:AdministrativeStaff",
                     2,
-                    loadExpectedExplanations("1_1")
+                    loadExpectedExplanations("1_1"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -38,7 +41,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Person",
                     20,
-                    loadExpectedExplanations("1_2")
+                    loadExpectedExplanations("1_2"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -48,7 +52,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Professor",
                     6,
-                    loadExpectedExplanations("1_3")
+                    loadExpectedExplanations("1_3"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -58,7 +63,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Employee",
                     15,
-                    loadExpectedExplanations("1_4")
+                    loadExpectedExplanations("1_4"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -68,7 +74,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Student",
                     2,
-                    loadExpectedExplanations("1_5")
+                    loadExpectedExplanations("1_5"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -78,7 +85,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Publication",
                     9,
-                    loadExpectedExplanations("1_6")
+                    loadExpectedExplanations("1_6"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -88,7 +96,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Work",
                     3,
-                    loadExpectedExplanations("1_7")
+                    loadExpectedExplanations("1_7"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -98,7 +107,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Faculty",
                     9,
-                    loadExpectedExplanations("1_8")
+                    loadExpectedExplanations("1_8"),
+                    REQUIRED_DEPTH_LIMIT
             ),
 
             new LubmInput(
@@ -108,7 +118,8 @@ public final class LubmS1Data extends LubmData {
                             "Individual: prefix0:a " +
                             "Types: prefix0:Course",
                     1,
-                    loadExpectedExplanations("1_9")
+                    loadExpectedExplanations("1_9"),
+                    REQUIRED_DEPTH_LIMIT
             )
     );
 }

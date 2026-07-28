@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms.mxp;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -15,7 +16,7 @@ public class TripleMxpNodeProcessor extends MxpNodeProcessor {
         super(solver);
     }
 
-    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel){
+    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel) {
 
         Set<OWLAxiom> positiveAbducibles = new HashSet<>();
         Set<OWLAxiom> negativeAbducibles = new HashSet<>();

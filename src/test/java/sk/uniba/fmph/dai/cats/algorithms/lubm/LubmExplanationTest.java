@@ -12,13 +12,13 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import java.io.IOException;
 import java.util.*;
 
-public abstract class LubmExpanationTest extends LubmTestBase {
+public abstract class LubmExplanationTest extends LubmTestBase {
 
     private final Map<String, Set<Optimisation>> optimizationCombinations = new HashMap<>();
     private final boolean IGNORE_DEFAULT_OPTIMIZATIONS = true;
     private final boolean NO_NEG = true;
 
-    public LubmExpanationTest(String name) throws OWLOntologyCreationException, IOException {
+    public LubmExplanationTest(String name) throws OWLOntologyCreationException, IOException {
         super(name);
         initializeOptimizationCombinations();
     }
@@ -36,7 +36,7 @@ public abstract class LubmExpanationTest extends LubmTestBase {
 //        optimizationCombinations.put("no-opt", new HashSet<>());
         optimizationCombinations.put("opt1", opt1);
 //        optimizationCombinations.put("opt2", opt2);
-//        optimizationCombinations.put("opt12", opt12);
+        optimizationCombinations.put("opt12", opt12);
     }
 
     protected void executeTest(LubmInput input,
@@ -52,16 +52,23 @@ public abstract class LubmExpanationTest extends LubmTestBase {
                     algorithmConfiguration.ignoreDefaultOptimisations
             );
             this.abducer.addOptimisations(algorithmConfiguration.optimisations);
-            this.abducer.setAlgorithm(algorithmConfiguration.algorithm);
+
+            Algorithm algorithm;
+            if (algorithmConfiguration.algorithm == null) {
+                algorithm = selectAlgorithmRandomly();
+                System.out.println("ALGORITHM: " + algorithm.name());
+            } else {
+                algorithm = algorithmConfiguration.algorithm;
+            }
+
+            this.abducer.setAlgorithm(algorithm);
 
             if (algorithmConfiguration.noNeg) {
                 Configuration.INPUT_FILE_NAME += "NoNeg";
                 this.abducer.setExplanationConfigurator(noNeg);
             }
 
-            if (getDepthLimit() != null) {
-                this.abducer.setDepth(getDepthLimit());
-            }
+            this.abducer.setDepth(input.getRequiredDepthLimit());
 
             solve();
             printUsedOptimizations();
@@ -100,29 +107,42 @@ public abstract class LubmExpanationTest extends LubmTestBase {
         return dynamicTests;
     }
 
+    private Algorithm selectAlgorithmRandomly() {
+        List<Algorithm> algorithms = new ArrayList<>();
+
+        algorithms.add(Algorithm.MHS_MXP);
+        algorithms.add(Algorithm.RCT_MXP);
+        algorithms.add(Algorithm.HSDAG_MXP);
+//        algorithms.add(Algorithm.HST_MXP);
+
+        Collections.shuffle(algorithms);
+        return algorithms.get(0);
+    }
+
 
     @TestFactory
-    public Collection<DynamicTest> multipleMhsMxpNoNeg() {
-        return generateDynamicTests(
-                Algorithm.MHS_MXP);
+    public Collection<DynamicTest> multipleRandomAlgNoNeg() {
+        return generateDynamicTests(null);
     }
 
 //    @TestFactory
+//    public Collection<DynamicTest> multipleMhsMxpNoNeg() {
+//        return generateDynamicTests(Algorithm.MHS_MXP);
+//    }
+//
+//    @TestFactory
 //    public Collection<DynamicTest> multipleRctMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.RCT_MXP);
+//        return generateDynamicTests(Algorithm.RCT_MXP);
 //    }
 
 //    @TestFactory
 //    public Collection<DynamicTest> multipleHsdagMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.HSDAG_MXP);
+//        return generateDynamicTests(Algorithm.HSDAG_MXP);
 //    }
 
 //    @TestFactory
 //    public Collection<DynamicTest> multipleHstMxpNoNeg() {
-//        return generateDynamicTests(
-//                Algorithm.HST_MXP);
+//        return generateDynamicTests(Algorithm.HST_MXP);
 //    }
 
 }

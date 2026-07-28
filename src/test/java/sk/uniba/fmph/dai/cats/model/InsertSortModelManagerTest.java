@@ -7,12 +7,10 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//TODO
 public class InsertSortModelManagerTest {
 
     private AlgorithmSolver solver;
@@ -47,26 +45,31 @@ public class InsertSortModelManagerTest {
     }
 
     @Test
-    void shouldStoreModelsInSortedOrder() {
+    void shouldStoreModelsInSpecificOrder() {
         Model first = new Model();
-        first.add(PERSON_JOHN_AXIOM);
+        first.add(PERSON_JANE_AXIOM);
+        first.add(PERSON_MARY_AXIOM);
+        first.addNegated(PERSON_JOHN_AXIOM);
 
         Model second = new Model();
-        second.add(PERSON_MARY_AXIOM);
+        second.addNegated(PERSON_JOHN_AXIOM);
+        second.addNegated(PERSON_JANE_AXIOM);
 
         Model third = new Model();
-        third.add(PERSON_JANE_AXIOM);
+        third.addNegated(PERSON_JOHN_AXIOM);
+        third.addNegated(PERSON_MARY_AXIOM);
+        third.addNegated(PERSON_JANE_AXIOM);
 
         manager.models.add(second);
         manager.models.add(third);
         manager.models.add(first);
 
-        List<Model> sorted = new ArrayList<>(manager.models);
 
-        assertEquals(3, sorted.size());
+        assertEquals(3, manager.models.size());
 
-        assertTrue(sorted.get(0).compareTo(sorted.get(1)) <= 0);
-        assertTrue(sorted.get(1).compareTo(sorted.get(2)) <= 0);
+        assertSame(first, new ArrayList<>(manager.models).get(0));
+        assertSame(second, new ArrayList<>(manager.models).get(1));
+        assertSame(third, new ArrayList<>(manager.models).get(2));
     }
 
     @Test
@@ -75,7 +78,7 @@ public class InsertSortModelManagerTest {
         first.add(PERSON_JOHN_AXIOM);
 
         Model second = new Model();
-        second.add(PERSON_JOHN_AXIOM);
+        second.add(PERSON_JOHN_AXIOM2);
 
         manager.models.add(first);
         manager.models.add(second);
@@ -88,38 +91,58 @@ public class InsertSortModelManagerTest {
         Model model = new Model();
         model.add(PERSON_JOHN_AXIOM);
 
+        Model correspondingModel = new Model();
+        correspondingModel.add(PERSON_JOHN_AXIOM);
+
         manager.models.add(model);
 
-        boolean found = manager.findReusableModel(model);
+        boolean found = manager.findReusableModel(correspondingModel);
 
         assertTrue(found);
         assertSame(model, manager.modelToReuse);
     }
 
     @Test
-    void shouldFindModelUsingTreeSetOrder() {
+    void shouldNotFindReusableModel() {
         Model first = new Model();
         first.add(PERSON_JOHN_AXIOM);
+        first.addNegated(PERSON_JANE_AXIOM);
 
         Model second = new Model();
         second.add(PERSON_JOHN_AXIOM);
 
-        manager.models.add(first);
+        Model third = new Model();
+        third.addNegated(PERSON_JANE_AXIOM);
+
+        Model fourth = new Model();
+        fourth.add(PERSON_JOHN_AXIOM);
+        fourth.addNegated(PERSON_JANE_AXIOM);
+        fourth.addNegated(PERSON_MARY_AXIOM);
+
+        Model fifth = new Model();
+        fifth.add(PERSON_JOHN_AXIOM);
+        fifth.add(PERSON_MARY_AXIOM);
+        fifth.addNegated(PERSON_JANE_AXIOM);
+
         manager.models.add(second);
+        manager.models.add(third);
+        manager.models.add(fourth);
+        manager.models.add(fifth);
 
-        assertTrue(manager.findReusableModel(first));
+        boolean found = manager.findReusableModel(first);
 
-        assertNotNull(manager.modelToReuse);
+        assertFalse(found);
+        assertNull(manager.modelToReuse);
     }
 
     @Test
     void shouldFindModelContainingPath() {
         Model first = new Model();
-        first.add(PERSON_JOHN_AXIOM);
-        first.add(PERSON_MARY_AXIOM);
+        first.add(PERSON_JANE_AXIOM);
 
         Model second = new Model();
-        second.add(PERSON_JANE_AXIOM);
+        second.add(PERSON_JOHN_AXIOM);
+        second.add(PERSON_MARY_AXIOM);
 
         manager.models.add(first);
         manager.models.add(second);
@@ -127,11 +150,10 @@ public class InsertSortModelManagerTest {
         Set<OWLAxiom> path = new HashSet<>();
         path.add(PERSON_JOHN_AXIOM);
 
-        boolean found =
-                manager.findReuseModelForPath(path);
+        boolean found = manager.findReuseModelForPath(path);
 
         assertTrue(found);
-        assertSame(first, manager.modelToReuse);
+        assertSame(second, manager.modelToReuse);
     }
 
     @Test
@@ -143,59 +165,51 @@ public class InsertSortModelManagerTest {
 
         Set<OWLAxiom> path = new HashSet<>();
         path.add(PERSON_MARY_AXIOM);
+        path.add(PERSON_JOHN_AXIOM);
 
-        boolean found =
-                manager.findReuseModelForPath(path);
+        boolean found = manager.findReuseModelForPath(path);
 
         assertFalse(found);
         assertNull(manager.modelToReuse);
     }
 
     @Test
-    void shouldKeepCollectionSortedAfterAddingModels() {
-        Model a = new Model();
-        a.add(PERSON_JANE_AXIOM);
+    void shouldFindModelWithTheSmallestNegDataContainingPath() {
+        Model first = new Model();
+        first.add(PERSON_JOHN_AXIOM);
+        first.addNegated(PERSON_JANE_AXIOM);
 
-        Model b = new Model();
-        b.add(PERSON_JOHN_AXIOM);
+        Model second = new Model();
+        second.add(PERSON_JOHN_AXIOM);
 
-        Model c = new Model();
-        c.add(PERSON_MARY_AXIOM);
+        Model third = new Model();
+        third.addNegated(PERSON_JANE_AXIOM);
 
-        manager.models.add(a);
-        manager.models.add(b);
-        manager.models.add(c);
+        Model fourth = new Model();
+        fourth.add(PERSON_JOHN_AXIOM);
+        fourth.add(PERSON_MARY_AXIOM);
+        fourth.addNegated(PERSON_JANE_AXIOM);
+        fourth.addNegated(PERSON_EVE_AXIOM);
 
-        Model previous = null;
+        Model fifth = new Model();
+        fifth.add(PERSON_JOHN_AXIOM);
+        fifth.add(PERSON_MARY_AXIOM);
+        fifth.addNegated(PERSON_JANE_AXIOM);
 
-        for (Model current : manager.models) {
-            if (previous != null) {
-                assertTrue(previous.compareTo(current) <= 0);
-            }
-            previous = current;
-        }
-    }
-
-    //TODO, toto ale naopak .. chceme prave ten mensi ziskat
-    @Test
-    void shouldFindNewestModelContainingPath() {
-        Model oldModel = new Model();
-        oldModel.add(PERSON_JOHN_AXIOM);
-
-        Model newestModel = new Model();
-        newestModel.add(PERSON_JOHN_AXIOM);
-        newestModel.add(PERSON_MARY_AXIOM);
-
-        manager.models.add(oldModel);
-        manager.models.add(newestModel);
+        manager.models.add(first);
+        manager.models.add(second);
+        manager.models.add(third);
+        manager.models.add(fourth);
+        manager.models.add(fifth);
 
         Set<OWLAxiom> path = new HashSet<>();
         path.add(PERSON_JOHN_AXIOM);
+        path.add(PERSON_MARY_AXIOM);
 
         boolean found = manager.findReuseModelForPath(path);
 
         assertTrue(found);
-        assertSame(newestModel, manager.modelToReuse);
+        assertSame(fifth, manager.modelToReuse);
     }
 
 
