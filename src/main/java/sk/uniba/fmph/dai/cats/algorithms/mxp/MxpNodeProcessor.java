@@ -5,6 +5,7 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -86,12 +87,12 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
     @Override
     public boolean shouldCloseNode(int explanationsFound) {
-        if (explanationLargerThanOne)
+        if (!Configuration.IGNORE_MXP_PRUNING && explanationLargerThanOne)
             return false;
         return explanationsFound == 0;
     }
 
-    private int addExplanationsFoundByMxp(boolean extractModel){
+    private int addExplanationsFoundByMxp(boolean extractModel) {
 
         Collection<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
@@ -125,7 +126,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return newExplanations.size();
     }
 
-    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel){
+    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel) {
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
@@ -192,11 +193,11 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return true;
     }
 
-    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel) {
         return runMxp(axioms,initialConsistencyAlreadyChecked,extractModel,false);
     }
 
-    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent) {
 
         if (!subsequent){
             solver.removeNegatedObservationFromPath();

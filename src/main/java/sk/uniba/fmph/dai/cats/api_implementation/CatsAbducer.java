@@ -15,6 +15,7 @@ import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
@@ -45,6 +46,10 @@ public class CatsAbducer implements IThreadAbducer {
     boolean logging = false;
     boolean debug = false;
 
+    final Set<Optimisation> optimisations = new HashSet<>();
+
+    boolean ignoreDefaultOptimizations = false;
+
     boolean multithread = false;
 
     AlgorithmSolver solver;
@@ -72,7 +77,6 @@ public class CatsAbducer implements IThreadAbducer {
     void setExplanations(Collection<Explanation> explanations){
         this.explanations = new HashSet<>(explanations);
     }
-
     @Override
     public void setBackgroundKnowledge(OWLOntology ontology) {
         backgroundKnowledge = ontology;
@@ -89,6 +93,35 @@ public class CatsAbducer implements IThreadAbducer {
             observations = Collections.singleton(axiom);
         else
             throwInvalidObservationException(axiom);
+    }
+
+    public boolean getIgnoreDefaultOptimisations() {
+        return ignoreDefaultOptimizations;
+    }
+
+    public void setIgnoreDefaultOptimizations(boolean ignoreDefaultOptimizations) {
+        this.ignoreDefaultOptimizations = ignoreDefaultOptimizations;
+    }
+
+    public Set<Optimisation> getOptimisations() {
+        return optimisations;
+    }
+
+    public void addOptimisation(Optimisation optimisation) {
+        this.optimisations.add(optimisation);
+    }
+
+    public void addOptimisations(Set<Optimisation> optimisations) {
+        this.optimisations.addAll(optimisations);
+    }
+
+    public void removeOptimisation(Optimisation optimisation) {
+        this.optimisations.remove(optimisation);
+    }
+
+    public void clearOptimisations() {
+        this.optimisations.clear();
+        //Configuration.optimisations.clear();
     }
 
     private void throwInvalidObservationException(OWLAxiom axiom){
@@ -249,6 +282,9 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.LOGGING = logging;
         Configuration.DEBUG_PRINT = debug;
         Configuration.ALGORITHM = algorithm;
+        Configuration.IGNORE_DEFAULT_OPTIMISATIONS = ignoreDefaultOptimizations;
+        Configuration.optimisations.clear();
+        Configuration.optimisations.addAll(optimisations);
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

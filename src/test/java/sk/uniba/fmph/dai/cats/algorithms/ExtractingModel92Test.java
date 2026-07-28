@@ -54,7 +54,7 @@ public class ExtractingModel92Test extends AlgorithmTestBase {
 
         super.qxpNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(1);
 
     }
 

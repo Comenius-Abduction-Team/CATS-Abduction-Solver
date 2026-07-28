@@ -91,7 +91,7 @@ public class RctTreeBuilder implements ITreeBuilder {
             return null;
 
         RctNode node = new RctNode(getAndIncreaseId());
-        node.model = solver.getModelWithoutPathAxioms(modelToReuse);
+        node.model = modelToReuse;
         node.path = path.getAxioms();
         node.depth = depth;
 
@@ -159,7 +159,7 @@ public class RctTreeBuilder implements ITreeBuilder {
                 continue;
 
             // nodes n' labeled with some Cj from CS such that Ci C Cj
-            if (currentNode.isSubsetOf(polledNode)){
+            if (currentNode.isProperSubsetOf(polledNode)){
 
                 StaticPrinter.debugPrint("[RCT] " + currentNode + " is subset of " + polledNode);
 
@@ -175,28 +175,30 @@ public class RctTreeBuilder implements ITreeBuilder {
                 polledNode.model = Ci;
 
                 // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
-                polledNode.childrenToIgnore.addAll(difference);
+                // the node connected by this edge and all of its descendants are removed
+                deleteNodeDescendants(polledNode, difference);
                 polledNode.childrenToProcess.removeAll(difference);
 
-                List<RctNode> children = new ArrayList<>(polledNode.children);
-
-                for (RctNode child : children){
-                    if (difference.contains(child.labelAxiom)){
-                        deleteNode(child, polledNode);
-                    }
-                }
-
+                // update ΘCs
                 traverseTreeToUpdateIgnoredChildren(polledNode, difference);
 
             }
 
             nodes.addAll(polledNode.children);
         }
+    }
 
+    private void deleteNodeDescendants(RctNode polledNode, Set<OWLAxiom> difference) {
+        List<RctNode> children = new ArrayList<>(polledNode.children);
+
+        for (RctNode child : children){
+            if (difference.contains(child.labelAxiom)){
+                deleteNode(child, polledNode);
+            }
+        }
     }
 
     void deleteNode(RctNode child, RctNode parent){
-
         parent.children.remove(child);
 
         Queue<RctNode> localQueue = new ArrayDeque<>();
@@ -227,6 +229,8 @@ public class RctTreeBuilder implements ITreeBuilder {
     }
 
     private void traverseTreeToUpdateIgnoredChildren(RctNode originalPolledNode, Set<OWLAxiom> difference){
+        // update ΘC(n') to ΘC(n')\(Cj\Ci)
+        originalPolledNode.childrenToIgnore.removeAll(difference);
 
         Queue<RctNode> nodes = new ArrayDeque<>();
         nodes.add(originalPolledNode);
@@ -234,6 +238,7 @@ public class RctTreeBuilder implements ITreeBuilder {
         while(!nodes.isEmpty()){
 
             RctNode polledNode = nodes.poll();
+            polledNode.usedLabels.removeAll(difference);
 
             // for all children n'' of n' update ΘC(n'') to ΘC(n'')\(Cj\Ci)
             for (RctNode child : polledNode.children) {
@@ -273,11 +278,7 @@ public class RctTreeBuilder implements ITreeBuilder {
 
     @Override
     public OWLAxiom getNextChild(){
-        OWLAxiom child = currentNode.childrenToProcess.remove(0);
-        if (child != null){
-            currentNode.childrenToIgnore.add(child);
-        }
-        return child;
+        return currentNode.childrenToProcess.remove(0);
     }
 
 }

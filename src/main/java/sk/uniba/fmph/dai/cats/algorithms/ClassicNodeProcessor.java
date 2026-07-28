@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.data.Explanation;

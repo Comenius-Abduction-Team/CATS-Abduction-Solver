@@ -1,0 +1,8 @@
+{SystemsStaff(a),UndergraduateStudent(a)}
+{GraduateStudent(a),ClericalStaff(a)}
+{AdministrativeStaff(a),GraduateStudent(a)}
+{SystemsStaff(a),GraduateStudent(a)}
+{UndergraduateStudent(a),AdministrativeStaff(a)}
+{UndergraduateStudent(a),ClericalStaff(a)}
+{SystemsStaff(a),Student(a)}
+{Student(a),ClericalStaff(a)}

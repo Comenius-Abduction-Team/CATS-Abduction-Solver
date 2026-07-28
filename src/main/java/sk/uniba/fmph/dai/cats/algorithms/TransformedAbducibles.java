@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
@@ -25,7 +26,7 @@ public class TransformedAbducibles {
 
     public Set<OWLAxiom> abducibleAxioms;
 
-    TransformedAbducibles(Loader loader){
+    TransformedAbducibles(Loader loader) {
 
         InputAbducibles inputAbducibles = loader.getAbducibles();
 
@@ -85,4 +86,21 @@ public class TransformedAbducibles {
             abducibleAxioms.addAll(negAssertionAxioms);
 
     }
+
+    public void filterAxiomsThatCannotBeInExplanations(Loader loader) {
+        abducibleAxioms.removeIf(axiom -> cannotBeInExplanations(loader, axiom));
+    }
+
+    private boolean cannotBeInExplanations(Loader loader, OWLAxiom axiom) {
+        OWLOntology originalOntology = loader.getOriginalOntology();
+
+        //axioms contained in ontology cannot be in explanations (relevance)
+        if (originalOntology.containsAxiom(axiom)) return true;
+
+        //complements of axioms contained in ontology cannot be in explanations (consistency)
+        OWLAxiom complement = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+        return originalOntology.containsAxiom(complement);
+    }
+
+
 }

@@ -30,7 +30,7 @@ public class Main {
 
     private static final String TEST1 = "ore_ont_7828_1768386529480__ABD1768386936835.in";
 
-    private static final String INPUT_FILE = TEST1;
+    private static final String INPUT_FILE = TOOTHACHE;
 
     public static void main(String[] args) throws Exception {
 

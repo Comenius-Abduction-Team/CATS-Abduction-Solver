@@ -26,15 +26,11 @@ public class RctNode extends TreeNode implements Comparable<RctNode> {
 
     final List<OWLAxiom> usedLabels = new ArrayList<>();
 
-    Level level;
-
     RctNode(int id){
         this.id = id;
     }
 
-    boolean isSubsetOf(RctNode other){
-        if (this == other)
-            return false;
+    boolean isProperSubsetOf(RctNode other){
         if (model.getNegatedData().size() >= other.model.getNegatedData().size())
             return false;
         return other.model.getNegatedData().containsAll(model.getNegatedData());
@@ -46,8 +42,29 @@ public class RctNode extends TreeNode implements Comparable<RctNode> {
 
     @Override
     public int compareTo(RctNode other) {
-        //return depth.compareTo(other.depth);
+        int depthOrder = Integer.compare(depth, other.depth);
+        if (depthOrder != 0)
+            return depthOrder;
+
         return Integer.compare(id, other.id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+
+        RctNode other = (RctNode) obj;
+
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 
     @Override

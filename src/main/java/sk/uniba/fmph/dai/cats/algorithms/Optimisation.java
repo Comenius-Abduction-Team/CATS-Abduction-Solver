@@ -2,10 +2,10 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 public enum Optimisation {
 
-    MOVE_CONSISTENCY_CHECKS { // move consistency checks for irrelevant/inconsistent explanations ater model reuse
+    MOVE_CONSISTENCY_CHECKS { // move consistency checks for irrelevant/inconsistent explanations after model reuse
         @Override
         public String getDescription() {
-            return "fewer conistency checks";
+            return "fewer consistency checks";
         }
     },
     SORT_MODEL { // sort models as they are stored for reuse based on the negated model's size

@@ -125,7 +125,7 @@ public class ToothacheTest extends AlgorithmTestBase {
 
         super.mxp();
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 

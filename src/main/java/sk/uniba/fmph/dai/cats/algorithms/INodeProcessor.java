@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
 public interface INodeProcessor {

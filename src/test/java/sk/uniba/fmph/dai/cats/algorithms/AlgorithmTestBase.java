@@ -10,13 +10,19 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsExplanationConfigurator;
 import sk.uniba.fmph.dai.cats.api_implementation.CatsSymbolAbducibles;
 import sk.uniba.fmph.dai.cats.common.Configuration;
+import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class for tests that run the algorithms and check the explanations found.
@@ -66,9 +72,6 @@ public abstract class AlgorithmTestBase {
      */
     protected AlgorithmTestBase(String name) throws OWLOntologyCreationException, IOException {
         setOntologyName(name);
-        setUpInput();
-        setUpHelperObjects();
-        setUpAbducibles();
     }
 
     private void setOntologyName(String name){
@@ -115,6 +118,12 @@ public abstract class AlgorithmTestBase {
         abducer = new CatsAbducer(backgroundKnowledge,observation);
         abducer.setLogging(CREATE_LOGS);
     }
+    @BeforeEach
+    void init() throws OWLOntologyCreationException, IOException {
+        setUpInput();
+        setUpHelperObjects();
+        setUpAbducibles();
+    }
 
     /**
      * Parses ontology from an OWL file.
@@ -156,6 +165,101 @@ public abstract class AlgorithmTestBase {
         if (PRINT_EXPLANATIONS)
             System.out.println(explanations);
         assertEquals(expectedCount, explanations.size());
+    }
+
+    /**
+     * Asserts that computed explanations correspond to expected explanations.
+     *
+     * @param computedExplanations set of computed explanations
+     * @param expectedExplanations set of expected explanations
+     */
+    protected void compareExplanations(Set<IExplanation> computedExplanations, Set<Set<String>> expectedExplanations){
+
+        Set<Set<String>> computed = computedExplanations.stream()
+                .map(this::getRepresentation)
+                .collect(Collectors.toSet());
+
+        Set<Set<String>> onlyInComputed = new HashSet<>(computed);
+        onlyInComputed.removeAll(expectedExplanations);
+
+        Set<Set<String>> onlyInExpected = new HashSet<>(expectedExplanations);
+        onlyInExpected.removeAll(computed);
+
+        System.out.println("Expected explanation count: " + expectedExplanations.size());
+        System.out.println("Computed explanation count: " + computed.size());
+
+        assertTrue(
+                onlyInComputed.isEmpty() && onlyInExpected.isEmpty(),
+                "\nOnly in computed (" + onlyInComputed.size() + "):\n"
+                        + formatExplanations(onlyInComputed) +
+                        "\n\nOnly in expected (" + onlyInExpected.size() + "):\n"
+                        + formatExplanations(onlyInExpected)
+        );
+
+    }
+
+    private Set<String> getRepresentation(IExplanation e) {
+        return e.getAxiomSet()
+                .stream()
+                .map(StringFactory::getRepresentation)
+                .collect(Collectors.toSet());
+    }
+
+    private String formatExplanations(Set<Set<String>> explanations) {
+        return explanations.stream()
+                .map(set -> set.stream()
+                        .sorted()
+                        .collect(Collectors.joining(", ", "{", "}")))
+                .sorted()
+                .collect(Collectors.joining("\n"));
+    }
+
+    private static <T> Set<T> difference(Set<T> first, Set<T> second) {
+        Set<T> result = new HashSet<>(first);
+        result.removeAll(second);
+        return result;
+    }
+
+    /**
+     * Normalizes the explanation (into a unique string)
+     *
+     * @param explanation an explanation
+     */
+    private String normalize(IExplanation explanation) {
+
+        return explanation.getAxiomSet().stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining("|"));
+    }
+
+    /**
+     * Asserts that the set of explanations does not contain duplicates.
+     *
+     * @param explanations set of explanations
+     */
+    protected void testDuplicateExplanations(Set<IExplanation> explanations) {
+        System.out.println("Returned explanations: " + explanations.size());
+
+        Set<String> normalizedSet = explanations.stream()
+                .map(this::normalize)
+                .collect(Collectors.toSet());
+
+        System.out.println("Unique normalized explanations: "
+                + normalizedSet.size());
+
+        Set<String> unique = new HashSet<>();
+
+        for (IExplanation explanation : explanations) {
+            String normalized = normalize(explanation);
+
+            assertTrue(
+                    unique.add(normalized),
+                    "Duplicate explanation found: " + normalized
+            );
+        }
+
+        assertEquals(normalizedSet.size(), explanations.size());
     }
 
     /** Runs the solver. * */

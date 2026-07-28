@@ -95,7 +95,7 @@ public class HsdagBuilder implements ITreeBuilder {
         node.labelAxiom = path.lastAxiom;
         nodesAtCurrentDepth.put(path.getAxiomSet(),node);
         node.depth = depth;
-        node.model = solver.removePathAxiomsFromModel(modelToReuse);
+        node.model = modelToReuse;
         node.parent = parent;
 
         parent.children.add(node);
@@ -203,7 +203,7 @@ public class HsdagBuilder implements ITreeBuilder {
             relabeledNodes.add(polledNode);
 
             // nodes n' labeled with some Cj from CS such that Ci C Cj
-            if (currentNode.isSubsetOf(polledNode)){
+            if (currentNode.isProperSubsetOf(polledNode)){
                 StaticPrinter.debugPrint("[HS-DAG] " + currentNode + " is subset of " + polledNode);
 
                 Model Ci = currentNode.model;
