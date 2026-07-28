@@ -65,7 +65,6 @@ public class Model implements Comparable<Model>{
         return Objects.hash(data, negatedData);
     }
 
-    //TODO fix
     @Override
     public int compareTo(Model o) {
         // when sorting models, they are sorted according to their negated data length

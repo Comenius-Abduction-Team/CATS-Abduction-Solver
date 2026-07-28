@@ -41,7 +41,7 @@ public class TransformedAbducibles {
                 abduciblesWithoutObservation.remove(loader.getObservationAxiom());
             }
             abducibleAxioms = abduciblesWithoutObservation;
-            return; //TODO POZOR !!!! tu returnujeme
+            return;
         }
 
         for(OWLClass owlClass : inputAbducibles.getClasses()){

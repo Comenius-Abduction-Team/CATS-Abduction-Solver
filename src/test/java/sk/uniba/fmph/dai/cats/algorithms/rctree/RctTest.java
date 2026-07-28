@@ -8,7 +8,6 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//TODO
 public class RctTest {
 
     private AlgorithmSolver solver;
