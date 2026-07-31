@@ -69,12 +69,10 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-
         return createNode(label, parent.depth + 1);
     }
 
     private TreeNode createNode(Explanation label, Integer depth){
-
 
         TreeNode node = new TreeNode();
 

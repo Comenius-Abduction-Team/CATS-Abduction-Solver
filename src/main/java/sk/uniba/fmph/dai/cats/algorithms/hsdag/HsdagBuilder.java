@@ -77,7 +77,6 @@ public class HsdagBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-
         return createNode(label, parent.depth + 1, (HsdagNode) parent);
     }
 
@@ -89,25 +88,14 @@ public class HsdagBuilder implements ITreeBuilder {
             return null;
 
         HsdagNode node = new HsdagNode(getAndIncreaseId());
-
-
-        node.path = path.getAxioms();
-        node.labelAxiom = path.lastAxiom;
-        nodesAtCurrentDepth.put(path.getAxiomSet(),node);
-        node.depth = depth;
         node.model = modelToReuse;
-        node.parent = parent;
+        node.path = path.getAxioms();
+        node.depth = depth;
+
+        node.incomingLabels.put(parent, path.lastAxiom);
+        nodesAtCurrentDepth.put(path.getAxiomSet(),node);
 
         parent.children.add(node);
-
-
-//        if (solver.currentLevel.reusedModels > currentLevelReusedModels) {
-//            node.modelWasNotReused = false;
-//            currentLevelReusedModels = solver.currentLevel.reusedModels;
-//        } else {
-//            node.modelWasNotReused = true;
-//        }
-
 
         return node;
     }
@@ -135,13 +123,11 @@ public class HsdagBuilder implements ITreeBuilder {
 
     public boolean startIteratingNodeChildren(TreeNode node){
         currentNode = (HsdagNode) node;
-        iteratedChildren = new ArrayList<>(currentNode.model.getNegatedData());
-//        if(currentNode.modelWasNotReused) {
-//          relabel();
-//          node.assignedLevel.relabeledCalls ++;
-//       }
+
         pruneTree();
-        return currentNode.hasParent();
+
+        iteratedChildren = new ArrayList<>(currentNode.model.getNegatedData());
+        return currentNode == root || currentNode.hasParent();
     }
 
     public boolean noChildrenLeft(){
@@ -149,9 +135,7 @@ public class HsdagBuilder implements ITreeBuilder {
     }
 
     public OWLAxiom getNextChild(){
-        OWLAxiom child = iteratedChildren.get(0);
-       iteratedChildren.remove(0);
-        return child;
+        return iteratedChildren.remove(0);
     }
 
     @Override
@@ -159,7 +143,7 @@ public class HsdagBuilder implements ITreeBuilder {
         nodesAtCurrentDepth.clear();
         currentLevelReusedModels ++;
     }
-    // check if node have same path and merge them
+    // check if nodes have same path and merge them
     public boolean mergeIfPossible(Explanation label) {
 
         Set<OWLAxiom> candidateSet = label.getAxiomSet();
@@ -167,7 +151,7 @@ public class HsdagBuilder implements ITreeBuilder {
         if (nodesAtCurrentDepth.containsKey(candidateSet)) {
             HsdagNode child = nodesAtCurrentDepth.get(candidateSet);
             currentNode.children.add(child);
-            child.referenceCount ++;
+            child.addParent(currentNode, label.lastAxiom);
 
             EventPublisher.publishNodeEvent(solver, EventType.MERGING_NODE, currentNode);
 
@@ -183,13 +167,15 @@ public class HsdagBuilder implements ITreeBuilder {
     }
 
     private void pruneTree(){
-        Queue<HsdagNode> localQueue = new ArrayDeque<>();
-        localQueue.add(root);
+
+        Queue<HsdagNode> nodes = new ArrayDeque<>();
+        nodes.add(root);
 
         Set<HsdagNode> relabeledNodes = new HashSet<>();
 
-        while (!localQueue.isEmpty()){
-            HsdagNode polledNode = localQueue.poll();
+        while (!nodes.isEmpty()){
+
+            HsdagNode polledNode = nodes.poll();
 
             if (polledNode == currentNode){
                 continue;
@@ -212,44 +198,63 @@ public class HsdagBuilder implements ITreeBuilder {
                 // Cj\Ci
                 Set<OWLAxiom> difference = new HashSet<>(Cj.getNegatedData());
                 difference.removeAll(Ci.getNegatedData());
-                StaticPrinter.debugPrint("[HS-DAG] Relabelling " + polledNode + " with " + Ci);
 
                 // Relabel n' with Ci
+                StaticPrinter.debugPrint("[HS-DAG] Relabelling " + polledNode + " with " + Ci);
                 polledNode.model = Ci;
 
-                List<HsdagNode> children = new ArrayList<>(polledNode.children);
-
-                for (HsdagNode child : children) {
-                    if (difference.contains(child.labelAxiom)){
-                        deleteNode(polledNode, child);
-                    }
-
-                }
+                // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
+                deleteNodeDescendants(polledNode, difference);
             }
 
-                localQueue.addAll(polledNode.children);
+                nodes.addAll(polledNode.children);
         }
     }
+
+    private void deleteNodeDescendants(HsdagNode polledNode, Set<OWLAxiom> difference) {
+        List<HsdagNode> children = new ArrayList<>(polledNode.children);
+
+        for (HsdagNode child : children) {
+
+            OWLAxiom edgeLabel = child.getLabelFrom(polledNode);
+
+            if (difference.contains(edgeLabel)){
+                deleteNode(polledNode, child);
+            }
+        }
+    }
+
     private void deleteNode(HsdagNode parent, HsdagNode child){
 
         parent.children.remove(child);
+        child.removeParent(parent);
 
-        Queue<HsdagNode> localQueue = new ArrayDeque<>();
-        localQueue.add(child);
+        Queue<HsdagNode> deletionQueue = new ArrayDeque<>();
+        deletionQueue.add(child);
 
-        while (!localQueue.isEmpty()){
+        while (!deletionQueue.isEmpty()){
 
-            HsdagNode polledNode = localQueue.poll();
-            polledNode.referenceCount --;
+            HsdagNode polledNode = deletionQueue.poll();
 
-            // decrease referenceCount if  polledNode has more than 1 parent
-            if(polledNode.hasParent()){
+            // if polledNode has parent, do not delete it
+            if (polledNode == root || polledNode.hasParent()){
                 continue;
             }
 
-            // delete node from structure
+            // else, delete node from structure
             queue.remove(polledNode);
-            localQueue.addAll(polledNode.children);
+            removeFromNodesAtCurrentDepth(polledNode);
+
+            for (HsdagNode polledNodeChild : new ArrayList<>(polledNode.children)) {
+                // deleted node is no longer parent of its children
+                polledNodeChild.removeParent(polledNode);
+
+                // if its child does not have other parents, it should be deleted
+                if (!polledNodeChild.hasParent()) {
+                    deletionQueue.add(polledNodeChild);
+                }
+            }
+
             polledNode.children.clear();
 
             if (polledNode.processed)
@@ -259,6 +264,13 @@ public class HsdagBuilder implements ITreeBuilder {
             }
         }
 
+    }
+
+    private void removeFromNodesAtCurrentDepth(HsdagNode child) {
+        if (nodesAtCurrentDepth.containsValue(child)) {
+            Set<OWLAxiom> pathAxioms = new HashSet<>(child.path);
+            nodesAtCurrentDepth.remove(pathAxioms, child);
+        }
     }
 
 }
