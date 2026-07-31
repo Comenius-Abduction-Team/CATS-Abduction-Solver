@@ -7,10 +7,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StringFactory {
@@ -28,6 +25,7 @@ public class StringFactory {
         for (OWLAxiom owlAxiom : axioms) {
             result.add(getRepresentation(owlAxiom));
         }
+        //Collections.sort(result);
         return "{" + StringUtils.join(result, ",") + "}";
     }
 
@@ -36,6 +34,7 @@ public class StringFactory {
         for (OWLAxiom owlAxiom : explanation.getAxioms()) {
             result.add(getRepresentation(owlAxiom));
         }
+        //Collections.sort(result);
         return "{" + StringUtils.join(result, ",") + "}";
     }
 

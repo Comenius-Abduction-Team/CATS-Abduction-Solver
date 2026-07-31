@@ -8,7 +8,6 @@ import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.*;
 
@@ -69,12 +68,10 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-
         return createNode(label, parent.depth + 1);
     }
 
     private TreeNode createNode(Explanation label, Integer depth){
-
 
         TreeNode node = new TreeNode();
 

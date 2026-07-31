@@ -50,7 +50,11 @@ public class RctTreeBuilder implements ITreeBuilder {
             return true;
         }
 
-        return nodeProcessor.shouldPruneBranch(explanation);
+        if (nodeProcessor.shouldPruneBranch(explanation)){
+            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, originalNode);
+            return true;
+        }
+        return false;
     }
 
     private int getAndIncreaseId(){
@@ -132,18 +136,16 @@ public class RctTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode getNextNodeFromTree() {
-        RctNode node = queue.poll();
-        //System.out.println(queue.stream().map(n -> n.depth).collect(Collectors.toSet()));
-        return node;
+        return queue.poll();
     }
 
     @Override
     public boolean startIteratingNodeChildren(TreeNode node){
         currentNode = (RctNode) node;
+
         pruneTree();
-        if (currentNode.closed || currentNode.childrenToProcess.isEmpty())
-            return false;
-        return true;
+
+        return !currentNode.closed && !currentNode.childrenToProcess.isEmpty();
     }
 
     private void pruneTree(){
@@ -201,18 +203,18 @@ public class RctTreeBuilder implements ITreeBuilder {
     void deleteNode(RctNode child, RctNode parent){
         parent.children.remove(child);
 
-        Queue<RctNode> localQueue = new ArrayDeque<>();
-        localQueue.add(child);
+        Queue<RctNode> deletionQueue = new ArrayDeque<>();
+        deletionQueue.add(child);
 
-        while (!localQueue.isEmpty()){
-            RctNode node = localQueue.poll();
+        while (!deletionQueue.isEmpty()){
+            RctNode node = deletionQueue.poll();
 
             if (node.closed)
                 continue;
 
             queue.remove(node);
             node.closeNode();
-            localQueue.addAll(node.children);
+            deletionQueue.addAll(node.children);
             node.children.clear();
             node.childrenToProcess.clear();
 
