@@ -45,6 +45,7 @@ public class CatsAbducer implements IThreadAbducer {
     boolean strictRelevance = true;
     boolean logging = false;
     boolean debug = false;
+    boolean json = false;
 
     final Set<Optimisation> optimisations = new HashSet<>();
 
@@ -77,6 +78,7 @@ public class CatsAbducer implements IThreadAbducer {
     void setExplanations(Collection<Explanation> explanations){
         this.explanations = new HashSet<>(explanations);
     }
+
     @Override
     public void setBackgroundKnowledge(OWLOntology ontology) {
         backgroundKnowledge = ontology;
@@ -200,6 +202,11 @@ public class CatsAbducer implements IThreadAbducer {
                             setDebug(debug);
                             i++;
                             continue;
+                        case "-json":
+                            boolean json = Boolean.parseBoolean(arguments[i + 1]);
+                            Configuration.JSON_EXPORT = json;
+                            i++;
+                            continue;
                         default:
                             throw new InvalidSolverParameterException(arguments[i], "Unknown solver argument");
                     }
@@ -285,6 +292,7 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.IGNORE_DEFAULT_OPTIMISATIONS = ignoreDefaultOptimizations;
         Configuration.optimisations.clear();
         Configuration.optimisations.addAll(optimisations);
+        Configuration.JSON_EXPORT = json;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

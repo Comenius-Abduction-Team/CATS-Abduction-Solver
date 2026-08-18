@@ -37,7 +37,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (pathsInCurrentLevel.contains(solver.path)){
             StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
+            EventPublisher.publishEdgeEvent(solver, EventType.EDGE_PRUNED, explanation.lastAxiom);
             return true;
         }
 
@@ -48,7 +48,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
             return true;
         }
 

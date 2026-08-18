@@ -116,6 +116,8 @@ public class AlgorithmSolver {
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
         if (Configuration.DEBUG_PRINT)
             EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
+        if (Configuration.JSON_EXPORT)
+            EventPublisher.registerSubscriber(this, new JsonExportEventSubscriber(this));
     }
 
     private void setAlgorithm(Algorithm algorithm){
@@ -158,7 +160,7 @@ public class AlgorithmSolver {
         if (Configuration.PRINT_PROGRESS)
             progressManager.updateProgress(0, "Initializing abduction.");
 
-        // nobody know why this line is here or what it does, but it must be here or the solver doesn't work ;)
+        // nobody knows why this line is here or what it does, but it must be here or the solver doesn't work ;)
         loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
 
         Future<Void> future = null;
