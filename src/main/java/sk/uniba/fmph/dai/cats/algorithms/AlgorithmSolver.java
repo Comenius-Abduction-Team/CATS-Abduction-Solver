@@ -79,6 +79,7 @@ public class AlgorithmSolver {
         this.progressManager = progressManager;
 
         consistencyChecker = new ConsistencyChecker(this);
+        explanationManager.setConsistencyChecker(consistencyChecker);
 
         setOptimisations(algorithm);
         registerSubscribersFromConfiguration();
@@ -184,7 +185,7 @@ public class AlgorithmSolver {
                 ){
                     future.cancel(true);
                     message += "Time-out reached! ";
-                    currentLevel.message = "time-out";
+                    currentLevel.message += "time-out";
                     logger.addLevelToPartialLog(currentLevel);
                 }
                 else {
@@ -262,7 +263,7 @@ public class AlgorithmSolver {
         } catch (EmptyModelException e) {
             emptyModel = true;
             message = e.getMessage();
-            currentLevel.message = "empty model found";
+            currentLevel.message += "empty model found";
         }
 
         if (root == null || emptyModel) {
@@ -357,7 +358,7 @@ public class AlgorithmSolver {
                         );
                     } catch (EmptyModelException e) {
                         message = e.getMessage();
-                        currentLevel.message = "empty model found";
+                        currentLevel.message += "empty model found";
                         return null;
                     }
 

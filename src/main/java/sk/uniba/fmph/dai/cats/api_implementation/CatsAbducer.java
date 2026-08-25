@@ -40,7 +40,6 @@ public class CatsAbducer implements IThreadAbducer {
 
     double timeout = 0;
     int depth = 0;
-    boolean hst = false;
     Algorithm algorithm = Algorithm.MHS_MXP;
     boolean strictRelevance = true;
     boolean logging = false;

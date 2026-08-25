@@ -218,12 +218,16 @@ public class RctTreeBuilder implements ITreeBuilder {
             node.children.clear();
             node.childrenToProcess.clear();
 
-            StaticPrinter.debugPrint("[RCT] Deleting node: " + node);
-
             if (node.processed)
                 node.assignedLevel.deletedProcessed += 1;
             else {
-                node.parent.assignedLevel.deletedCreated += 1;
+                node.parent.assignedLevel.deletedUnprocessed += 1;
+            }
+
+            if (node.processed)
+                EventPublisher.publishNodeEvent(solver, EventType.DELETED_PROCESSED_NODE, node);
+            else {
+                EventPublisher.publishNodeEvent(solver, EventType.DELETED_UNPROCESSED_NODE, node);
             }
 
         }

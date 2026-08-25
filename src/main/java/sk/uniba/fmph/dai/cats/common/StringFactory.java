@@ -124,19 +124,6 @@ public class StringFactory {
         StringBuilder builder = new StringBuilder();
         buildCsvRow(builder, addComas, objects);
         return builder.toString();
-
-//        for (int i = 0; i < objects.length; i++) {
-//            if (objects[i] != null)
-//                builder.append(objects[i].toString());
-//            if (i + 1 != objects.length) {
-//                builder.append(';');
-//                if (addComas)
-//                    builder.append(' ');
-//            }
-//        }
-//
-//        return builder.toString();
-
     }
 
     public static void buildCsvRow(StringBuilder builder, boolean addComas, Object... objects) {

@@ -12,6 +12,8 @@ import java.util.List;
 
 public class EventPublisher {
 
+    private static AlgorithmSolver defaultSolver;
+
     private static HashMap<AlgorithmSolver, List<IEventSubscriber>> subscribers;
 
     public static void publishGenericEvent(AlgorithmSolver solver, EventType type){
@@ -19,7 +21,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
+        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -33,7 +35,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
+        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -47,7 +49,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
+        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -61,7 +63,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get(solver);
+        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -80,8 +82,13 @@ public class EventPublisher {
         if (subscribers == null){
             subscribers = new HashMap<>();
         }
+
         subscribers.computeIfAbsent(solver, v -> new ArrayList<>(1));
         subscribers.get(solver).add(subscriber);
+
+        if (defaultSolver == null){
+            defaultSolver = solver;
+        }
 
     }
 

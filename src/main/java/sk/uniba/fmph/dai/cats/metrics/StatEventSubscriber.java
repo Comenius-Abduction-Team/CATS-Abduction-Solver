@@ -35,14 +35,14 @@ public class StatEventSubscriber implements IEventSubscriber {
                 solver.currentLevel.prunedEdges += 1;
                 break;
             case EXPLANATION_EDGE:
-                solver.stats.getCurrentLevelStats().prunedEdges += 1;
-                solver.stats.getCurrentLevelStats().explanationEdges += 1;
+                solver.currentLevel.prunedEdges += 1;
+                solver.currentLevel.explanationEdges += 1;
                 break;
 
             case IRELEVANT_EXPLANATION:
             case INCONSISTENT_EXPLANATION:
-                solver.stats.getCurrentLevelStats().originalExplanations += 1;
-                solver.stats.getCurrentLevelStats().filteredExplanations += 1;
+                solver.currentLevel.originalExplanations += 1;
+                solver.currentLevel.filteredExplanations += 1;
 
             case MODEL_REUSE:
                 solver.currentLevel.reusedModels += 1;
@@ -61,17 +61,17 @@ public class StatEventSubscriber implements IEventSubscriber {
                 break;
 
             case MXP_CALL:
-                solver.stats.getCurrentLevelStats().mxpCalls++;
+                solver.currentLevel.mxpCalls++;
                 break;
             case QXP_CALL:
-                solver.stats.getCurrentLevelStats().qxpCalls++;
+                solver.currentLevel.qxpCalls++;
                 break;
 
             case CONSISTENCY_CHECK:
-                solver.stats.getCurrentLevelStats().consistencyChecks += 1;
+                solver.currentLevel.consistencyChecks += 1;
                 break;
             case MODEL_EXTRACTION:
-                solver.stats.getCurrentLevelStats().modelExtractions += 1;
+                solver.currentLevel.modelExtractions += 1;
                 break;
             case MERGING_NODE:
                 solver.currentLevel.mergedNodes += 1;
@@ -80,7 +80,7 @@ public class StatEventSubscriber implements IEventSubscriber {
                 solver.currentLevel.deletedProcessed += 1;
                 break;
             case DELETED_UNPROCESSED_NODE:
-                solver.currentLevel.deletedCreated += 1;
+                solver.currentLevel.deletedUnprocessed += 1;
                 break;
         }
 

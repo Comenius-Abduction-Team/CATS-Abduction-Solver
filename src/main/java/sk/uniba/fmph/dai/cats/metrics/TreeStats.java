@@ -12,17 +12,6 @@ public class TreeStats {
     private Level currentLevel;
     private final Level filteringLevel = new Level(-1);
 
-
-//    public Map<Level, LevelStats> levels = new HashMap<>();
-//
-//    private Level currentLevel;
-
-//    public LevelStats startNewLevel(int depth){
-//        LevelStats newStats = new LevelStats();
-//        levels.put(new Level(depth), newStats);
-//        return newStats;
-//    }
-
     public Level getCurrentLevelStats(){
         return currentLevel;
     }
@@ -114,7 +103,7 @@ public class TreeStats {
         builder.append(';');
         level.buildCsvRow(builder, false);
         builder.append(';');
-        builder.append(StringFactory.getExplanationsRepresentation(level.explanations));
+        builder.append(StringFactory.getExplanationsRepresentation(level.finalExplanations));
         builder.append('\n');
 
     }

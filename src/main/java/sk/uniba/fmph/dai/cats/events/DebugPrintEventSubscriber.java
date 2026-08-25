@@ -65,10 +65,10 @@ public class DebugPrintEventSubscriber implements IEventSubscriber {
             case MERGING_NODE:
                 StaticPrinter.debugPrint("[MERGING] Path already exists in history.");
             case DELETED_PROCESSED_NODE:
-                StaticPrinter.debugPrint("[HS-DAG] Deleting processed node: " + ((NodeEvent)event).node);
+                StaticPrinter.debugPrint("[HS-DAG/RCT] Deleting processed node: " + ((NodeEvent)event).node);
                 break;
             case DELETED_UNPROCESSED_NODE:
-                StaticPrinter.debugPrint("[HS-DAG] Deleting not processed node: " + ((NodeEvent)event).node);
+                StaticPrinter.debugPrint("[HS-DAG/RCT] Deleting not processed node: " + ((NodeEvent)event).node);
                 break;
         }
 

@@ -43,7 +43,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
-            solver.stats.getCurrentLevelStats().explanationEdges += 1;
+            solver.currentLevel.explanationEdges += 1;
 
             if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                 EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
@@ -183,7 +183,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         if (!consistencyChecker.checkOntologyConsistency(extractModel)) {
             solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
-            solver.currentLevel.message = "nothing to explain";
+            solver.currentLevel.message += "nothing to explain";
             return false;
         }
 

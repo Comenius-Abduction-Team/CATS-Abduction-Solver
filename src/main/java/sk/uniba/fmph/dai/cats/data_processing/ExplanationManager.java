@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.data_processing;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -23,6 +24,7 @@ public abstract class ExplanationManager {
     protected AlgorithmSolver solver;
 
     private RuleChecker ruleChecker;
+    private ConsistencyChecker consistencyChecker;
     protected IPrinter printer;
     MetricsManager timer;
 
@@ -43,6 +45,10 @@ public abstract class ExplanationManager {
         this.solver = solver;
         ruleChecker = solver.ruleChecker;
         timer = solver.metrics;
+    }
+
+    public void setConsistencyChecker(ConsistencyChecker consistencyChecker) {
+        this.consistencyChecker = consistencyChecker;
     }
     
     public void setPossibleExplanations(Collection<Explanation> possibleExplanations) {
@@ -82,7 +88,7 @@ public abstract class ExplanationManager {
         List<Explanation> filteredExplanations = new ArrayList<>();
         for (Explanation explanation : explanationsToProcess) {
             if (!containsContradictoryAxioms(explanation)
-                    && ruleChecker.checkConsistencyUsingNewReasoner(explanation)) {
+                    && consistencyChecker.checkConsistencyUsingNewReasoner(explanation)) {
                 filteredExplanations.add(explanation);
             } else {
                 solver.stats.getFilteringStats().filteredExplanations += 1;
@@ -232,7 +238,7 @@ public abstract class ExplanationManager {
         for (Explanation e : finalExplanations){
 
             Level level = e.level;
-            level.finalExplanations++;
+            level.finalExplanationsCount++;
 
             double time = e.getAcquireTime();
 

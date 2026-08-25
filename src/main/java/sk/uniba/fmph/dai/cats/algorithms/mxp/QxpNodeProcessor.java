@@ -41,7 +41,7 @@ public class QxpNodeProcessor  implements INodeProcessor {
 
         if (!consistencyChecker.checkOntologyConsistency(extractModel)) {
             solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
-            solver.currentLevel.message = "nothing to explain";
+            solver.currentLevel.message += "nothing to explain";
             return false;
         }
 

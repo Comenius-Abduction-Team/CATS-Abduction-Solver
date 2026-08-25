@@ -32,7 +32,7 @@ public class ClassicNodeProcessor implements INodeProcessor {
         boolean isConsistent = consistencyChecker.checkOntologyConsistency(extractModel);
         if (!isConsistent){
             solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
-            solver.currentLevel.message = "nothing to explain";
+            solver.currentLevel.message += "nothing to explain";
         }
         return isConsistent;
     }

@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.application.EmptyModelException;
+import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.events.Event;
@@ -13,6 +14,7 @@ import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ConsistencyChecker {
 
@@ -94,6 +96,12 @@ public class ConsistencyChecker {
         }
 
         return true;
+    }
+
+    public boolean checkConsistencyUsingNewReasoner(Explanation explanation) {
+        OntologyWrapper ontology = new OntologyWrapper(loader.getInitialOntology().axioms().collect(Collectors.toList()));
+        ontology.addAxioms(explanation.getAxioms());
+        return ontology.isConsistent();
     }
 
     public void turnMinimalityCheckingOn(Set<OWLAxiom> path){
