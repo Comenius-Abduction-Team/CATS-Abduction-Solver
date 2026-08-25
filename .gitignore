@@ -3,8 +3,12 @@
 *.iml
 
 # Build output
-target/
+/target/
+*.class
 
 # Default ignored files
 /shelf/
 /workspace.xml
+
+# CATS
+/logs/
