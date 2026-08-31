@@ -47,11 +47,13 @@ public class HsdagBuilder implements ITreeBuilder {
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
             return true;
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
+            //TODO mozno to tu nema byt .. classic node processor si to riesi, v mxp to asi chyba
+            // ??? minimalne to asi treba nahradit za edge event ...
             EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }

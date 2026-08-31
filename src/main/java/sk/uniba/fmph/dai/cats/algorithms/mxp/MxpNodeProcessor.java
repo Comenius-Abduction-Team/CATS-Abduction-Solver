@@ -87,6 +87,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
     @Override
     public boolean shouldCloseNode(int explanationsFound) {
+        //TODO... to ignore MXP pruning je uz irelevantne
         if (!Configuration.IGNORE_MXP_PRUNING && explanationLargerThanOne)
             return false;
         return explanationsFound == 0;

@@ -53,6 +53,8 @@ public class MhsTreeBuilder implements ITreeBuilder {
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
+            //TODO mozno to tu nema byt .. classic node processor si to riesi, v mxp to asi chyba
+            // ??? minimalne to asi treba nahradit za edge event ...
             EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }

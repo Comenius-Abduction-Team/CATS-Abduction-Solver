@@ -11,7 +11,6 @@ import sk.uniba.fmph.dai.cats.algorithms.mxp.TripleMxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
 import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
-import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -382,8 +381,10 @@ public class AlgorithmSolver {
                 }
 
                 TreeNode childNode = treeBuilder.createChildNode(node, explanation);
-                treeBuilder.addNodeToTree(childNode);
-                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
+                if (childNode != null) {
+                    treeBuilder.addNodeToTree(childNode);
+                    EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
+                }
                 path.clear();
 
             }

@@ -45,12 +45,14 @@ public class RctTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, originalNode);
+            EventPublisher.publishExplanationEvent(solver, EventType.EDGE_PRUNED, explanation);
             StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
             return true;
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
+            //TODO mozno to tu nema byt .. classic node processor si to riesi, v mxp to asi chyba
+            // ???
             EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, originalNode);
             return true;
         }

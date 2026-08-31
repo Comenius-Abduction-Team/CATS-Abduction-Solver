@@ -90,6 +90,9 @@ public class Level {
     public int modelExtractions;
 
     //TODO S TYMTO SA NIC NEROBI, JE TO V TABULKE ALE REALNE NETRACKUJEME ZIADEN UDAJ
+    /**
+     * Number of stored models.
+     * **/
     public int storedModels;
 
     /**
