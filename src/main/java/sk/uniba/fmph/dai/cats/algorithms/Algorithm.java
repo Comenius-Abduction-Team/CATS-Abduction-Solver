@@ -156,13 +156,10 @@ public enum Algorithm {
         //MXP, QXP
         if (isRootOnly())
             return new Optimisation[0];
-        //HST, HST-MXP
+        //HST(-MXP)
         if (isHst())
             return new Optimisation[]{Optimisation.SORT_MODEL};
-        //RCT, RCT-MXP
-        if (isRcTree())
-            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS};
-        //MHS, MHS-MXP
+        //MHS(-MXP), RCT(-MXP), HS-DAG(-MXP)
         return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.SORT_MODEL};
     }
 
@@ -170,12 +167,13 @@ public enum Algorithm {
         //MXP, QXP
         if (isRootOnly())
             return new Optimisation[0];
-        //MHS, MHS-MXP
-        if (!isHst() && !isRcTree())
-            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP,
+        //HST(-MXP)
+        if (isHst())
+            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP};
+
+        //MHS(-MXP), RCT(-MXP), HS-DAG(-MXP)
+        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP,
                     Optimisation.SORT_MODEL};
-        //HST, HST-MXP, RCT, RCT-MXP
-        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP};
     }
 
 }
