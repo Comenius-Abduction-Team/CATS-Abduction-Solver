@@ -40,7 +40,7 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 * **-o: \<ontology\>** observation $O$ in the form of an ontology (in any ontology syntax), which has to be written in one line.
 
 #### Algorithm settings:
-* *-alg: \[ mhs | hst | rct | mhs-mxp | hst-mxp | rct-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
+* *-alg: \[ mhs | hst | rct | hsdag | mhs-mxp | hst-mxp | rct-mxp |  hsdag-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
 * *-t: \<positive integer\>* the time after which the search for explanations terminates. By default, it is not set.
 * *-d: \<positive integer\>* the depth of the HS-tree, when the search terminates. For example, for *-d: 2* search terminates after completing level 1 of HS-tree. By default, it is not set.
 
@@ -183,18 +183,18 @@ Each algorithm uses a combination of optimisations that lead to the best average
 
 #### Without negations (*-n: false*)
 
-| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
-|----------------------------|-----------|-----------|-----------|
-| Reduced consistency checks | ✓         | ✓         | ✗         |
-| Model sorting              | ✓         | ✗         | ✓         |
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
+|----------------------------|-----------|-----------|-----------|-----------|
+| Reduced consistency checks | ✓         | ✓         | ✓         | ✗         |
+| Model sorting              | ✓         | ✓         | ✓         | ✓         |
 
 #### With negations (*-n: true*)
 
-| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
 |----------------------------|-----------|-----------|-----------|
-| Reduced consistency checks | ✓         | ✓         | ✓         |
-| Model sorting              | ✓         | ✗         | ✗         |
-| Triple MXP                 | ✓         | ✓         | ✓         |
+| Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
+| Model sorting              | ✓         | ✓         | ✓         | ✗         |
+| Triple MXP                 | ✓         | ✓         | ✓         | ✓         |
 
 # License
 
@@ -203,6 +203,6 @@ See the [LICENSE](./LICENSE) file for more information.
 
 # Acknowledgements
 
-The development of this sofwtare was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
+The development of this software was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
 under the H2020 grant no. 952215 (TAILOR)
 
