@@ -70,6 +70,7 @@ public class ModelManager {
     public void storeModelFoundByConsistencyCheck() {
 
         Model model = extractor.extractModel();
+        EventPublisher.publishGenericEvent(solver, EventType.MODEL_EXTRACTION);
 
         if (model.isEmpty())
             throw new EmptyModelException(LogMessage.INFO_EMPTY_MODEL_FOUND_NO_EXPLANATIONS);

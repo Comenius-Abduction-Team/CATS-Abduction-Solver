@@ -33,7 +33,6 @@ public class Configuration {
     public static boolean CACHED_CONFLICTS_MEDIAN = false;
     public static boolean CONTINUOUS_HYBRID_RELEVANCE_CHECKS = false;
     public static boolean CONTINUOUS_HYBRID_MINIMALITY_CHECKS = false;
-    public static boolean IGNORE_MXP_PRUNING = false;
 
     public static boolean ALWAYS_EXTRACT_MODELS_IN_MXP = true;
 

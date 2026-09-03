@@ -8,7 +8,6 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
-import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.*;
@@ -17,8 +16,6 @@ public class RctTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
     final INodeProcessor nodeProcessor;
-    final TreeStats stats;
-
     final Queue<RctNode> queue  = new PriorityQueue<>();
 
     public int idToAssign = 0;
@@ -30,7 +27,6 @@ public class RctTreeBuilder implements ITreeBuilder {
     public RctTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.nodeProcessor = solver.nodeProcessor;
-        this.stats = solver.stats;
     }
 
     @Override
@@ -45,15 +41,11 @@ public class RctTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            EventPublisher.publishExplanationEvent(solver, EventType.EDGE_PRUNED, explanation);
-            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_PATH, explanation);
             return true;
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
-            //TODO mozno to tu nema byt .. classic node processor si to riesi, v mxp to asi chyba
-            // ???
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, originalNode);
             return true;
         }
         return false;
@@ -67,9 +59,6 @@ public class RctTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createRoot() {
-
-        if (!nodeProcessor.canCreateRoot(true))
-            return null;
 
         Model modelToReuse = solver.findAndGetModelToReuse();
 
@@ -219,12 +208,6 @@ public class RctTreeBuilder implements ITreeBuilder {
             deletionQueue.addAll(node.children);
             node.children.clear();
             node.childrenToProcess.clear();
-
-            if (node.processed)
-                node.assignedLevel.deletedProcessed += 1;
-            else {
-                node.parent.assignedLevel.deletedUnprocessed += 1;
-            }
 
             if (node.processed)
                 EventPublisher.publishNodeEvent(solver, EventType.DELETED_PROCESSED_NODE, node);

@@ -10,6 +10,11 @@ import java.util.List;
 
 public class TreeNode {
 
+    /**
+     * The root has an empty path but depth 1.
+     * Processing a node at depth d produces candidate explanations of size d, so in the
+     * standard tree algorithms node.depth == node.path.size() + 1.
+     */
     public static final int DEFAULT_DEPTH = 1;
 
     public List<OWLAxiom> path = new ArrayList<>();

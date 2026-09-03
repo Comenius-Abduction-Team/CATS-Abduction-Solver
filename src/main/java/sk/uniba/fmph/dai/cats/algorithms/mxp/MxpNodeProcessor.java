@@ -5,7 +5,6 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.INodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
-import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
@@ -13,7 +12,6 @@ import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
-import sk.uniba.fmph.dai.cats.events.Event;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
@@ -43,7 +41,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
-            solver.currentLevel.explanationEdges += 1;
+            EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
             if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                 EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
@@ -67,7 +65,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
             if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
-                solver.stats.getCurrentLevelStats().explanationEdges += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
                 if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                     EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
@@ -87,8 +85,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
     @Override
     public boolean shouldCloseNode(int explanationsFound) {
-        //TODO... to ignore MXP pruning je uz irelevantne
-        if (!Configuration.IGNORE_MXP_PRUNING && explanationLargerThanOne)
+        if (explanationLargerThanOne)
             return false;
         return explanationsFound == 0;
     }

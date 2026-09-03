@@ -85,17 +85,17 @@ public abstract class ExplanationManager {
 
     private List<Explanation> getConsistentExplanations() {
 
-        List<Explanation> filteredExplanations = new ArrayList<>();
+        List<Explanation> consistentExplanations = new ArrayList<>();
         for (Explanation explanation : explanationsToProcess) {
             if (!containsContradictoryAxioms(explanation)
                     && consistencyChecker.checkConsistencyUsingNewReasoner(explanation)) {
-                filteredExplanations.add(explanation);
+                consistentExplanations.add(explanation);
             } else {
-                solver.stats.getFilteringStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
             }
         }
 
-        return filteredExplanations;
+        return consistentExplanations;
     }
 
     private StringBuilder formatExplanationsBySize(){
@@ -120,10 +120,13 @@ public abstract class ExplanationManager {
 
     private void filterIfNotMinimal(List<Explanation> explanations){
         List<Explanation> notMinimalExplanations = new ArrayList<>();
+
         for (Explanation e : explanations){
             for (Explanation m : finalExplanations){
                 if (new HashSet<>(e.getAxioms()).containsAll(m.getAxioms())){
                     notMinimalExplanations.add(e);
+                    EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, e);
+                    break;
                 }
             }
         }
@@ -135,7 +138,7 @@ public abstract class ExplanationManager {
         for(Explanation e : explanations){
             if(!ruleChecker.isRelevant(e)){
                 notRelevantExplanations.add(e);
-                solver.stats.getFilteringStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, e);
             }
         }
         explanations.removeAll(notRelevantExplanations);

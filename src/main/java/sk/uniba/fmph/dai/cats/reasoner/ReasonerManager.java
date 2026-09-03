@@ -1,7 +1,6 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -16,12 +15,12 @@ public class ReasonerManager {
 
     public void addAxiomToOntology(OWLAxiom axiom) {
         loader.getOntologyManager().addAxiom(loader.getOntology(), axiom);
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     public void addAxiomToOriginalOntology(OWLAxiom axiom) {
         loader.getOntologyManager().addAxiom(loader.getOriginalOntology(), axiom);
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     public void addNegatedObservationToOntologies(){
@@ -32,19 +31,19 @@ public class ReasonerManager {
 
     public void addAxiomsToOntology(Collection<OWLAxiom> axioms) {
         loader.getOntologyManager().addAxioms(loader.getOntology(), axioms);
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     public void removeAxiomFromOntology(OWLAxiom axiom) {
         loader.getOntologyManager().removeAxiom(loader.getOntology(), axiom);
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     public void resetOntology(Stream<OWLAxiom> axioms) {
         loader.getOntologyManager().removeAxioms(loader.getOntology(), loader.getOntology().axioms());
-        loader.initializeReasoner();
+        loader.flushReasoner();
         loader.getOntologyManager().addAxioms(loader.getOntology(), axioms);
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     public void resetOntologyToOriginal(){
@@ -56,19 +55,7 @@ public class ReasonerManager {
     }
 
     public boolean isOntologyConsistent() {
-        loader.initializeReasoner();
+        loader.flushReasoner();
         return loader.getReasoner().isConsistent();
     }
-
-    public boolean isOntologyWithLiteralsConsistent(Collection<OWLAxiom> axioms, OWLOntology ontology) {
-        addAxiomsToOntology(axioms);
-        boolean isConsistent = isOntologyConsistent();
-        resetOntology(ontology.axioms());
-        return isConsistent;
-    }
-
-    public boolean isOriginalOntologyConsistentWithLiterals(Collection<OWLAxiom> axioms){
-        return isOntologyWithLiteralsConsistent(axioms, loader.getOriginalOntology());
-    }
-
 }

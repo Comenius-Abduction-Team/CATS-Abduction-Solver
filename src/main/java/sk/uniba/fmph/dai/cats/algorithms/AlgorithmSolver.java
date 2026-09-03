@@ -81,7 +81,6 @@ public class AlgorithmSolver {
         explanationManager.setConsistencyChecker(consistencyChecker);
 
         setOptimisations(algorithm);
-        registerSubscribersFromConfiguration();
         setAlgorithm(algorithm);
 
         if (Configuration.optimisations.contains(Optimisation.SORT_MODEL))
@@ -149,74 +148,86 @@ public class AlgorithmSolver {
 
     public void solve(){
 
-        printInfo();
-
-        addNegatedObservation();
-
-        if (Configuration.PRINT_PROGRESS)
-            progressManager.updateProgress(0, "Initializing abducibles.");
-        initializeAbducibles();
-
-        if (Configuration.PRINT_PROGRESS)
-            progressManager.updateProgress(0, "Initializing abduction.");
-
-        // nobody knows why this line is here or what it does, but it must be here or the solver doesn't work ;)
-        loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
-
-        Future<Void> future = null;
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
         try {
 
-            Callable<Void> task = this::startSolving;
-            future = executor.submit(task);
+            registerSubscribersFromConfiguration();
 
-            if (Configuration.TIMEOUT > 0)
-                future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
-            else
-                future.get();
-        }  catch (Throwable e) {
+            printInfo();
 
-                if (    (e.getClass() == ExecutionException.class &&
-                        e.getCause().getClass() == TimeoutException.class)
-                ||
-                        e.getClass() == TimeoutException.class
-                ){
-                    future.cancel(true);
-                    message += "Time-out reached! ";
-                    currentLevel.message += "time-out";
-                    logger.addLevelToPartialLog(currentLevel);
-                }
-                else {
-                    if (!(future == null))
+            addNegatedObservation();
+
+            if (Configuration.PRINT_PROGRESS)
+                progressManager.updateProgress(0, "Initializing abducibles.");
+            initializeAbducibles();
+
+            if (Configuration.PRINT_PROGRESS)
+                progressManager.updateProgress(0, "Initializing abduction.");
+
+            // reset of original ontology, reasoner acts unstable without it
+            loader.reasonerManager.resetOntologyToOriginal();
+
+            Future<Void> future = null;
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+
+            try {
+
+                Callable<Void> task = this::startSolving;
+                future = executor.submit(task);
+
+                if (Configuration.TIMEOUT > 0)
+                    future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
+                else
+                    future.get();
+            }  catch (Throwable e) {
+
+                    if (    (e.getClass() == ExecutionException.class &&
+                            e.getCause().getClass() == TimeoutException.class)
+                    ||
+                            e.getClass() == TimeoutException.class
+                    ){
                         future.cancel(true);
-                    currentLevel.error = true;
-                    String errorString = /*e.getClass().getName() + " : " + */e.getMessage();
-                    currentLevel.errorMessage = errorString;
-                    message += "An error occured: " + errorString;
-                    logger.makeErrorAndPartialLog(currentLevel, e);
-                    StaticPrinter.logError("An error occurred:", e);
-                    e.printStackTrace();
-                }
+                        message += "Time-out reached! ";
+                        currentLevel.message += "time-out";
+                        logger.addLevelToPartialLog(currentLevel);
+                    }
+                    else {
+                        if (!(future == null))
+                            future.cancel(true);
+                        currentLevel.error = true;
+                        String errorString = /*e.getClass().getName() + " : " + */e.getMessage();
+                        currentLevel.errorMessage = errorString;
+                        message += "An error occured: " + errorString;
+                        logger.makeErrorAndPartialLog(currentLevel, e);
+                        StaticPrinter.logError("An error occurred:", e);
+                        e.printStackTrace();
+                    }
+
+            } finally {
+
+                executor.shutdown();
+                if (currentLevel.finish < 0)
+                    currentLevel.finish = metrics.getRunningTime();
+                if (currentLevel.memory == 0)
+                    currentLevel.memory = metrics.measureAverageMemory();
+                if (Configuration.PRINT_PROGRESS)
+                    progressManager.updateProgress(100, "Abduction finished.");
+
+                Level filteringLevel = stats.getFilteringStats();
+                currentLevel = filteringLevel;
+
+                filteringLevel.start = metrics.getRunningTime();
+                nodeProcessor.postProcessExplanations();
+                filteringLevel.finish = metrics.getRunningTime();
+
+                metrics.setEndTime();
+                explanationManager.processExplanations(message, stats);
+
+                logger.logInfo(Configuration.getInfo(), message);
+
+            }
 
         } finally {
-
-            executor.shutdown();
-            if (currentLevel.finish < 0)
-                currentLevel.finish = metrics.getRunningTime();
-            if (currentLevel.memory == 0)
-                currentLevel.memory = metrics.measureAverageMemory();
-            if (Configuration.PRINT_PROGRESS)
-                progressManager.updateProgress(100, "Abduction finished.");
-
-            stats.getFilteringStats().start = metrics.getRunningTime();
-            nodeProcessor.postProcessExplanations();
-            stats.getFilteringStats().finish = metrics.getRunningTime();
-
-            metrics.setEndTime();
-            explanationManager.processExplanations(message, stats);
-
-            logger.logInfo(Configuration.getInfo(), message);
+            EventPublisher.unregisterSubscribers(this);
         }
 
     }
@@ -271,7 +282,7 @@ public class AlgorithmSolver {
         }
 
         treeBuilder.addNodeToTree(root);
-        currentLevel.createdNodes = 1;
+        EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, root);
 
         if(isTimeout()) {
             logger.addLevelToPartialLog(currentLevel);
@@ -300,7 +311,7 @@ public class AlgorithmSolver {
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
-            if (!canIterateNodeChildren){
+            if (!canIterateNodeChildren || treeBuilder.noChildrenLeft()){
                 EventPublisher.publishNodeEvent(this, EventType.CHILDLESS_NODE, node);
                 continue;
             }

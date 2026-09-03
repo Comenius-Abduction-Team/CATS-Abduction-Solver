@@ -36,7 +36,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
     public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
         if (pathsInCurrentLevel.contains(solver.path)){
-            StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
+            StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!"); //TODO duplicate path event?
             EventPublisher.publishEdgeEvent(solver, EventType.EDGE_PRUNED, explanation.lastAxiom);
             return true;
         }
@@ -47,15 +47,11 @@ public class MhsTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
-            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_PATH, explanation);
             return true;
         }
 
         if (nodeProcessor.shouldPruneBranch(explanation)){
-            //TODO mozno to tu nema byt .. classic node processor si to riesi, v mxp to asi chyba
-            // ??? minimalne to asi treba nahradit za edge event ...
-            EventPublisher.publishNodeEvent(solver, EventType.EDGE_PRUNED, node);
             return true;
         }
         return false;
@@ -63,9 +59,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createRoot(){
-        if (nodeProcessor.canCreateRoot(true))
-            return createNode(null, TreeNode.DEFAULT_DEPTH);
-        return null;
+        return createNode(null, TreeNode.DEFAULT_DEPTH);
     }
 
     @Override

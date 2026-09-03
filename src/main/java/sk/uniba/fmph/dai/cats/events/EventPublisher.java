@@ -6,22 +6,28 @@ import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EventPublisher {
 
-    private static AlgorithmSolver defaultSolver;
+    /**
+     * Subscribers are stored per solver because multiple solver instances may exist in one JVM.
+     * Entries MUST be removed after a solver finishes; otherwise this static map keeps the whole
+     * solver object graph reachable and prevents it from being garbage-collected.
+     */
+    private static final Map<AlgorithmSolver, CopyOnWriteArrayList<IEventSubscriber>> subscribers =
+            new ConcurrentHashMap<>();
 
-    private static HashMap<AlgorithmSolver, List<IEventSubscriber>> subscribers;
 
     public static void publishGenericEvent(AlgorithmSolver solver, EventType type){
 
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
+        List<IEventSubscriber> solverSubscribers = getSubscribers(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -35,7 +41,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
+        List<IEventSubscriber> solverSubscribers = getSubscribers(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -49,7 +55,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
+        List<IEventSubscriber> solverSubscribers = getSubscribers(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -63,7 +69,7 @@ public class EventPublisher {
         if (!Configuration.EVENTS)
             return;
 
-        List<IEventSubscriber> solverSubscribers = subscribers.get((solver != null) ? solver : defaultSolver);
+        List<IEventSubscriber> solverSubscribers = getSubscribers(solver);
 
         if (solverSubscribers == null || solverSubscribers.isEmpty())
             return;
@@ -77,20 +83,23 @@ public class EventPublisher {
             subscriber.processEvent(event);
     }
 
-    public static void registerSubscriber(AlgorithmSolver solver, IEventSubscriber subscriber){
+    private static List<IEventSubscriber> getSubscribers(AlgorithmSolver solver){
+        if (solver == null)
+            throw new IllegalArgumentException("Solver must not be null when publishing an event.");
 
-        if (subscribers == null){
-            subscribers = new HashMap<>();
-        }
-
-        subscribers.computeIfAbsent(solver, v -> new ArrayList<>(1));
-        subscribers.get(solver).add(subscriber);
-
-        if (defaultSolver == null){
-            defaultSolver = solver;
-        }
-
+        return subscribers.get(solver);
     }
 
+    public static void registerSubscriber(AlgorithmSolver solver, IEventSubscriber subscriber){
+        if (solver == null || subscriber == null)
+            throw new IllegalArgumentException("Solver and subscriber must not be null.");
+
+        subscribers.computeIfAbsent(solver, v -> new CopyOnWriteArrayList<>()).add(subscriber);
+    }
+
+    public static void unregisterSubscribers(AlgorithmSolver solver){
+        if (solver != null)
+            subscribers.remove(solver);
+    }
 
 }

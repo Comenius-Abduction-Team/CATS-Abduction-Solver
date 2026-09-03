@@ -14,11 +14,13 @@ import java.util.Collection;
 
 public class OntologyWrapper {
 
+    private final AlgorithmSolver solver;
     private final OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
     private OWLOntology ontology;
     private OWLReasoner reasoner;
 
-    OntologyWrapper(Collection<OWLAxiom> axioms) {
+    OntologyWrapper(AlgorithmSolver solver, Collection<OWLAxiom> axioms) {
+        this.solver = solver;
         try {
             ontology = ontologyManager.createOntology(axioms);
         } catch(OWLOntologyCreationException e){
@@ -47,7 +49,7 @@ public class OntologyWrapper {
             reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
         }
         boolean isConsistent = reasoner.isConsistent();
-        EventPublisher.publishGenericEvent(null, EventType.CONSISTENCY_CHECK);
+        EventPublisher.publishGenericEvent(solver, EventType.CONSISTENCY_CHECK);
         return isConsistent;
     }
 

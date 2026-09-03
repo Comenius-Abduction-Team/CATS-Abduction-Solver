@@ -62,20 +62,30 @@ public class Level {
 
     /// /// /// EDGES
     /**
-     * Number of child edges that have been created.
+     * Number of candidate child edges generated and examined in this level.
+     * An edge is counted here before it is classified as invalid, pruned, an explanation edge,
+     * or continued into a child node.
      * **/
     public int createdEdges;
 
-    //TODO pomaha nam nejak zaratavat explanation edges ako pruned? asi by bolo krajsie ich oddelit
-    //TODO pozriet ci sa pruned vola vsade kde sa ma
     /**
-     * Number of child edges that have been pruned by the 1st and 2nd pruning condition OR closed as an explanation.
+     * Number of generated child edges rejected because they would create an invalid path
+     * (e.g. a path containing complementary axioms or the observation itself).
+     * Invalid paths are tracked separately from algorithmic pruning.
+     * **/
+    public int invalidPaths;
+
+    /**
+     * Number of valid candidate child edges whose branches were cut by an algorithmic pruning condition
+     * (e.g. duplicate path or a path that contains an already known explanation).
+     * Invalid paths, explanation edges, and explanations rejected by filtering conditions are not included.
      * **/
     public int prunedEdges;
 
     /**
-     * Number of child edges that have been closed because the paths that they are concluding are valid explanations.
-     * **/
+     * Number of child edges on which the current path was identified as an explanation.
+     * The explanation may subsequently be rejected by explanation filtering.
+     */
     public int explanationEdges;
 
     /// /// /// MODELS AND REASONING
@@ -89,9 +99,10 @@ public class Level {
      * **/
     public int modelExtractions;
 
-    //TODO S TYMTO SA NIC NEROBI, JE TO V TABULKE ALE REALNE NETRACKUJEME ZIADEN UDAJ
     /**
-     * Number of stored models.
+     * Number of new unique models added to the model store during this level.
+     * Since models are not removed from the store, the total number stored at the end of a level
+     * can be obtained as the cumulative sum of this value.
      * **/
     public int storedModels;
 
@@ -112,12 +123,15 @@ public class Level {
 
     /// /// /// EXPLANATIONS
     /**
-     * Number of all explanations that have been found, including undesirable ones.
+     * Number of unique explanations that have been found (may include undesirable ones if the filtering is done during post-processing).
      * **/
-    public int originalExplanations;
+    public int possibleExplanations;
 
     /**
-     * Number of undesirable explanations that have been found filtered out.
+     * Number of candidate explanations rejected by explanation filtering conditions
+     * (irrelevance, inconsistency, or non-minimality).
+     *
+     * Filtering can happen either during the tree search or during final post-processing (level "f").
      * **/
     public int filteredExplanations;
 
@@ -185,40 +199,63 @@ public class Level {
     @Override
     public String toString() {
         return "LevelStats{" +
-                "processed_nodes=" + processedNodes +
-                ", rct_deleted_nodes=" + deletedUnprocessed +
-                ", rct_retrospectively_deleted_nodes=" + deletedProcessed +
+                "processedNodes=" + processedNodes +
+                ", rctDeletedNodes=" + deletedUnprocessed +
+                ", rctDeletedProcessedNodes=" + deletedProcessed +
                 ", edges=" + createdEdges +
-                ", pruned_edges=" + prunedEdges +
-                ", merged_nodes=" + mergedNodes +
-                ", explanation_edges=" + explanationEdges +
-                ", created_nodes=" + createdNodes +
-                ", reused_model_labels=" + reusedModels +
-                ", extracted_models=" + modelExtractions +
-                ", consistency_checks=" + consistencyChecks +
-                ", explanations=" + originalExplanations +
+                ", invalidPaths=" + invalidPaths +
+                ", prunedEdges=" + prunedEdges +
+                ", hs-dagMergedNodes=" + mergedNodes +
+                ", explanationEdges=" + explanationEdges +
+                ", createdNodes=" + createdNodes +
+                ", reusedModelLabels=" + reusedModels +
+                ", extractedModels=" + modelExtractions +
+                ", consistencyChecks=" + consistencyChecks +
+                ", possibleExplanations=" + possibleExplanations +
                 ", finalExplanations=" + finalExplanationsCount +
-                ", start_time=" + start +
-                ", first_explanation=" + firstExplanationTime +
-                ", last_explanation=" + lastExplanationTime +
-                ", finish_time=" + finish +
+                ", startTime=" + start +
+                ", firstExplanation=" + firstExplanationTime +
+                ", lastExplanation=" + lastExplanationTime +
+                ", finishTime=" + finish +
                 ", message=" + message +
                 ", error=" + error +
-                ", error_message=" + errorMessage +
+                ", errorMessage=" + errorMessage +
 
                 "}\n";
     }
 
     public void buildCsvRow(StringBuilder builder, boolean addCommas){
         StringFactory.buildCsvRow(builder, addCommas,
-                processedNodes, childlessNodes, repeatedProcessing, deletedProcessed,
-                createdEdges, prunedEdges-explanationEdges, mergedNodes, explanationEdges, createdNodes, deletedUnprocessed,
-                reusedModels, modelExtractions, storedModels, consistencyChecks, qxpCalls, mxpCalls,
+                processedNodes,
+                childlessNodes,
+                repeatedProcessing,
+                deletedProcessed,
+                createdEdges,
+                invalidPaths,
+                prunedEdges,
+                mergedNodes,
+                explanationEdges,
+                createdNodes,
+                deletedUnprocessed,
+                reusedModels,
+                modelExtractions,
+                storedModels,
+                consistencyChecks,
+                qxpCalls,
+                mxpCalls,
                 hstGlobalMin,
-                originalExplanations, filteredExplanations, finalExplanationsCount,
+                possibleExplanations,
+                filteredExplanations,
+                finalExplanationsCount,
                 memory,
-                start, finish, finish-start, firstExplanationTime, lastExplanationTime,
-                message, (error ? "error" : null), errorMessage
+                start,
+                finish,
+                finish-start,
+                firstExplanationTime,
+                lastExplanationTime,
+                message,
+                (error ? "error" : null),
+                errorMessage
         );
     }
 }

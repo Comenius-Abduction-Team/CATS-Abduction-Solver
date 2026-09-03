@@ -105,6 +105,11 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
                 handleEdgePruned(currentNode, "IRRELEVANT EXPLANATION:", "IRELEVANT_EXPLANATION");
                 break;
 
+            case NONMINIMAL_PATH:
+            case NONMINIMAL_EXPLANATION:
+                handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!", "NONMINIMAL_EXPLANATION");
+                break;
+
             case NODE_CREATED:
                 handleNodeCreated((NodeEvent) event);
                 break;
@@ -115,10 +120,6 @@ public class JsonExportEventSubscriber implements IEventSubscriber {
 
             case POSSIBLE_EXPLANATION:
                 handlePossibleExplanation((ExplanationEvent) event);
-                break;
-
-            case NONMINIMAL_EXPLANATION:
-                handleEdgePruned(currentNode, "NON-MINIMAL EXPLANATION!", "NONMINIMAL_EXPLANATION");
                 break;
 
             case TREE_FINISHED:

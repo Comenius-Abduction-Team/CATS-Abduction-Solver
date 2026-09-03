@@ -48,7 +48,7 @@ public abstract class Loader {
             ontologyManager = OWLManager.createOWLOntologyManager();
             setupOntology();
             changeReasoner(reasonerType);
-            initializeReasoner();
+            flushReasoner();
 
             StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
 
@@ -116,7 +116,7 @@ public abstract class Loader {
     }
 
     
-    public void initializeReasoner() {
+    public void flushReasoner() {
         reasoner.flush();
     }
 

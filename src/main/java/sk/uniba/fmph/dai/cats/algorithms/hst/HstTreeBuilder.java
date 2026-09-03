@@ -44,9 +44,7 @@ public class HstTreeBuilder implements ITreeBuilder {
     @Override
     public TreeNode createRoot(){
         solver.currentLevel.hstGlobalMin = globalMin;
-        if (nodeProcessor.canCreateRoot(true))
-            return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
-        return null;
+        return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
     }
 
     @Override
@@ -109,8 +107,7 @@ public class HstTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
-            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, explanation);
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_PATH, explanation);
             return true;
         }
 

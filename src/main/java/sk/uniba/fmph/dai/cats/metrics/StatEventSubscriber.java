@@ -26,26 +26,44 @@ public class StatEventSubscriber implements IEventSubscriber {
             case CHILDLESS_NODE:
                 solver.currentLevel.childlessNodes += 1;
                 break;
+            case NODE_CREATED:
+                solver.currentLevel.createdNodes += 1;
+                break;
             case EDGE_CREATED:
                 solver.currentLevel.createdEdges += 1;
                 break;
 
             case INVALID_PATH:
+                solver.currentLevel.invalidPaths += 1;
+                break;
+
             case EDGE_PRUNED:
+            case NONMINIMAL_PATH:
                 solver.currentLevel.prunedEdges += 1;
                 break;
+
             case EXPLANATION_EDGE:
-                solver.currentLevel.prunedEdges += 1;
                 solver.currentLevel.explanationEdges += 1;
                 break;
 
             case IRELEVANT_EXPLANATION:
             case INCONSISTENT_EXPLANATION:
-                solver.currentLevel.originalExplanations += 1;
+            case NONMINIMAL_EXPLANATION:
                 solver.currentLevel.filteredExplanations += 1;
+                break;
+
+            case POSSIBLE_EXPLANATION:
+                solver.currentLevel.possibleExplanations += 1;
+                break;
 
             case MODEL_REUSE:
                 solver.currentLevel.reusedModels += 1;
+                break;
+            case MODEL_EXTRACTION:
+                solver.currentLevel.modelExtractions += 1;
+                break;
+            case MODEL_STORED:
+                solver.currentLevel.storedModels += 1;
                 break;
 
             case LEVEL_FINISHED:
@@ -70,9 +88,7 @@ public class StatEventSubscriber implements IEventSubscriber {
             case CONSISTENCY_CHECK:
                 solver.currentLevel.consistencyChecks += 1;
                 break;
-            case MODEL_EXTRACTION:
-                solver.currentLevel.modelExtractions += 1;
-                break;
+
             case MERGING_NODE:
                 solver.currentLevel.mergedNodes += 1;
                 break;

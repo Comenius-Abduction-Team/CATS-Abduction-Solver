@@ -1,29 +1,23 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
-import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.LogMessage;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
-import sk.uniba.fmph.dai.cats.metrics.TreeStats;
 
 public class ClassicNodeProcessor implements INodeProcessor {
 
     private final RuleChecker ruleChecker;
     private final ConsistencyChecker consistencyChecker;
     private final ExplanationManager explanationManager;
-
-    private final TreeStats stats;
-
     private final AlgorithmSolver solver;
 
     ClassicNodeProcessor(AlgorithmSolver solver){
         ruleChecker = solver.ruleChecker;
         consistencyChecker = solver.consistencyChecker;
         explanationManager = solver.explanationManager;
-        stats = solver.stats;
         this.solver = solver;
     }
 
@@ -40,14 +34,14 @@ public class ClassicNodeProcessor implements INodeProcessor {
     @Override
     public boolean shouldPruneBranch(Explanation explanation) {
         if (!Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS)){
-            if (!ruleChecker.isRelevant(explanation)) {
-                stats.getCurrentLevelStats().explanationEdges += 1;
-                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
+            if (!ruleChecker.isConsistent(explanation)) {
+                EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
+                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
                 return true;
             }
-            if (!ruleChecker.isConsistent(explanation)) {
-                stats.getCurrentLevelStats().explanationEdges += 1;
-                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
+            if (!ruleChecker.isRelevant(explanation)) {
+                EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return true;
             }
         }
@@ -60,16 +54,16 @@ public class ClassicNodeProcessor implements INodeProcessor {
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
             return 0;
 
-        EventPublisher.publishGenericEvent(solver, EventType.EXPLANATION_EDGE);
+        EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
         if (Configuration.optimisations.contains(Optimisation.MOVE_CONSISTENCY_CHECKS)) {
 
-            if (!ruleChecker.isRelevant(explanation)) {
-                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
-                return 1;
-            }
             if (!ruleChecker.isConsistent(explanation)) {
                 EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
+                return 1;
+            }
+            if (!ruleChecker.isRelevant(explanation)) {
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return 1;
             }
         }
