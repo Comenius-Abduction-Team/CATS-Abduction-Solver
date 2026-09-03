@@ -191,7 +191,7 @@ Each algorithm uses a combination of optimisations that lead to the best average
 #### With negations (*-n: true*)
 
 | Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
-|----------------------------|-----------|-----------|-----------|
+|----------------------------|-----------|-----------|-----------|-----------|
 | Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
 | Model sorting              | ✓         | ✓         | ✓         | ✗         |
 | Triple MXP                 | ✓         | ✓         | ✓         | ✓         |
