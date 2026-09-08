@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.hsdag;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.*;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
@@ -167,6 +168,10 @@ public class HsdagBuilder implements ITreeBuilder {
 
         Set<HsdagNode> relabeledNodes = new HashSet<>();
 
+        boolean sortNodesByModelSize = Configuration.optimisations.contains(
+                        Optimisation.SORT_NODES_BY_MODEL_SIZE
+                );
+
         while (!nodes.isEmpty()){
 
             HsdagNode polledNode = nodes.poll();
@@ -189,6 +194,13 @@ public class HsdagBuilder implements ITreeBuilder {
                 Model Ci = currentNode.model;
                 Model Cj = polledNode.model;
 
+                // if node ordering depends on model size, remove a queued node
+                // before relabelling so it can be reinserted with the correct priority
+                boolean wasQueued = false;
+                if (sortNodesByModelSize) {
+                    wasQueued = queue.remove(polledNode);
+                }
+
                 // Cj\Ci
                 Set<OWLAxiom> difference = new HashSet<>(Cj.getNegatedData());
                 difference.removeAll(Ci.getNegatedData());
@@ -199,9 +211,13 @@ public class HsdagBuilder implements ITreeBuilder {
 
                 // for any ci in Cj\Ci, the edge labeled ci originating from n' is no longer allowed
                 deleteNodeDescendants(polledNode, difference);
+
+                if (sortNodesByModelSize && wasQueued) {
+                    queue.add(polledNode);
+                }
             }
 
-                nodes.addAll(polledNode.children);
+            nodes.addAll(polledNode.children);
         }
     }
 

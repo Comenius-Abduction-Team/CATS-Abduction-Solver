@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.algorithms.rctree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.*;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -144,6 +145,10 @@ public class RctTreeBuilder implements ITreeBuilder {
         Queue<RctNode> nodes = new ArrayDeque<>();
         nodes.add(root);
 
+        boolean sortNodesByModelSize = Configuration.optimisations.contains(
+                Optimisation.SORT_NODES_BY_MODEL_SIZE
+        );
+
         while (!nodes.isEmpty()){
 
             RctNode polledNode = nodes.poll();
@@ -158,6 +163,13 @@ public class RctTreeBuilder implements ITreeBuilder {
 
                 Model Ci = currentNode.model;
                 Model Cj = polledNode.model;
+
+                // if node ordering depends on model size, remove a queued node
+                // before relabelling so it can be reinserted with the correct priority
+                boolean wasQueued = false;
+                if (sortNodesByModelSize) {
+                    wasQueued = queue.remove(polledNode);
+                }
 
                 // Cj\Ci
                 Set<OWLAxiom> difference = new HashSet<>(Cj.getNegatedData());
@@ -175,6 +187,9 @@ public class RctTreeBuilder implements ITreeBuilder {
                 // update ΘCs
                 traverseTreeToUpdateIgnoredChildren(polledNode, difference);
 
+                if (sortNodesByModelSize && wasQueued) {
+                    queue.add(polledNode);
+                }
             }
 
             nodes.addAll(polledNode.children);

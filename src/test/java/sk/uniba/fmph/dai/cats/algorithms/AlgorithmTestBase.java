@@ -38,7 +38,7 @@ public abstract class AlgorithmTestBase {
     /** Whether each test should print the explanations found into the console. */
     private final boolean PRINT_EXPLANATIONS = true;
     /** Whether the tests should create logs. */
-    private final boolean CREATE_LOGS = false;
+    private final boolean CREATE_LOGS = true;
     /** Whether the tests should print the debugging prints. */
     private final boolean DEBUG_PRINTING = false;
 

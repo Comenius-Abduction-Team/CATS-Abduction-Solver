@@ -332,7 +332,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void rctMxp() {
 
         super.rctMxp();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
         testExplanationsFound(4);
 
@@ -343,9 +343,9 @@ public class FamilyTest extends AlgorithmTestBase {
     void rctMxpNoNeg() {
 
         super.rctMxpNoNeg();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
 
     }
 
@@ -415,18 +415,18 @@ public class FamilyTest extends AlgorithmTestBase {
     @Override
     void hsdagMxp() {
         super.hsdagMxp();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
     }
 
     @Test
     @Override
     void hsdagMxpNoNeg() {
         super.hsdagMxpNoNeg();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
 
     }
 

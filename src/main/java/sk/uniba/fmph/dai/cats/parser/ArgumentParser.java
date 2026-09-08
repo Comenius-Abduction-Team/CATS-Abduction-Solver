@@ -244,7 +244,14 @@ public class ArgumentParser {
                         Configuration.optimisations.add(Optimisation.FULLY_RANDOM_SET_DIVISION);
                     }
                     else if (next.contains("6")) {
-                        Configuration.optimisations.add(Optimisation.EQUAL_SIZE_RANDOM_SET_DIVISION);
+                    Configuration.optimisations.add(
+                            Optimisation.EQUAL_SIZE_RANDOM_SET_DIVISION
+                    );
+                    }
+                    if (next.contains("7")) {
+                        Configuration.optimisations.add(
+                                Optimisation.SORT_NODES_BY_MODEL_SIZE
+                        );
                     }
                     break;
                 case "-defOpt:":

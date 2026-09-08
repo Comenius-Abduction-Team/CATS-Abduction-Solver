@@ -1,7 +1,9 @@
 package sk.uniba.fmph.dai.cats.algorithms.hsdag;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 
 import java.util.*;
@@ -31,12 +33,15 @@ public class HsdagNode extends TreeNode implements Comparable<HsdagNode>{
         if (depthOrder != 0)
             return depthOrder;
 
-        int negatedDataSizeOrder = Integer.compare(
-                model.getNegatedData().size(),
-                other.model.getNegatedData().size()
-        );
-        if (negatedDataSizeOrder != 0)
-            return negatedDataSizeOrder;
+        if (Configuration.optimisations.contains(Optimisation.SORT_NODES_BY_MODEL_SIZE)) {
+            int negatedDataSizeOrder = Integer.compare(
+                    model.getNegatedData().size(),
+                    other.model.getNegatedData().size()
+            );
+
+            if (negatedDataSizeOrder != 0)
+                return negatedDataSizeOrder;
+        }
 
         return Integer.compare(id, other.id);
     }

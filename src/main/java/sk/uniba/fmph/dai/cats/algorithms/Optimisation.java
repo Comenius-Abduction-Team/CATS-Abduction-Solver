@@ -37,7 +37,15 @@ public enum Optimisation {
         public String getDescription() {
             return "random set division with equal size";
         }
+    },
+
+    SORT_NODES_BY_MODEL_SIZE {
+        @Override
+        public String getDescription() {
+            return "sort nodes by model size";
+        }
     };
+
     public String getDescription(){return "";}
 
 }

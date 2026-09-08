@@ -175,7 +175,7 @@ Partial log is a temporary version of the level log, updated after each level of
 | 4  | Triple MXP                     | (Only with negations) When MXP should be called, it is called thrice: with all axioms on its input, with only positive axioms and only negative axioms. This increases the chance of finding explanations with conflicting abducibles. |
 | 5  | Fully random set division      | When QXP divides its input set into two, the division is fully random instead of deterministic.                                                                                                                                        |
 | 6  | Equal size random set division | Same as the previous one, but the input set is divided in two halves of the same size if possible.                                                                                                                                     |
-
+| 7  | Node model-size sorting        | (HS-DAG/RCT) Nodes on the same depth are processed in ascending order of their model label size. Experimental; not enabled by default.                                                                                                 |
 ### Default optimisations
 
 The default optimisations have been chosen based on an empirical evaluation.
@@ -185,7 +185,7 @@ Each algorithm uses a combination of optimisations that lead to the best average
 
 | Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
 |----------------------------|-----------|-----------|-----------|-----------|
-| Reduced consistency checks | ✓         | ✓         | ✓         | ✗         |
+| Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
 | Model sorting              | ✓         | ✓         | ✓         | ✓         |
 
 #### With negations (*-n: true*)
@@ -193,7 +193,7 @@ Each algorithm uses a combination of optimisations that lead to the best average
 | Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
 |----------------------------|-----------|-----------|-----------|-----------|
 | Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
-| Model sorting              | ✓         | ✓         | ✓         | ✗         |
+| Model sorting              | ✓         | ✓         | ✓         | ✓         |
 | Triple MXP                 | ✓         | ✓         | ✓         | ✓         |
 
 # License

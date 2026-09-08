@@ -1,7 +1,9 @@
 package sk.uniba.fmph.dai.cats.algorithms.rctree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.metrics.Level;
@@ -45,6 +47,16 @@ public class RctNode extends TreeNode implements Comparable<RctNode> {
         int depthOrder = Integer.compare(depth, other.depth);
         if (depthOrder != 0)
             return depthOrder;
+
+        if (Configuration.optimisations.contains(Optimisation.SORT_NODES_BY_MODEL_SIZE)) {
+            int negatedDataSizeOrder = Integer.compare(
+                    model.getNegatedData().size(),
+                    other.model.getNegatedData().size()
+            );
+
+            if (negatedDataSizeOrder != 0)
+                return negatedDataSizeOrder;
+        }
 
         return Integer.compare(id, other.id);
     }
