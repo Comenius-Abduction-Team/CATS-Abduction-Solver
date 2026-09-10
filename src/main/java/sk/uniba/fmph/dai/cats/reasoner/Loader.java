@@ -1,5 +1,6 @@
 package sk.uniba.fmph.dai.cats.reasoner;
 
+import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -111,7 +112,9 @@ public abstract class Loader {
 //                break;
 //        }
 
-        setOWLReasonerFactory(new JFactFactory());
+        setOWLReasonerFactory(new OpenlletReasonerFactory());
+        //new JFactFactory();
+        //new OpenlletReasonerFactory();
         reasoner = (OWLKnowledgeExplorerReasoner) reasonerFactory.createReasoner(ontology);
     }
 

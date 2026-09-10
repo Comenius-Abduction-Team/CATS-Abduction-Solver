@@ -1,0 +1,7 @@
+level;processed nodes;childless nodes;(RCT) repeated node processing;(RCT) deleted processed nodes;created edges;pruned edges;explanation edges;created nodes;(RCT) deleted created nodes;reused models;model extractions;stored models;consistency checks;QXP calls;MXP calls;(HST) largest unassigned index;explanations;filtered explanations;final explanations;average memory;start time;finish time;duration;first explanation time;last explanation time;message;error;error message;explanations
+0;0;0;0;0;0;0;0;1;0;0;1130;0;3126;3816;2;0;0;0;3;303.909847142857;0.0;4.149658327;4.149658327;2.499260559;3.041139072;;;;{ {TechnicalReport(a)}, {ConferencePaper(a)}, {JournalArticle(a)} }
+1;1;0;0;0;85;0;0;0;0;82;0;0;0;0;0;0;0;0;0;404.696064;4.149658327;4.160309022;0.010650694999999821;;;;;;{  }
+2;82;0;0;0;6970;-13;95;0;0;4755;1189;0;3014;2840;6;0;0;0;0;338.090889087819;4.160309022;7.979329959;3.8190209370000003;;;;;;{  }
+3;4757;0;0;0;404345;9478;36;0;0;222117;14008;0;34145;32680;69;0;0;0;0;1446.3758753031004;7.979329959;98.526095292;90.546765333;;;;;;{  }
+4;46659;0;0;0;3965960;139819;156;0;0;2210680;33078;0;87403;72842;165;0;0;0;0;11707.848965521303;98.526095292;1482.218700343;1383.6926050509999;;;time-out;;;{  }
+f;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;7164;0;0.0;1482.220347985;1512.418236701;30.19788871600008;;;;;

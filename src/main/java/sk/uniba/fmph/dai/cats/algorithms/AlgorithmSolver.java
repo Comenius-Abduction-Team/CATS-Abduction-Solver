@@ -107,7 +107,7 @@ public class AlgorithmSolver {
             optimisations = algorithm.getDefaultOptimisationsWithNegations();
         else
             optimisations = algorithm.getDefaultOptimisationsWithoutNegations();
-
+      
         Configuration.optimisations.addAll(Arrays.asList(optimisations));
     }
 
@@ -172,6 +172,10 @@ public class AlgorithmSolver {
             Future<Void> future = null;
             ExecutorService executor = Executors.newSingleThreadExecutor();
 
+            double postProcessingClockTime = Double.NaN;
+            double postProcessingCpuTime = Double.NaN;
+            double postProcessingUserTime = Double.NaN;
+
             try {
 
                 Callable<Void> task = this::startSolving;
@@ -215,14 +219,35 @@ public class AlgorithmSolver {
                 if (Configuration.PRINT_PROGRESS)
                     progressManager.updateProgress(100, "Abduction finished.");
 
+                metrics.refresh();
+                double postProcessingUserStart = metrics.getUserTime();
+                double postProcessingCpuStart = metrics.getCpuTime();
+                long postProcessingClockStart = System.nanoTime();
+
                 Level filteringLevel = stats.getFilteringStats();
                 currentLevel = filteringLevel;
 
                 filteringLevel.start = metrics.getRunningTime();
                 nodeProcessor.postProcessExplanations();
-                filteringLevel.finish = metrics.getRunningTime();
 
+                metrics.refresh();
+
+                filteringLevel.finish = metrics.getRunningTime();
                 metrics.setEndTime();
+
+                postProcessingClockTime = (System.nanoTime() - postProcessingClockStart) / 1000000000.0;
+                postProcessingUserTime = metrics.getUserTime() - postProcessingUserStart;
+                double currentCpuTime = metrics.getCpuTime();
+                if (!Double.isNaN(currentCpuTime) && !Double.isNaN(postProcessingCpuStart)) {
+                    postProcessingCpuTime = currentCpuTime - postProcessingCpuStart;
+                }
+
+                StaticPrinter.print(metrics.buildTimingSummary(
+                        postProcessingClockTime,
+                        postProcessingCpuTime,
+                        postProcessingUserTime
+                ));
+
                 explanationManager.processExplanations(message, stats);
 
                 logger.logInfo(Configuration.getInfo(), message);
