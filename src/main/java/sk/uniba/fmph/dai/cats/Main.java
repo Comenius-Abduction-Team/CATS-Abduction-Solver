@@ -28,10 +28,9 @@ public class Main {
     private static final String FAMILY_MULTI = "in/multiple_obs/family.in";
     private static final String TOOTHACHE = "in/toothache.in";
 
-    private static final String TEST1 = "ore_ont_7828_1768386529480__ABD1768386936835.in";
+    private static final String TEST1 = "D:\\studium\\diplom\\CATS_ver2\\CATS-Abduction-Solver\\in\\lubm_mhsmxp_testing_mykyta\\lubm_1.in";
 
     private static final String INPUT_FILE = TEST1;
-
     public static void main(String[] args) throws Exception {
 
         if (TESTING){

@@ -29,6 +29,16 @@
         </repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-distribution</artifactId>
+                <version>5.1.20</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.github.jakloo</groupId>
@@ -36,45 +46,55 @@
             <version>8d2c377cbe</version>
         </dependency>
         <dependency>
+            <groupId>com.github.kupornikita.openllet</groupId>
+            <artifactId>openllet-owlapi</artifactId>
+            <version>758aac454c</version>
+        </dependency>
+        <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-osgidistribution</artifactId>
-            <version>[5.1.7,5.1.20]</version>
+            <version>5.1.20</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-api</artifactId>-->
-<!--            <version>2.0.13</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-reload4j</artifactId>-->
-<!--            <version>2.0.13</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.semanticweb.elk</groupId>-->
-<!--            <artifactId>elk-owlapi</artifactId>-->
-<!--            <version>0.4.3</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-reload4j</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.semanticweb.elk</groupId>
+            <artifactId>elk-owlapi</artifactId>
+            <version>0.4.3</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>1.7.36</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>net.sourceforge.owlapi</groupId>-->
-<!--            <artifactId>jfact</artifactId>-->
-<!--            <version>5.0.3</version>-->
-<!--        </dependency>-->
         <dependency>
-            <groupId>com.github.galigator.openllet</groupId>
-            <artifactId>openllet-owlapi</artifactId>
-            <version>2.6.4</version>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>jfact</artifactId>
+            <version>5.0.3</version>
         </dependency>
 <!--        <dependency>-->
-<!--            <groupId>net.sourceforge.owlapi</groupId>-->
-<!--            <artifactId>org.semanticweb.hermit</artifactId>-->
-<!--            <version>[1.4.3.517,)</version>-->
+<!--            <groupId>com.github.galigator.openllet</groupId>-->
+<!--            <artifactId>openllet-owlapi</artifactId>-->
+<!--            <version>2.6.4</version>-->
 <!--        </dependency>-->
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>org.semanticweb.hermit</artifactId>
+            <version>[1.4.3.517,)</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.14.0</version>
+        </dependency>
        <dependency>
             <groupId>com.github.Comenius-Abduction-Team</groupId>
             <artifactId>DL-Abduction-API</artifactId>
@@ -106,8 +126,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>

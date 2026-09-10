@@ -158,6 +158,9 @@ public class AlgorithmSolver {
 
         Future<Void> future = null;
         ExecutorService executor = Executors.newSingleThreadExecutor();
+        double postProcessingClockTime = Double.NaN;
+        double postProcessingCpuTime = Double.NaN;
+        double postProcessingUserTime = Double.NaN;
 
         try {
 
@@ -202,14 +205,31 @@ public class AlgorithmSolver {
             if (Configuration.PRINT_PROGRESS)
                 progressManager.updateProgress(100, "Abduction finished.");
 
+            metrics.refresh();
+            double postProcessingUserStart = metrics.getUserTime();
+            double postProcessingCpuStart = metrics.getCpuTime();
+            long postProcessingClockStart = System.nanoTime();
+
             stats.getFilteringStats().start = metrics.getRunningTime();
             nodeProcessor.postProcessExplanations();
+            metrics.refresh();
             stats.getFilteringStats().finish = metrics.getRunningTime();
+            postProcessingClockTime = (System.nanoTime() - postProcessingClockStart) / 1000000000.0;
+            postProcessingUserTime = metrics.getUserTime() - postProcessingUserStart;
+            double currentCpuTime = metrics.getCpuTime();
+            if (!Double.isNaN(currentCpuTime) && !Double.isNaN(postProcessingCpuStart)) {
+                postProcessingCpuTime = currentCpuTime - postProcessingCpuStart;
+            }
 
-            metrics.setEndTime();
             explanationManager.processExplanations(message, stats);
 
             logger.logInfo(Configuration.getInfo(), message);
+            metrics.setEndTime();
+            StaticPrinter.print(metrics.buildTimingSummary(
+                    postProcessingClockTime,
+                    postProcessingCpuTime,
+                    postProcessingUserTime
+            ));
         }
 
     }

@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.metrics;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricsThread extends Thread {
@@ -10,9 +11,13 @@ public class MetricsThread extends Thread {
     private static final long BILLION = 1000000000;
     private final long timeInterval;
     private final long thisThreadId;
-    private long startTime;
+    private final ThreadMXBean threadBean;
+    private final boolean cpuTimeSupported;
+    private final CountDownLatch initialized = new CountDownLatch(1);
+    private long startUserTime;
+    private long startCpuTime;
     private final Map<Long, TimeRecord> records = new ConcurrentHashMap<>();
-    private int memorySum;
+    private double memorySum;
     private double memoryCount;
     private final Runtime runtime;
 
@@ -27,6 +32,17 @@ public class MetricsThread extends Thread {
         thisThreadId = getId();
         setDaemon(true);
 
+        threadBean = ManagementFactory.getThreadMXBean();
+        boolean supported = threadBean.isThreadCpuTimeSupported();
+        if (supported && !threadBean.isThreadCpuTimeEnabled()) {
+            try {
+                threadBean.setThreadCpuTimeEnabled(true);
+            } catch (SecurityException | UnsupportedOperationException e) {
+                supported = false;
+            }
+        }
+        cpuTimeSupported = supported;
+
         runtime = Runtime.getRuntime();
     }
 
@@ -34,7 +50,9 @@ public class MetricsThread extends Thread {
     public void run() {
 
         updateTimeRecords();
-        startTime = getTotalUserTime();
+        startUserTime = getAccumulatedUserTime();
+        startCpuTime = getAccumulatedCpuTime();
+        initialized.countDown();
 
         while (running) {
             updateTimeRecords();
@@ -51,8 +69,7 @@ public class MetricsThread extends Thread {
      * Update the hash table of thread times.
      */
     private void updateTimeRecords() {
-        final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-        final long[] ids = bean.getAllThreadIds();
+        final long[] ids = threadBean.getAllThreadIds();
 
         for (long id : ids) {
 
@@ -60,21 +77,31 @@ public class MetricsThread extends Thread {
                 continue; // Exclude polling thread
             }
 
-            final long userTime = bean.getThreadUserTime(id);
+            final long userTime = threadBean.getThreadUserTime(id);
 
             if (userTime < 1) {
                 continue; // Thread died
             }
 
+            final long cpuTime = cpuTimeSupported ? threadBean.getThreadCpuTime(id) : userTime;
+            if (cpuTimeSupported && cpuTime < 0) {
+                continue;
+            }
+
             TimeRecord timeRecord = records.get(id);
 
             if (timeRecord == null) {
-                timeRecord = new TimeRecord(id, userTime, userTime);
+                timeRecord = new TimeRecord(id, userTime, userTime, cpuTime, cpuTime);
                 records.put(id, timeRecord);
             } else {
                 timeRecord.endUserTime = userTime;
+                timeRecord.endCpuTime = cpuTime;
             }
         }
+    }
+
+    void refreshTimeRecords() {
+        updateTimeRecords();
     }
 
     private void measureMemory(){
@@ -88,7 +115,7 @@ public class MetricsThread extends Thread {
     /**
      * Get total user time so far in nanoseconds.
      */
-    long getTotalUserTime() {
+    private long getAccumulatedUserTime() {
         final Collection<TimeRecord> hist = records.values();
         long time = 0L;
 
@@ -96,15 +123,58 @@ public class MetricsThread extends Thread {
             time += timeRecord.getUserTime();
         }
 
-        return time - startTime;
+        return time;
+    }
+
+    private long getAccumulatedCpuTime() {
+        if (!cpuTimeSupported) {
+            return -1L;
+        }
+
+        final Collection<TimeRecord> hist = records.values();
+        long time = 0L;
+
+        for (TimeRecord timeRecord : hist) {
+            time += timeRecord.getCpuTime();
+        }
+
+        return time;
+    }
+
+    long getTotalUserTime() {
+        return getAccumulatedUserTime() - startUserTime;
+    }
+
+    long getTotalCpuTime() {
+        if (!cpuTimeSupported) {
+            return -1L;
+        }
+        return getAccumulatedCpuTime() - startCpuTime;
     }
 
     double getTotalUserTimeInSec() {
         return (double) getTotalUserTime() / BILLION;
     }
 
+    double getTotalCpuTimeInSec() {
+        long cpuTime = getTotalCpuTime();
+        if (cpuTime < 0) {
+            return Double.NaN;
+        }
+        return (double) cpuTime / BILLION;
+    }
+
+    void awaitInitialization() {
+        try {
+            initialized.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void terminate(){
         running = false;
+        interrupt();
     }
 
     double getAverageMemory(){
