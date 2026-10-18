@@ -34,6 +34,9 @@ public class DebugPrintEventSubscriber implements IEventSubscriber {
             case INVALID_PATH:
                 StaticPrinter.debugPrint("[PRUNING] INVALID PATH!");
                 break;
+            case NONMINIMAL_PATH:
+                StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION: " + ((ExplanationEvent) event).explanation);
+                break;
             case EDGE_PRUNED:
                 StaticPrinter.debugPrint("[PRUNING] PRUNED PATH!");
                 break;
@@ -42,6 +45,9 @@ public class DebugPrintEventSubscriber implements IEventSubscriber {
                 break;
             case INCONSISTENT_EXPLANATION:
                 StaticPrinter.debugPrint("[FILTERING] INCONSISTENT EXPLANATION: " + ((ExplanationEvent)event).explanation);
+                break;
+            case NONMINIMAL_EXPLANATION:
+                StaticPrinter.debugPrint("[FILTERING] NON-MINIMAL EXPLANATION: " + ((ExplanationEvent) event).explanation);
                 break;
             case POSSIBLE_EXPLANATION:
                 Explanation explanation = ((ExplanationEvent)event).explanation;
@@ -61,6 +67,15 @@ public class DebugPrintEventSubscriber implements IEventSubscriber {
                 break;
             case LEVEL_STARTED:
                 StaticPrinter.debugPrint("[TREE] entering depth " + solver.currentLevel.depth);
+                break;
+            case MERGING_NODE:
+                StaticPrinter.debugPrint("[MERGING] Path already exists in history.");
+                break;
+            case DELETED_PROCESSED_NODE:
+                StaticPrinter.debugPrint("[HS-DAG/RCT] Deleting processed node: " + ((NodeEvent)event).node);
+                break;
+            case DELETED_UNPROCESSED_NODE:
+                StaticPrinter.debugPrint("[HS-DAG/RCT] Deleting not processed node: " + ((NodeEvent)event).node);
                 break;
         }
 

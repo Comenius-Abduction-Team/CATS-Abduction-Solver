@@ -15,6 +15,7 @@ import sk.uniba.fmph.dai.abduction_api.monitor.AbductionMonitor;
 import sk.uniba.fmph.dai.cats.algorithms.Algorithm;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
@@ -39,11 +40,15 @@ public class CatsAbducer implements IThreadAbducer {
 
     double timeout = 0;
     int depth = 0;
-    boolean hst = false;
     Algorithm algorithm = Algorithm.MHS_MXP;
     boolean strictRelevance = true;
     boolean logging = false;
     boolean debug = false;
+    boolean json = false;
+
+    final Set<Optimisation> optimisations = new HashSet<>();
+
+    boolean ignoreDefaultOptimizations = false;
 
     boolean multithread = false;
 
@@ -89,6 +94,35 @@ public class CatsAbducer implements IThreadAbducer {
             observations = Collections.singleton(axiom);
         else
             throwInvalidObservationException(axiom);
+    }
+
+    public boolean getIgnoreDefaultOptimisations() {
+        return ignoreDefaultOptimizations;
+    }
+
+    public void setIgnoreDefaultOptimizations(boolean ignoreDefaultOptimizations) {
+        this.ignoreDefaultOptimizations = ignoreDefaultOptimizations;
+    }
+
+    public Set<Optimisation> getOptimisations() {
+        return optimisations;
+    }
+
+    public void addOptimisation(Optimisation optimisation) {
+        this.optimisations.add(optimisation);
+    }
+
+    public void addOptimisations(Set<Optimisation> optimisations) {
+        this.optimisations.addAll(optimisations);
+    }
+
+    public void removeOptimisation(Optimisation optimisation) {
+        this.optimisations.remove(optimisation);
+    }
+
+    public void clearOptimisations() {
+        this.optimisations.clear();
+        //Configuration.optimisations.clear();
     }
 
     private void throwInvalidObservationException(OWLAxiom axiom){
@@ -167,6 +201,11 @@ public class CatsAbducer implements IThreadAbducer {
                             setDebug(debug);
                             i++;
                             continue;
+                        case "-json":
+                            boolean json = Boolean.parseBoolean(arguments[i + 1]);
+                            Configuration.JSON_EXPORT = json;
+                            i++;
+                            continue;
                         default:
                             throw new InvalidSolverParameterException(arguments[i], "Unknown solver argument");
                     }
@@ -201,7 +240,7 @@ public class CatsAbducer implements IThreadAbducer {
 
     private void setupSolver() {
 
-        timer = new MetricsThread(10);
+        timer = new MetricsThread(2);
 
         setSolverConfiguration();
 
@@ -249,6 +288,10 @@ public class CatsAbducer implements IThreadAbducer {
         Configuration.LOGGING = logging;
         Configuration.DEBUG_PRINT = debug;
         Configuration.ALGORITHM = algorithm;
+        Configuration.IGNORE_DEFAULT_OPTIMISATIONS = ignoreDefaultOptimizations;
+        Configuration.optimisations.clear();
+        Configuration.optimisations.addAll(optimisations);
+        Configuration.JSON_EXPORT = json;
 
         setDepthInConfiguration();
         setTimeoutInConfiguration();

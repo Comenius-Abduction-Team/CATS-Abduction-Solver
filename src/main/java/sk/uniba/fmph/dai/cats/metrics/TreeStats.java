@@ -12,17 +12,6 @@ public class TreeStats {
     private Level currentLevel;
     private final Level filteringLevel = new Level(-1);
 
-
-//    public Map<Level, LevelStats> levels = new HashMap<>();
-//
-//    private Level currentLevel;
-
-//    public LevelStats startNewLevel(int depth){
-//        LevelStats newStats = new LevelStats();
-//        levels.put(new Level(depth), newStats);
-//        return newStats;
-//    }
-
     public Level getCurrentLevelStats(){
         return currentLevel;
     }
@@ -82,14 +71,38 @@ public class TreeStats {
     public static String getCsvHeader(boolean addCommas){
         return StringFactory.buildCsvRow(addCommas,
                 "level",
-                "processed nodes", "childless nodes", "(RCT) repeated node processing", "(RCT) deleted processed nodes",
-                "created edges", "pruned edges", "explanation edges", "created nodes", "(RCT) deleted created nodes",
-                "reused models", "model extractions", "stored models", "consistency checks", "QXP calls", "MXP calls",
+                "processed nodes",
+                "childless nodes",
+                "(RCT) repeated node processing",
+                "(RCT/HS-DAG) deleted processed nodes",
+                "created edges",
+                "invalid paths",
+                "pruned edges",
+                "(HS-DAG) merged nodes",
+                "explanation edges",
+                "created nodes",
+                "(RCT/HS-DAG) deleted created nodes",
+                "reused models",
+                "model extractions",
+                "newly stored models",
+                "consistency checks",
+                "QXP calls",
+                "MXP calls",
                 "(HST) largest unassigned index",
-                "explanations", "filtered explanations", "final explanations",
+                "possible explanations",
+                "filtered explanations",
+                "final explanations",
                 "average memory",
-                "start time", "finish time", "duration", "first explanation time", "last explanation time",
-                "message", "error", "error message", "explanations");
+                "start time",
+                "finish time",
+                "duration",
+                "first explanation time",
+                "last explanation time",
+                "message",
+                "error",
+                "error message",
+                "explanations"
+        );
     }
 
     public String buildCsvTable(){
@@ -114,7 +127,7 @@ public class TreeStats {
         builder.append(';');
         level.buildCsvRow(builder, false);
         builder.append(';');
-        builder.append(StringFactory.getExplanationsRepresentation(level.explanations));
+        builder.append(StringFactory.getExplanationsRepresentation(level.finalExplanations));
         builder.append('\n');
 
     }

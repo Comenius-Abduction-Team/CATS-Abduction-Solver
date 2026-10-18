@@ -1,0 +1,6 @@
+{AssistantProfessor(a)}
+{Dean(a)}
+{FullProfessor(a)}
+{Chair(a)}
+{AssociateProfessor(a)}
+{VisitingProfessor(a)}

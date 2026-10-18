@@ -12,7 +12,6 @@ import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.EventType;
-import sk.uniba.fmph.dai.cats.events.Event;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
@@ -42,7 +41,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
-            solver.stats.getCurrentLevelStats().explanationEdges += 1;
+            EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
             if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                 EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
@@ -66,7 +65,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
             if (!consistencyChecker.checkOntologyConsistencyWithPath(false, true)){
 
-                solver.stats.getCurrentLevelStats().explanationEdges += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
                 if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                     EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
@@ -91,7 +90,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return explanationsFound == 0;
     }
 
-    private int addExplanationsFoundByMxp(boolean extractModel){
+    private int addExplanationsFoundByMxp(boolean extractModel) {
 
         Collection<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
@@ -125,7 +124,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return newExplanations.size();
     }
 
-    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel){
+    protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel) {
 
         Set<OWLAxiom> abduciblesCopy = new HashSet<>();
 
@@ -182,7 +181,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         if (!consistencyChecker.checkOntologyConsistency(extractModel)) {
             solver.message = LogMessage.INFO_NOTHING_TO_EXPLAIN;
-            solver.currentLevel.message = "nothing to explain";
+            solver.currentLevel.message += "nothing to explain";
             return false;
         }
 
@@ -192,11 +191,11 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
         return true;
     }
 
-    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel) {
         return runMxp(axioms,initialConsistencyAlreadyChecked,extractModel,false);
     }
 
-    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent){
+    protected Conflict runMxp(Set<OWLAxiom> axioms, boolean initialConsistencyAlreadyChecked, boolean extractModel, boolean subsequent) {
 
         if (!subsequent){
             solver.removeNegatedObservationFromPath();

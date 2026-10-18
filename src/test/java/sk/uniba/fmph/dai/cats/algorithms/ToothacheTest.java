@@ -125,7 +125,7 @@ public class ToothacheTest extends AlgorithmTestBase {
 
         super.mxp();
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(1);
 
     }
 
@@ -354,6 +354,81 @@ public class ToothacheTest extends AlgorithmTestBase {
     void rctMxpSymbolAbdNoNeg() {
 
         super.rctMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    // ------- HS-DAG -------
+
+    @Test
+    @Override
+    void hsdag() {
+        super.hsdag();
+        solve();
+        testExplanationsFound(3);
+    }
+
+    @Test
+    @Override
+    void hsdagNoNeg() {
+        super.hsdagNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbd() {
+        super.hsdagSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbdNoNeg() {
+        super.hsdagSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+
+    // ------- HS-DAG-MXP -------
+
+    @Test
+    @Override
+    void hsdagMxp() {
+        super.hsdagMxp();
+        solve();
+        testExplanationsFound(3);
+    }
+
+    @Test
+    @Override
+    void hsdagMxpNoNeg() {
+        super.hsdagMxpNoNeg();
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbd() {
+        super.hsdagMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbdNoNeg() {
+        super.hsdagMxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(2);
 

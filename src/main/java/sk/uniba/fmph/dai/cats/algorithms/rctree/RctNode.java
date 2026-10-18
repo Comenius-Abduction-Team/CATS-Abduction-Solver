@@ -1,7 +1,9 @@
 package sk.uniba.fmph.dai.cats.algorithms.rctree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.algorithms.TreeNode;
+import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
 import sk.uniba.fmph.dai.cats.data.AxiomSet;
 import sk.uniba.fmph.dai.cats.metrics.Level;
@@ -26,15 +28,11 @@ public class RctNode extends TreeNode implements Comparable<RctNode> {
 
     final List<OWLAxiom> usedLabels = new ArrayList<>();
 
-    Level level;
-
     RctNode(int id){
         this.id = id;
     }
 
-    boolean isSubsetOf(RctNode other){
-        if (this == other)
-            return false;
+    boolean isProperSubsetOf(RctNode other){
         if (model.getNegatedData().size() >= other.model.getNegatedData().size())
             return false;
         return other.model.getNegatedData().containsAll(model.getNegatedData());
@@ -46,8 +44,39 @@ public class RctNode extends TreeNode implements Comparable<RctNode> {
 
     @Override
     public int compareTo(RctNode other) {
-        //return depth.compareTo(other.depth);
+        int depthOrder = Integer.compare(depth, other.depth);
+        if (depthOrder != 0)
+            return depthOrder;
+
+        if (Configuration.optimisations.contains(Optimisation.SORT_NODES_BY_MODEL_SIZE)) {
+            int negatedDataSizeOrder = Integer.compare(
+                    model.getNegatedData().size(),
+                    other.model.getNegatedData().size()
+            );
+
+            if (negatedDataSizeOrder != 0)
+                return negatedDataSizeOrder;
+        }
+
         return Integer.compare(id, other.id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+
+        RctNode other = (RctNode) obj;
+
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 
     @Override

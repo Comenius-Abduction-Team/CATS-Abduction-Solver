@@ -1,0 +1,14 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Build output
+/target/
+*.class
+
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# CATS
+/logs/

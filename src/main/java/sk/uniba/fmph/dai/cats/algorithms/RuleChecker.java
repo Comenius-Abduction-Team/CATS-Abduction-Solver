@@ -1,39 +1,41 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
-import openllet.owlapi.OpenlletReasonerFactory;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
-import sk.uniba.fmph.dai.cats.metrics.TreeStats;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 import sk.uniba.fmph.dai.cats.reasoner.ReasonerManager;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
 
 public class RuleChecker {
 
+    private final AlgorithmSolver solver;
     private final Loader loader;
     private final ReasonerManager reasonerManager;
+    private static final AtomicLong isMinimalCalls = new AtomicLong();
 
-    private final TreeStats stats;
+    public static long getIsMinimalCalls() {
+        return isMinimalCalls.get();
+    }
 
     RuleChecker(AlgorithmSolver solver) {
+        this.solver = solver;
         this.loader = solver.loader;
         this.reasonerManager = loader.reasonerManager;
-        this.stats = solver.stats;
     }
 
     public boolean isConsistent(Explanation explanation) {
         reasonerManager.resetOntologyToInitial();
         reasonerManager.addAxiomsToOntology(explanation.getAxioms());
         boolean isConsistent = reasonerManager.isOntologyConsistent();
+        EventPublisher.publishGenericEvent(solver, EventType.CONSISTENCY_CHECK);
         reasonerManager.resetOntologyToOriginal();
         return isConsistent;
     }
@@ -43,7 +45,12 @@ public class RuleChecker {
             return false;
         }
 
+        //Pellet: 6358632757
+        //Jfact:  162259578
+
         for (Explanation minimalExplanation : explanationList) {
+            isMinimalCalls.incrementAndGet();
+
             if (new HashSet<>(explanation.getAxioms()).containsAll(minimalExplanation.getAxioms())) {
                 return false;
             }
@@ -52,58 +59,28 @@ public class RuleChecker {
     }
 
     public boolean isRelevant(Explanation explanation) {
-        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
 
-        OWLOntology ontology;
-
-        try {
-            ontology = ontologyManager.createOntology(explanation.getAxioms());
-        } catch(OWLOntologyCreationException e){
-            throw new RuntimeException("Could not create ontology while checking relevancy: " + e.getMessage());
-        }
-
-        OWLReasoner reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
-        //OWLReasoner reasoner = new ReasonerFactory().createNonBufferingReasoner(ontology);
+        OntologyWrapper ontology = new OntologyWrapper(solver, explanation.getAxioms());
 
         if(loader.isMultipleObservationOnInput()){
 
             for(OWLAxiom obs : loader.getObservation().getAxiomsInMultipleObservations()){
                 OWLAxiom negObs = AxiomManager.getComplementOfOWLAxiom(loader, obs);
-                ontologyManager.addAxiom(ontology, negObs);
-                stats.getCurrentLevelStats().consistencyChecks += 1;
-                if(Configuration.STRICT_RELEVANCE && !reasoner.isConsistent()){ //strictly relevant
+                ontology.addAxiom(negObs);
+                boolean isConsistent = ontology.isConsistent();
+                if(Configuration.STRICT_RELEVANCE && !isConsistent){ //strictly relevant
                     return false;
                 }
-                else if(!Configuration.STRICT_RELEVANCE && reasoner.isConsistent()){ //partially relevant
+                else if(!Configuration.STRICT_RELEVANCE && isConsistent){ //partially relevant
                     return true;
                 }
-                ontologyManager.removeAxiom(ontology, negObs);
+                ontology.removeAxiom(negObs);
             }
             return true;
 
         } else {
-            ontologyManager.addAxiom(ontology, loader.getNegObservation().getOwlAxiom());
-            stats.getCurrentLevelStats().consistencyChecks += 1;
-            return reasoner.isConsistent();
+            ontology.addAxiom(loader.getNegObservation().getOwlAxiom());
+            return ontology.isConsistent();
         }
-    }
-
-    public boolean checkConsistencyUsingNewReasoner(Explanation explanation) {
-        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-
-        OWLOntology ontology;
-
-        try {
-            ontology = ontologyManager.createOntology(loader.getInitialOntology().axioms());
-        } catch(OWLOntologyCreationException e){
-            throw new RuntimeException("Could not create ontology while checking relevancy: " + e.getMessage());
-        }
-
-        ontologyManager.addAxioms(ontology, explanation.getAxioms());
-
-        OWLReasoner reasoner = new OpenlletReasonerFactory().createNonBufferingReasoner(ontology);
-        stats.getCurrentLevelStats().consistencyChecks += 1;
-        return reasoner.isConsistent();
-
     }
 }

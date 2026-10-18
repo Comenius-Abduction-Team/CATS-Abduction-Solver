@@ -1,0 +1,3 @@
+{JournalArticle(a)}
+{TechnicalReport(a)}
+{ConferencePaper(a)}

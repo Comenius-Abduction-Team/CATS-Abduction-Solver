@@ -24,11 +24,7 @@ public class RootOnlyTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createRoot() {
-        if (!solver.nodeProcessor.canCreateRoot(false))
-            return null;
-
         return new TreeNode();
-
     }
 
     @Override

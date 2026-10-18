@@ -5,6 +5,8 @@ import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.ArrayDeque;
@@ -42,9 +44,7 @@ public class HstTreeBuilder implements ITreeBuilder {
     @Override
     public TreeNode createRoot(){
         solver.currentLevel.hstGlobalMin = globalMin;
-        if (nodeProcessor.canCreateRoot(true))
-            return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
-        return null;
+        return createNode(null, TreeNode.DEFAULT_DEPTH, abducibles.size() + 1);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class HstTreeBuilder implements ITreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        node.model = solver.getModelWithoutPathAxioms(modelToReuse);
+        node.model = modelToReuse;
 
         return node;
     }
@@ -107,7 +107,7 @@ public class HstTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_PATH, explanation);
             return true;
         }
 

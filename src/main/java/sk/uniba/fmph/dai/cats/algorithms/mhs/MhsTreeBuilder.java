@@ -5,15 +5,15 @@ import sk.uniba.fmph.dai.cats.algorithms.*;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.data.Explanation;
 import sk.uniba.fmph.dai.cats.data_processing.ExplanationManager;
+import sk.uniba.fmph.dai.cats.events.EventPublisher;
+import sk.uniba.fmph.dai.cats.events.EventType;
 import sk.uniba.fmph.dai.cats.model.Model;
-import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
 import java.util.*;
 
 public class MhsTreeBuilder implements ITreeBuilder {
 
     final AlgorithmSolver solver;
-    final Loader loader;
     final INodeProcessor nodeProcessor;
     final Queue<TreeNode> queue = new ArrayDeque<>();
 
@@ -24,7 +24,6 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     public MhsTreeBuilder(AlgorithmSolver solver){
         this.solver = solver;
-        this.loader = solver.loader;
         this.nodeProcessor = solver.nodeProcessor;
     }
 
@@ -37,7 +36,8 @@ public class MhsTreeBuilder implements ITreeBuilder {
     public boolean shouldPruneChildBranch(TreeNode node, Explanation explanation) {
 
         if (pathsInCurrentLevel.contains(solver.path)){
-            StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!");
+            StaticPrinter.debugPrint("[PRUNING] PATH ALREADY STORED!"); //TODO duplicate path event?
+            EventPublisher.publishEdgeEvent(solver, EventType.EDGE_PRUNED, explanation.lastAxiom);
             return true;
         }
 
@@ -47,7 +47,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
         ExplanationManager explanationManager = solver.explanationManager;
 
         if (!ruleChecker.isMinimal(explanationManager.getPossibleExplanations(), explanation)){
-            StaticPrinter.debugPrint("[PRUNING] NON-MINIMAL EXPLANATION!");
+            EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_PATH, explanation);
             return true;
         }
 
@@ -59,19 +59,15 @@ public class MhsTreeBuilder implements ITreeBuilder {
 
     @Override
     public TreeNode createRoot(){
-        if (nodeProcessor.canCreateRoot(true))
-            return createNode(null, TreeNode.DEFAULT_DEPTH);
-        return null;
+        return createNode(null, TreeNode.DEFAULT_DEPTH);
     }
 
     @Override
     public TreeNode createChildNode(TreeNode parent, Explanation label){
-
         return createNode(label, parent.depth + 1);
     }
 
     private TreeNode createNode(Explanation label, Integer depth){
-
 
         TreeNode node = new TreeNode();
 
@@ -85,7 +81,7 @@ public class MhsTreeBuilder implements ITreeBuilder {
         if (modelToReuse == null)
             return null;
 
-        node.model = solver.getModelWithoutPathAxioms(modelToReuse);
+        node.model = modelToReuse;
 
         return node;
     }

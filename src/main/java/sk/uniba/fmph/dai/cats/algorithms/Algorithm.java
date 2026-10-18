@@ -37,6 +37,32 @@ public enum Algorithm {
 
     },
 
+    HSDAG{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean matchesName(String name) {
+            return "HSDAG".equals(name) || "HS-DAG".equals(name) || "HS_DAG".equals(name);
+        }
+    },
+    HSDAG_MXP{
+        @Override
+        public boolean isHsdag() {return true;}
+
+        @Override
+        public boolean usesMxp() {
+            return true;
+        }
+
+        @Override
+        public boolean matchesName(String name) {
+            return  "HSDAG-MXP".equals(name) || "HSDAGMXP".equals(name) ||
+                    "HSDAG_X".equals(name) || "HSDAG-X".equals(name) || "HSDAGX".equals(name);
+        }
+
+    },
+
     HST_MXP {
         @Override
         public boolean isHst() {
@@ -112,6 +138,8 @@ public enum Algorithm {
         return false;
     }
 
+    public boolean isHsdag(){ return false; }
+
     /**
      * Decides which strings can be used as the value for the -alg input parameter to identify the given algorithm.
      * The default method checks whether the string matches the enum value name as it is.
@@ -128,13 +156,8 @@ public enum Algorithm {
         //MXP, QXP
         if (isRootOnly())
             return new Optimisation[0];
-        //HST, HST-MXP
-        if (isHst())
-            return new Optimisation[]{Optimisation.SORT_MODEL};
-        //RCT, RCT-MXP
-        if (isRcTree())
-            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS};
-        //MHS, MHS-MXP
+
+        //MHS(-MXP), RCT(-MXP), HS-DAG(-MXP), HST(-MXP)
         return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.SORT_MODEL};
     }
 
@@ -142,12 +165,10 @@ public enum Algorithm {
         //MXP, QXP
         if (isRootOnly())
             return new Optimisation[0];
-        //MHS, MHS-MXP
-        if (!isHst() && !isRcTree())
-            return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP,
+
+        //MHS(-MXP), RCT(-MXP), HS-DAG(-MXP), HST(-MXP)
+        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP,
                     Optimisation.SORT_MODEL};
-        //HST, HST-MXP, RCT, RCT-MXP
-        return new Optimisation[]{Optimisation.MOVE_CONSISTENCY_CHECKS, Optimisation.TRIPLE_MXP};
     }
 
 }

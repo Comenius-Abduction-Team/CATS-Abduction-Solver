@@ -44,6 +44,7 @@ public class Configuration {
     public static boolean DEBUG_PRINT = false;
     public static boolean TRACKING_STATS = true;
     public static boolean LOGGING = true;
+    public static boolean JSON_EXPORT = false;
 
     public static boolean PARTIAL_LOGS = true;
 

@@ -11,8 +11,16 @@ import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
+import uk.ac.manchester.cs.factplusplus.owlapiv3.FaCTPlusPlusReasonerFactory;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,12 +57,47 @@ public abstract class Loader {
             ontologyManager = OWLManager.createOWLOntologyManager();
             setupOntology();
             changeReasoner(reasonerType);
-            initializeReasoner();
+            flushReasoner();
 
             StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_LOADED);
 
+            Runtime runtime = Runtime.getRuntime();
+            long usedMemoryBefore = (runtime.totalMemory() - runtime.freeMemory());
+
             if (reasoner.isConsistent()) {
                 StaticPrinter.logInfo(LogMessage.INFO_ONTOLOGY_CONSISTENCY);
+
+
+                long usedMemoryAfter = (runtime.totalMemory() - runtime.freeMemory());
+
+                long memoryIncreased = (usedMemoryAfter-usedMemoryBefore) / (1024*1024);
+
+                Path file = Paths.get("consistencyCalls.txt");
+
+                long oldValue = 0;
+
+                try {
+                    if (Files.exists(file)) {
+                        String content = Files.readString(file).trim();
+
+                        if (!content.isEmpty()) {
+                            oldValue = Long.parseLong(content);
+                        }
+                    }
+
+                    long newValue = oldValue + Math.toIntExact(memoryIncreased);
+
+                    Files.writeString(
+                            file,
+                            String.valueOf(newValue),
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING
+                    );
+
+                } catch (IOException | NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+
             } else {
                 reasoner.dispose();
                 throw new RuntimeException(LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
@@ -96,30 +139,26 @@ public abstract class Loader {
 
     
     public void changeReasoner(ReasonerType reasonerType) {
-        // Note: we only use JFact for now
 
-//        switch (reasonerType) {
-//            case PELLET:
-//                setOWLReasonerFactory(new OpenlletReasonerFactory());
-//                break;
-//
+        switch (reasonerType) {
+            case PELLET:
+                setOWLReasonerFactory(new OpenlletReasonerFactory());
+                break;
+
 //            case HERMIT:
 //                setOWLReasonerFactory(new ReasonerFactory());
 //                break;
-//
-//            case JFACT:
-//                setOWLReasonerFactory(new JFactFactory());
-//                break;
-//        }
 
-        setOWLReasonerFactory(new OpenlletReasonerFactory());
-        //new JFactFactory();
-        //new OpenlletReasonerFactory();
+            case JFACT:
+                setOWLReasonerFactory(new JFactFactory());
+                break;
+        }
+
         reasoner = (OWLKnowledgeExplorerReasoner) reasonerFactory.createReasoner(ontology);
     }
 
     
-    public void initializeReasoner() {
+    public void flushReasoner() {
         reasoner.flush();
     }
 

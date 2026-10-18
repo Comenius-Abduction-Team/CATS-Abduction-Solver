@@ -1,7 +1,6 @@
 package sk.uniba.fmph.dai.cats.parser;
 
 import org.semanticweb.owlapi.model.*;
-import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.IPrinter;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
 
@@ -72,7 +71,7 @@ public abstract class ObservationParser {
             processMultipleObservations(reductionClass, observationsAxioms, reductionIndividual);
         }
 
-        loader.initializeReasoner();
+        loader.flushReasoner();
     }
 
     private void processClassAssertionAxiom(OWLClassAssertionAxiom axiom){

@@ -40,7 +40,7 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 * **-o: \<ontology\>** observation $O$ in the form of an ontology (in any ontology syntax), which has to be written in one line.
 
 #### Algorithm settings:
-* *-alg: \[ mhs | hst | rct | mhs-mxp | hst-mxp | rct-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
+* *-alg: \[ mhs | hst | rct | hsdag | mhs-mxp | hst-mxp | rct-mxp |  hsdag-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
 * *-t: \<positive integer\>* the time after which the search for explanations terminates. By default, it is not set.
 * *-d: \<positive integer\>* the depth of the HS-tree, when the search terminates. For example, for *-d: 2* search terminates after completing level 1 of HS-tree. By default, it is not set.
 
@@ -50,6 +50,7 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 * *-l: \<boolean\>* allows assertions of form $i, i: R$ in explanations, i.e. individual $i$ can be in role $R$ with itself (it is also called *looping*).  
 
 #### Output:
+* *-json: \<boolean\>* whether a json file containing information for [HS-tree Visualizer](https://m1chaelat.github.io/HSTreeVisualizer/) should be created. *false* by default.
 * *-log: \<boolean\>* whether any output log files should be created. *true* by default.
 * *-partial: \<boolean\>* whether partial log files (see section Output) should be created. *true* by default. If set to *false*, the run may be faster, bu there are no level data in the case of a crash.
 * *-stats: \<boolean\>* whether stats for the level log should be tracked. *true* by default. If set to *false*, the run may be a bit faster, but no data is stored in the level logs. 
@@ -174,7 +175,7 @@ Partial log is a temporary version of the level log, updated after each level of
 | 4  | Triple MXP                     | (Only with negations) When MXP should be called, it is called thrice: with all axioms on its input, with only positive axioms and only negative axioms. This increases the chance of finding explanations with conflicting abducibles. |
 | 5  | Fully random set division      | When QXP divides its input set into two, the division is fully random instead of deterministic.                                                                                                                                        |
 | 6  | Equal size random set division | Same as the previous one, but the input set is divided in two halves of the same size if possible.                                                                                                                                     |
-
+| 7  | Node model-size sorting        | (HS-DAG/RCT) Nodes on the same depth are processed in ascending order of their model label size. Experimental; not enabled by default.                                                                                                 |
 ### Default optimisations
 
 The default optimisations have been chosen based on an empirical evaluation.
@@ -182,18 +183,18 @@ Each algorithm uses a combination of optimisations that lead to the best average
 
 #### Without negations (*-n: false*)
 
-| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
-|----------------------------|-----------|-----------|-----------|
-| Reduced consistency checks | ✓         | ✓         | ✗         |
-| Model sorting              | ✓         | ✗         | ✓         |
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
+|----------------------------|-----------|-----------|-----------|-----------|
+| Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
+| Model sorting              | ✓         | ✓         | ✓         | ✓         |
 
 #### With negations (*-n: true*)
 
-| Optimisation               | MHS(-MXP) | RCT(-MXP) | HST(-MXP) |
-|----------------------------|-----------|-----------|-----------|
-| Reduced consistency checks | ✓         | ✓         | ✓         |
-| Model sorting              | ✓         | ✗         | ✗         |
-| Triple MXP                 | ✓         | ✓         | ✓         |
+| Optimisation               | MHS(-MXP) | RCT(-MXP) | HSDAG(-MXP) | HST(-MXP) |
+|----------------------------|-----------|-----------|-----------|-----------|
+| Reduced consistency checks | ✓         | ✓         | ✓         | ✓         |
+| Model sorting              | ✓         | ✓         | ✓         | ✓         |
+| Triple MXP                 | ✓         | ✓         | ✓         | ✓         |
 
 # License
 
@@ -202,6 +203,6 @@ See the [LICENSE](./LICENSE) file for more information.
 
 # Acknowledgements
 
-The development of this sofwtare was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
+The development of this software was supported by the Slovak Republic under the grant no. APVV-19-0220 (ORBIS) and by the EU
 under the H2020 grant no. 952215 (TAILOR)
 

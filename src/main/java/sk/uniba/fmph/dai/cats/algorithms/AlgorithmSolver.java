@@ -1,6 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import sk.uniba.fmph.dai.cats.algorithms.hsdag.HsdagBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
@@ -8,6 +9,7 @@ import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.RootOnlyTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.TripleMxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.rctree.RctTreeBuilder;
+import sk.uniba.fmph.dai.cats.application.EmptyModelException;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.common.StaticPrinter;
 import sk.uniba.fmph.dai.cats.common.StringFactory;
@@ -76,9 +78,9 @@ public class AlgorithmSolver {
         this.progressManager = progressManager;
 
         consistencyChecker = new ConsistencyChecker(this);
+        explanationManager.setConsistencyChecker(consistencyChecker);
 
         setOptimisations(algorithm);
-        registerSubscribersFromConfiguration();
         setAlgorithm(algorithm);
 
         if (Configuration.optimisations.contains(Optimisation.SORT_MODEL))
@@ -104,7 +106,7 @@ public class AlgorithmSolver {
             optimisations = algorithm.getDefaultOptimisationsWithNegations();
         else
             optimisations = algorithm.getDefaultOptimisationsWithoutNegations();
-      
+
         Configuration.optimisations.addAll(Arrays.asList(optimisations));
     }
 
@@ -113,6 +115,8 @@ public class AlgorithmSolver {
             EventPublisher.registerSubscriber(this, new StatEventSubscriber(this));
         if (Configuration.DEBUG_PRINT)
             EventPublisher.registerSubscriber(this, new DebugPrintEventSubscriber(this));
+        if (Configuration.JSON_EXPORT)
+            EventPublisher.registerSubscriber(this, new JsonExportEventSubscriber(this));
     }
 
     private void setAlgorithm(Algorithm algorithm){
@@ -132,6 +136,8 @@ public class AlgorithmSolver {
         // TreeBuilder
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
+        else if (algorithm.isHsdag())
+            treeBuilder = new HsdagBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);
         else if (algorithm.isRootOnly())
@@ -142,86 +148,98 @@ public class AlgorithmSolver {
 
     public void solve(){
 
-        printInfo();
-
-        addNegatedObservation();
-
-        if (Configuration.PRINT_PROGRESS)
-            progressManager.updateProgress(0, "Initializing abducibles.");
-        initializeAbducibles();
-
-        if (Configuration.PRINT_PROGRESS)
-            progressManager.updateProgress(0, "Initializing abduction.");
-
-        // nobody know why this line is here or what it does, but it must be here or the solver doesn't work ;)
-        loader.reasonerManager.isOriginalOntologyConsistentWithLiterals(abducibleAxioms.getAxioms());
-
-        Future<Void> future = null;
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        double postProcessingClockTime = Double.NaN;
-        double postProcessingCpuTime = Double.NaN;
-        double postProcessingUserTime = Double.NaN;
-
         try {
 
-            Callable<Void> task = this::startSolving;
-            future = executor.submit(task);
+            registerSubscribersFromConfiguration();
 
-            if (Configuration.TIMEOUT > 0)
-                future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
-            else
-                future.get();
-        }  catch (Throwable e) {
+            printInfo();
 
-                if (    (e.getClass() == ExecutionException.class &&
-                        e.getCause().getClass() == TimeoutException.class)
-                ||
-                        e.getClass() == TimeoutException.class
-                ){
-                    future.cancel(true);
-                    message += "Time-out reached! ";
-                    currentLevel.message = "time-out";
-                    logger.addLevelToPartialLog(currentLevel);
-                }
-                else {
-                    if (!(future == null))
-                        future.cancel(true);
-                    currentLevel.error = true;
-                    String errorString = /*e.getClass().getName() + " : " + */e.getMessage();
-                    currentLevel.errorMessage = errorString;
-                    message += "An error occured: " + errorString;
-                    logger.makeErrorAndPartialLog(currentLevel, e);
-                    StaticPrinter.logError("An error occurred:", e);
-                    e.printStackTrace();
-                }
+            addNegatedObservation();
 
-        } finally {
-
-            executor.shutdown();
-            if (currentLevel.finish < 0)
-                currentLevel.finish = metrics.getRunningTime();
-            if (currentLevel.memory == 0)
-                currentLevel.memory = metrics.measureAverageMemory();
             if (Configuration.PRINT_PROGRESS)
-                progressManager.updateProgress(100, "Abduction finished.");
+                progressManager.updateProgress(0, "Initializing abducibles.");
+            initializeAbducibles();
 
-            metrics.refresh();
-            double postProcessingUserStart = metrics.getUserTime();
-            double postProcessingCpuStart = metrics.getCpuTime();
-            long postProcessingClockStart = System.nanoTime();
+            if (Configuration.PRINT_PROGRESS)
+                progressManager.updateProgress(0, "Initializing abduction.");
 
-            stats.getFilteringStats().start = metrics.getRunningTime();
-            nodeProcessor.postProcessExplanations();
-            metrics.refresh();
-            stats.getFilteringStats().finish = metrics.getRunningTime();
-            postProcessingClockTime = (System.nanoTime() - postProcessingClockStart) / 1000000000.0;
-            postProcessingUserTime = metrics.getUserTime() - postProcessingUserStart;
-            double currentCpuTime = metrics.getCpuTime();
-            if (!Double.isNaN(currentCpuTime) && !Double.isNaN(postProcessingCpuStart)) {
-                postProcessingCpuTime = currentCpuTime - postProcessingCpuStart;
+            // reset of original ontology, reasoner acts unstable without it
+            loader.reasonerManager.resetOntologyToOriginal();
+
+            Future<Void> future = null;
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+
+            double postProcessingClockTime = Double.NaN;
+            double postProcessingCpuTime = Double.NaN;
+            double postProcessingUserTime = Double.NaN;
+
+            try {
+
+                Callable<Void> task = this::startSolving;
+                future = executor.submit(task);
+
+                if (Configuration.TIMEOUT > 0)
+                    future.get(Configuration.TIMEOUT, TimeUnit.SECONDS);
+                else
+                    future.get();
+            }  catch (Throwable e) {
+
+                    if (    (e.getClass() == ExecutionException.class &&
+                            e.getCause().getClass() == TimeoutException.class)
+                    ||
+                            e.getClass() == TimeoutException.class
+                    ){
+                        future.cancel(true);
+                        message += "Time-out reached! ";
+                        currentLevel.message += "time-out";
+                        logger.addLevelToPartialLog(currentLevel);
+                    }
+                    else {
+                        if (!(future == null))
+                            future.cancel(true);
+                        currentLevel.error = true;
+                        String errorString = /*e.getClass().getName() + " : " + */e.getMessage();
+                        currentLevel.errorMessage = errorString;
+                        message += "An error occured: " + errorString;
+                        logger.makeErrorAndPartialLog(currentLevel, e);
+                        StaticPrinter.logError("An error occurred:", e);
+                        e.printStackTrace();
+                    }
+
+            } finally {
+
+                executor.shutdown();
+                if (currentLevel.finish < 0)
+                    currentLevel.finish = metrics.getRunningTime();
+                if (currentLevel.memory == 0)
+                    currentLevel.memory = metrics.measureAverageMemory();
+                if (Configuration.PRINT_PROGRESS)
+                    progressManager.updateProgress(100, "Abduction finished.");
+
+                Level filteringLevel = stats.getFilteringStats();
+                currentLevel = filteringLevel;
+
+                filteringLevel.start = metrics.getRunningTime();
+                nodeProcessor.postProcessExplanations();
+                filteringLevel.finish = metrics.getRunningTime();
+                metrics.refresh();
+                double postProcessingUserStart = metrics.getUserTime();
+                double postProcessingCpuStart = metrics.getCpuTime();
+                long postProcessingClockStart = System.nanoTime();
+
+                stats.getFilteringStats().start = metrics.getRunningTime();
+                nodeProcessor.postProcessExplanations();
+                metrics.refresh();
+                stats.getFilteringStats().finish = metrics.getRunningTime();
+                postProcessingClockTime = (System.nanoTime() - postProcessingClockStart) / 1000000000.0;
+                postProcessingUserTime = metrics.getUserTime() - postProcessingUserStart;
+                double currentCpuTime = metrics.getCpuTime();
+                if (!Double.isNaN(currentCpuTime) && !Double.isNaN(postProcessingCpuStart)) {
+                    postProcessingCpuTime = currentCpuTime - postProcessingCpuStart;
             }
 
-            explanationManager.processExplanations(message, stats);
+                metrics.setEndTime();
+                explanationManager.processExplanations(message, stats);
 
             logger.logInfo(Configuration.getInfo(), message);
             metrics.setEndTime();
@@ -230,6 +248,11 @@ public class AlgorithmSolver {
                     postProcessingCpuTime,
                     postProcessingUserTime
             ));
+                logger.logInfo(Configuration.getInfo(), message);
+            }
+
+        } finally {
+            EventPublisher.unregisterSubscribers(this);
         }
 
     }
@@ -249,6 +272,8 @@ public class AlgorithmSolver {
 
     protected void initializeAbducibles() {
         TransformedAbducibles transformedAbduciblesFromInput = new TransformedAbducibles(loader);
+        transformedAbduciblesFromInput.filterAxiomsThatCannotBeInExplanations(loader);
+
         abducibleAxioms = treeBuilder.createAbducibles(transformedAbduciblesFromInput);
         modelManager.setExtractor(new ModelExtractor(loader, abducibleAxioms));
         nodeProcessor.storeAbduciblesIfNeeded(abducibleAxioms);
@@ -263,18 +288,26 @@ public class AlgorithmSolver {
         currentLevel.start = metrics.getRunningTime();
 
         TreeNode root = null;
+        boolean emptyModel = false;
 
         boolean shouldExtractModel = treeBuilder.shouldExtractModel();
-        if (nodeProcessor.canCreateRoot(shouldExtractModel)) {
-            root = treeBuilder.createRoot();
+        try {
+            if (nodeProcessor.canCreateRoot(shouldExtractModel)) {
+                root = treeBuilder.createRoot();
+            }
+        } catch (EmptyModelException e) {
+            emptyModel = true;
+            message = e.getMessage();
+            currentLevel.message += "empty model found";
         }
-        if (root == null) {
+
+        if (root == null || emptyModel) {
             EventPublisher.publishGenericEvent(this, EventType.ROOT_NOT_CREATED);
             return null;
         }
 
         treeBuilder.addNodeToTree(root);
-        currentLevel.createdNodes = 1;
+        EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, root);
 
         if(isTimeout()) {
             logger.addLevelToPartialLog(currentLevel);
@@ -303,7 +336,7 @@ public class AlgorithmSolver {
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
-            if (!canIterateNodeChildren){
+            if (!canIterateNodeChildren || treeBuilder.noChildrenLeft()){
                 EventPublisher.publishNodeEvent(this, EventType.CHILDLESS_NODE, node);
                 continue;
             }
@@ -352,9 +385,18 @@ public class AlgorithmSolver {
                         throw new TimeoutException();
                     }
 
-                    int explanationsFound = nodeProcessor.findExplanations(
-                            explanation, treeBuilder.shouldExtractModel()
+                    int explanationsFound = 0;
+
+                    try {
+                        explanationsFound = nodeProcessor.findExplanations(
+                                explanation, treeBuilder.shouldExtractModel()
                         );
+                    } catch (EmptyModelException e) {
+                        message = e.getMessage();
+                        currentLevel.message += "empty model found";
+                        return null;
+                    }
+
                     boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
 
                     if (shouldCloseNode){
@@ -375,8 +417,10 @@ public class AlgorithmSolver {
                 }
 
                 TreeNode childNode = treeBuilder.createChildNode(node, explanation);
-                treeBuilder.addNodeToTree(childNode);
-                EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
+                if (childNode != null) {
+                    treeBuilder.addNodeToTree(childNode);
+                    EventPublisher.publishNodeEvent(this, EventType.NODE_CREATED, childNode);
+                }
                 path.clear();
 
             }
@@ -449,10 +493,6 @@ public class AlgorithmSolver {
 
     public Model findAndGetModelToReuse(){
         return modelManager.findAndGetModelToReuse(path);
-    }
-
-    public Model getModelWithoutPathAxioms(Model model){
-        return modelManager.getModelWithoutAxioms(model, path);
     }
 
     public void updateProgress(){

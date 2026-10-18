@@ -7,10 +7,7 @@ import sk.uniba.fmph.dai.cats.data.Explanation;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StringFactory {
@@ -28,6 +25,7 @@ public class StringFactory {
         for (OWLAxiom owlAxiom : axioms) {
             result.add(getRepresentation(owlAxiom));
         }
+        //Collections.sort(result);
         return "{" + StringUtils.join(result, ",") + "}";
     }
 
@@ -36,6 +34,7 @@ public class StringFactory {
         for (OWLAxiom owlAxiom : explanation.getAxioms()) {
             result.add(getRepresentation(owlAxiom));
         }
+        //Collections.sort(result);
         return "{" + StringUtils.join(result, ",") + "}";
     }
 
@@ -125,19 +124,6 @@ public class StringFactory {
         StringBuilder builder = new StringBuilder();
         buildCsvRow(builder, addComas, objects);
         return builder.toString();
-
-//        for (int i = 0; i < objects.length; i++) {
-//            if (objects[i] != null)
-//                builder.append(objects[i].toString());
-//            if (i + 1 != objects.length) {
-//                builder.append(';');
-//                if (addComas)
-//                    builder.append(' ');
-//            }
-//        }
-//
-//        return builder.toString();
-
     }
 
     public static void buildCsvRow(StringBuilder builder, boolean addComas, Object... objects) {
@@ -166,5 +152,4 @@ public class StringFactory {
     public static String formatTime(long time){
         return formatTimeByPattern(time, "HH:mm:ss");
     }
-
 }

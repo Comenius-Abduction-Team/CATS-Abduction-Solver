@@ -2,6 +2,7 @@ package sk.uniba.fmph.dai.cats.data_processing;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolver;
+import sk.uniba.fmph.dai.cats.algorithms.ConsistencyChecker;
 import sk.uniba.fmph.dai.cats.algorithms.RuleChecker;
 import sk.uniba.fmph.dai.cats.common.*;
 import sk.uniba.fmph.dai.cats.data.Explanation;
@@ -23,6 +24,7 @@ public abstract class ExplanationManager {
     protected AlgorithmSolver solver;
 
     private RuleChecker ruleChecker;
+    private ConsistencyChecker consistencyChecker;
     protected IPrinter printer;
     MetricsManager timer;
 
@@ -31,8 +33,10 @@ public abstract class ExplanationManager {
     public ExplanationLogger logger;
 
     public void addPossibleExplanation(Explanation explanation){
-        possibleExplanations.add(explanation);
-        EventPublisher.publishExplanationEvent(solver, EventType.POSSIBLE_EXPLANATION, explanation);
+        if (!possibleExplanations.contains(explanation)) {
+            possibleExplanations.add(explanation);
+            EventPublisher.publishExplanationEvent(solver, EventType.POSSIBLE_EXPLANATION, explanation);
+        }
     }
 
     abstract public void processExplanations(String message, TreeStats stats);
@@ -41,6 +45,10 @@ public abstract class ExplanationManager {
         this.solver = solver;
         ruleChecker = solver.ruleChecker;
         timer = solver.metrics;
+    }
+
+    public void setConsistencyChecker(ConsistencyChecker consistencyChecker) {
+        this.consistencyChecker = consistencyChecker;
     }
     
     public void setPossibleExplanations(Collection<Explanation> possibleExplanations) {
@@ -77,17 +85,17 @@ public abstract class ExplanationManager {
 
     private List<Explanation> getConsistentExplanations() {
 
-        List<Explanation> filteredExplanations = new ArrayList<>();
+        List<Explanation> consistentExplanations = new ArrayList<>();
         for (Explanation explanation : explanationsToProcess) {
             if (!containsContradictoryAxioms(explanation)
-                    && ruleChecker.checkConsistencyUsingNewReasoner(explanation)) {
-                filteredExplanations.add(explanation);
+                    && consistencyChecker.checkConsistencyUsingNewReasoner(explanation)) {
+                consistentExplanations.add(explanation);
             } else {
-                solver.stats.getFilteringStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
             }
         }
 
-        return filteredExplanations;
+        return consistentExplanations;
     }
 
     private StringBuilder formatExplanationsBySize(){
@@ -112,10 +120,13 @@ public abstract class ExplanationManager {
 
     private void filterIfNotMinimal(List<Explanation> explanations){
         List<Explanation> notMinimalExplanations = new ArrayList<>();
+
         for (Explanation e : explanations){
             for (Explanation m : finalExplanations){
                 if (new HashSet<>(e.getAxioms()).containsAll(m.getAxioms())){
                     notMinimalExplanations.add(e);
+                    EventPublisher.publishExplanationEvent(solver, EventType.NONMINIMAL_EXPLANATION, e);
+                    break;
                 }
             }
         }
@@ -127,7 +138,7 @@ public abstract class ExplanationManager {
         for(Explanation e : explanations){
             if(!ruleChecker.isRelevant(e)){
                 notRelevantExplanations.add(e);
-                solver.stats.getFilteringStats().filteredExplanations += 1;
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, e);
             }
         }
         explanations.removeAll(notRelevantExplanations);
@@ -230,7 +241,7 @@ public abstract class ExplanationManager {
         for (Explanation e : finalExplanations){
 
             Level level = e.level;
-            level.finalExplanations++;
+            level.finalExplanationsCount++;
 
             double time = e.getAcquireTime();
 

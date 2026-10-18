@@ -4,38 +4,33 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.stream.Collectors;
 
-public class ModelData extends HashSet<OWLAxiom> {
-
-    private Iterator<OWLAxiom> iterator;
+public class ModelData extends HashSet<OWLAxiom> implements Comparable<ModelData> {
 
     public ModelData(){
         super();
-    }
-
-    ModelData(Iterator<OWLAxiom> iterator){
-        this.iterator = iterator;
     }
 
     ModelData(Collection<OWLAxiom> collection){
         super(collection);
     }
 
-    ModelData(Collection<OWLAxiom> collection, Iterator<OWLAxiom> iterator){
-        super(collection);
-        this.iterator = iterator;
-    }
-
     @Override
-    public Iterator<OWLAxiom> iterator() {
-        if (iterator == null)
-            return super.iterator();
-        else
-            return iterator;
-    }
+    public int compareTo(ModelData o) {
+        if (this.equals(o))
+            return 0;
 
-    public void setIterator(Iterator<OWLAxiom> iterator) {
-        this.iterator = iterator;
+        String firstString = this.stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining());
+
+        String secondString = o.stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining());
+
+        return firstString.compareTo(secondString);
     }
 }

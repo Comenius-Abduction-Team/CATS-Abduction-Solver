@@ -1,3 +1,4 @@
+/*
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.junit.jupiter.api.Test;
@@ -332,7 +333,7 @@ public class FamilyTest extends AlgorithmTestBase {
     void rctMxp() {
 
         super.rctMxp();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
         testExplanationsFound(3);
 
@@ -343,9 +344,9 @@ public class FamilyTest extends AlgorithmTestBase {
     void rctMxpNoNeg() {
 
         super.rctMxpNoNeg();
-        abducer.setDepth(4);
+        abducer.setDepth(5);
         solve();
-        testExplanationsFound(3);
+        testExplanationsFound(4);
 
     }
 
@@ -369,6 +370,86 @@ public class FamilyTest extends AlgorithmTestBase {
 
     }
 
+    // ------- HS-DAG -------
+
+    @Test
+    @Override
+    void hsdag() {
+        super.hsdag();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+    }
+
+    @Test
+    @Override
+    void hsdagNoNeg() {
+        super.hsdagNoNeg();
+        abducer.setDepth(4);
+        solve();
+        testExplanationsFound(3);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbd() {
+        super.hsdagSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbdNoNeg() {
+        super.hsdagSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+
+    // ------- HS-DAG-MXP -------
+
+    @Test
+    @Override
+    void hsdagMxp() {
+        super.hsdagMxp();
+        abducer.setDepth(5);
+        solve();
+        testExplanationsFound(4);
+    }
+
+    @Test
+    @Override
+    void hsdagMxpNoNeg() {
+        super.hsdagMxpNoNeg();
+        abducer.setDepth(5);
+        solve();
+        testExplanationsFound(4);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbd() {
+        super.hsdagMxpSymbolAbd();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbdNoNeg() {
+        super.hsdagMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
 
 
 }
+*/

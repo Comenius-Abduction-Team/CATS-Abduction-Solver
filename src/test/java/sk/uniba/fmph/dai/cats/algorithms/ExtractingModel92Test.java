@@ -54,7 +54,7 @@ public class ExtractingModel92Test extends AlgorithmTestBase {
 
         super.qxpNoNeg();
         solve();
-        testExplanationsFound(0);
+        testExplanationsFound(1);
 
     }
 
@@ -355,6 +355,81 @@ public class ExtractingModel92Test extends AlgorithmTestBase {
     void rctMxpSymbolAbdNoNeg() {
 
         super.rctMxpSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+    // ------- HS-DAG -------
+
+    @Test
+    @Override
+    void hsdag() {
+        super.hsdag();
+        solve();
+        testExplanationsFound(4);
+    }
+
+    @Test
+    @Override
+    void hsdagNoNeg() {
+        super.hsdagNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbd() {
+        super.hsdagSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hsdagSymbolAbdNoNeg() {
+        super.hsdagSymbolAbdNoNeg();
+        solve();
+        testExplanationsFound(0);
+
+    }
+
+
+    // ------- HS-DAG-MXP -------
+
+    @Test
+    @Override
+    void hsdagMxp() {
+        super.hsdagMxp();
+        solve();
+        testExplanationsFound(4);
+    }
+
+    @Test
+    @Override
+    void hsdagMxpNoNeg() {
+        super.hsdagMxpNoNeg();
+        solve();
+        testExplanationsFound(1);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbd() {
+        super.hsdagMxpSymbolAbd();
+        solve();
+        testExplanationsFound(2);
+
+    }
+
+    @Test
+    @Override
+    void hsdagMxpSymbolAbdNoNeg() {
+        super.hsdagMxpSymbolAbdNoNeg();
         solve();
         testExplanationsFound(0);
 
