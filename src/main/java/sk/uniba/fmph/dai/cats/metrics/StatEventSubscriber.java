@@ -71,10 +71,13 @@ public class StatEventSubscriber implements IEventSubscriber {
                 level += 1;
                 if( level == 3) {
                     solver.metrics.changeTimeout();
+                    //solver.metrics.writeMemory();
                 }
             case TREE_FINISHED:
                 solver.currentLevel.memory = solver.metrics.measureAverageMemory();
                 solver.currentLevel.finish = solver.metrics.getRunningTime();
+                solver.currentLevel.memoryPeak = solver.metrics.getPeakMemory();
+                solver.metrics.clearMemory();
                 break;
 
             case LEVEL_STARTED:

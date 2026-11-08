@@ -192,6 +192,14 @@ public class ArgumentParser {
                         System.err.println("Wrong 'logging (-log)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
+                case "-m:":
+                case "-m":
+                    if (silentTrue || next.equals("true")) {
+                        Configuration.MEMORY_LOGGING = true;
+                    } else if (!next.equals("false")) {
+                        System.err.println("Wrong 'memory logging (-m)' value: " + next + ", allowed values are 'true' and 'false'");
+                    }
+                    break;
                 case "-abdF:":
                 case "-abdF":
                     if (!(new File(next).exists())){

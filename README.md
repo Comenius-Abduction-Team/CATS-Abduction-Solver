@@ -38,6 +38,7 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 #### Problem definition:
 * **-f: \<string\>**  a relative path to the ontology file, which represents the knowledge base $K$.
 * **-o: \<ontology\>** observation $O$ in the form of an ontology (in any ontology syntax), which has to be written in one line.
+* *-r: \[ jfact | pellet ]*  which DL reasoner should be used. Set to *jfact* by default
 
 #### Algorithm settings:
 * *-alg: \[ mhs | hst | rct | hsdag | mhs-mxp | hst-mxp | rct-mxp |  hsdag-mxp | qxp | mxp ]*  which algorithm should be used. Not case-sensitive, the dash can be replaced by an underscore or fully ignored (*MHS-MXP*, *mhsmxp*, *mhs_mxp* are all valid values). Set to MHS-MXP by default.
@@ -45,19 +46,21 @@ A line in the input file can be commented out with a '**//**' or '**#**' at the 
 * *-d: \<positive integer\>* the depth of the HS-tree, when the search terminates. For example, for *-d: 2* search terminates after completing level 1 of HS-tree. By default, it is not set.
 
 #### Explanation limitations:
-* *-r: \<boolean\>* allowing role assertions in explanations. Set to *false*, by default.
+* *-roles: \<boolean\>* allowing role assertions in explanations. Set to *false*, by default.
 * *-n: \<boolean\>*  allowing negated assertions in explanations. Set to *true*, by default.
 * *-l: \<boolean\>* allows assertions of form $i, i: R$ in explanations, i.e. individual $i$ can be in role $R$ with itself (it is also called *looping*).  
 
 #### Output:
 * *-json: \<boolean\>* whether a json file containing information for [HS-tree Visualizer](https://m1chaelat.github.io/HSTreeVisualizer/) should be created. *false* by default.
 * *-log: \<boolean\>* whether any output log files should be created. *true* by default.
+* *-m: \<boolean\>* whether memory log should be created. *false* by default.
 * *-partial: \<boolean\>* whether partial log files (see section Output) should be created. *true* by default. If set to *false*, the run may be faster, bu there are no level data in the case of a crash.
 * *-stats: \<boolean\>* whether stats for the level log should be tracked. *true* by default. If set to *false*, the run may be a bit faster, but no data is stored in the level logs. 
 * *-out: \<string\>* custom relative path to output log files.
 * *-p: \<boolean\>* prints a simple progress bar into the console. Most useful when *-d* or *-t* is set. Set to *false* by default.
 * *-debug: \<boolean\>* prints detailed messages that describe events happening during the algorithm's run into the console. Set to *false* by default.
 * *-fast: \<boolean\>* is a shorthand for *-log: false*,*-stats: false*,*-debug: false*. Additionally, the internal event communication system is shut down, providing an extra speed boost.  Set to *false* by default. If set to *true*, the run should be faster, but no information is stored or tracked except for the final explanations.
+* 
 
 #### Relevance for multiple observation
 In the case where observation consists of multiple assertions (also called multiple observations), there are two ways of defining a relevant explanation.
@@ -148,10 +151,17 @@ Final logs are created only after the search for explanations is complete (it ei
 *\<time\>__\<input file name\>__info.log*
 * contains basic information about how the input was set in a given run, e.g. timeout, maximum depth or enabling negation in explanations (switches)
 
+
+**Memory log**
+*\<time\>__\<input file name\>__memory.log*
+* created only if -m switch is set to *true*.
+* records memory used by solver, every 30ms.
+
 **Error log**
 *\<time\>__\<input file name\>__error.log*
 * created only if an error occurred during the algorithm's run
 * records an error that occurred
+
 
 ### Partial logs
 Partial log is a temporary version of the level log, updated after each level of the tree. It is deleted if the run successfully finished. However, if the run crashed and could not create the final level log for some reason, at least some data is stored in the partial log. 

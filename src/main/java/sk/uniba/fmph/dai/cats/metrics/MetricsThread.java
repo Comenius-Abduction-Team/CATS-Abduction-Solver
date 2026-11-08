@@ -1,5 +1,7 @@
 package sk.uniba.fmph.dai.cats.metrics;
 
+import sk.uniba.fmph.dai.cats.data_processing.ExplanationLogger;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.*;
@@ -18,15 +20,19 @@ public class MetricsThread extends Thread {
     private long startCpuTime;
     private final Map<Long, TimeRecord> records = new ConcurrentHashMap<>();
     private double memorySum;
+    private double memoryPeak = 0;
     private double memoryCount;
+    private double timeForMemoryUpdate = 0;
     private final Runtime runtime;
+    private volatile ExplanationLogger explanationLogger;
+    private long memoryStartNanos;
 
     public boolean running = true;
 
     /**
      * Create a polling thread to track times.
      */
-    public MetricsThread(final long timeInterval) {
+    public MetricsThread( final long timeInterval) {
         super("Thread time monitor");
         this.timeInterval = timeInterval;
         thisThreadId = getId();
@@ -49,6 +55,7 @@ public class MetricsThread extends Thread {
     @Override
     public void run() {
 
+        memoryStartNanos = System.nanoTime();
         updateTimeRecords();
         startUserTime = getAccumulatedUserTime();
         startCpuTime = getAccumulatedCpuTime();
@@ -56,13 +63,24 @@ public class MetricsThread extends Thread {
 
         while (running) {
             updateTimeRecords();
-            measureMemory();
+            double measuredMemory = measureMemory();
+            ExplanationLogger logger = explanationLogger;
+            timeForMemoryUpdate += timeInterval;
+            if (logger != null && timeForMemoryUpdate >= 30) {
+                timeForMemoryUpdate = 0;
+                double elapsedMillis = (System.nanoTime() - memoryStartNanos) / 1_000_000.0;
+                logger.addRecordToMemoryLog(elapsedMillis + "," + measuredMemory + System.lineSeparator());
+            }
             try {
                 sleep(timeInterval);
             } catch (InterruptedException e) {
                 break;
             }
         }
+    }
+
+    public void setExplanationLogger(ExplanationLogger explanationLogger) {
+        this.explanationLogger = explanationLogger;
     }
 
     /**
@@ -104,12 +122,14 @@ public class MetricsThread extends Thread {
         updateTimeRecords();
     }
 
-    private void measureMemory(){
+    private double measureMemory(){
         long totalMemory = runtime.totalMemory();
         long freeMemory = runtime.freeMemory();
         double usedMemory = (totalMemory - freeMemory) / 1000000.0;
         memorySum += usedMemory;
         memoryCount += 1;
+        if (usedMemory > memoryPeak){ memoryPeak = usedMemory;}
+        return usedMemory;
     }
 
     /**
@@ -181,6 +201,11 @@ public class MetricsThread extends Thread {
         return memorySum / memoryCount;
     }
 
+    double getMemoryPeak(){
+        return memoryPeak;
+    }
+
+
     void setTimeInterval(){
         this.timeInterval = 10;
     }
@@ -188,6 +213,7 @@ public class MetricsThread extends Thread {
     void clearMemoryRecords(){
         memorySum = 0;
         memoryCount = 0;
+        memoryPeak = 0;
     }
 
 }

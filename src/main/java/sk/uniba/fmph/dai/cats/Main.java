@@ -38,7 +38,7 @@ public class Main {
 
     private static final String TEST1 = "D:\\studium\\diplom\\CATS_ver2\\CATS-Abduction-Solver\\in\\lubm_mhsmxp_testing_mykyta\\lubm_1.in";
 
-    private static final String INPUT_FILE = "D:\\studium\\diplom\\CATS_ver2\\CATS-Abduction-Solver\\in\\dl2025\\S2\\lubm-0_2_1_mhs-mxp_noNeg.in";
+    private static final String INPUT_FILE = FAMILY_MULTI;//"D:\\studium\\diplom\\CATS_ver2\\CATS-Abduction-Solver\\in\\dl2025\\S4\\lubm-0_4_8_mhs-mxp_noneg.in";
 
     public static void main(String[] args) throws Exception {
 
@@ -112,18 +112,6 @@ public class Main {
             long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
             //System.out.println("Used Memory before" + usedMemoryBefore);
             solver.solve();
-//            long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
-//            try {
-//                fw = new FileWriter("output.txt", true);
-//                pw = new PrintWriter(fw);
-//
-//                pw.write("Used memory: " + (usedMemoryAfter - usedMemoryBefore) / (1024 * 1024)
-//                        + " MB\n");
-//                pw.close();
-//                fw.close();
-//            } catch (IOException ex) {
-//                //pass
-//            }
 
 
 
