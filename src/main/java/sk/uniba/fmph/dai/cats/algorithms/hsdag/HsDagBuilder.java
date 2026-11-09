@@ -12,7 +12,7 @@ import sk.uniba.fmph.dai.cats.model.Model;
 
 import java.util.*;
 
-public class HsdagBuilder implements ITreeBuilder {
+public class HsDagBuilder implements ITreeBuilder {
     final AlgorithmSolver solver;
     final INodeProcessor nodeProcessor;
     final Queue<HsdagNode> queue = new PriorityQueue<>();
@@ -27,7 +27,7 @@ public class HsdagBuilder implements ITreeBuilder {
 
     List<OWLAxiom> iteratedChildren;
 
-    public HsdagBuilder(AlgorithmSolver solver){
+    public HsDagBuilder(AlgorithmSolver solver){
         this.solver = solver;
         this.nodeProcessor = solver.nodeProcessor;
     }
@@ -71,8 +71,8 @@ public class HsdagBuilder implements ITreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label){
-        return createNode(label, parent.depth + 1, (HsdagNode) parent);
+    public TreeNode createChildNode(TreeNode parent, Explanation path){
+        return createNode(path, parent.depth + 1, (HsdagNode) parent);
     }
 
     private TreeNode createNode(Explanation path, Integer depth, HsdagNode parent){
@@ -139,14 +139,14 @@ public class HsdagBuilder implements ITreeBuilder {
         currentLevelReusedModels ++;
     }
     // check if nodes have same path and merge them
-    public boolean mergeIfPossible(Explanation label) {
+    public boolean mergeIfPossible(Explanation path) {
 
-        Set<OWLAxiom> candidateSet = label.getAxiomSet();
+        Set<OWLAxiom> candidateSet = path.getAxiomSet();
 
         if (nodesAtCurrentDepth.containsKey(candidateSet)) {
             HsdagNode child = nodesAtCurrentDepth.get(candidateSet);
             currentNode.children.add(child);
-            child.addParent(currentNode, label.lastAxiom);
+            child.addParent(currentNode, path.lastAxiom);
 
             EventPublisher.publishNodeEvent(solver, EventType.MERGING_NODE, currentNode);
 

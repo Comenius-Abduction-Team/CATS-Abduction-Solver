@@ -28,7 +28,7 @@ public class RootOnlyTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label) {
+    public TreeNode createChildNode(TreeNode parent, Explanation path) {
         return null;
     }
 

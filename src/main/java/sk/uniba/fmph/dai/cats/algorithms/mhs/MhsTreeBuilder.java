@@ -63,16 +63,16 @@ public class MhsTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label){
-        return createNode(label, parent.depth + 1);
+    public TreeNode createChildNode(TreeNode parent, Explanation path){
+        return createNode(path, parent.depth + 1);
     }
 
-    private TreeNode createNode(Explanation label, Integer depth){
+    private TreeNode createNode(Explanation path, Integer depth){
 
         TreeNode node = new TreeNode();
 
-        if (label != null) {
-            node.path = label.getAxioms();
+        if (path != null) {
+            node.path = path.getAxioms();
         }
         node.depth = depth;
 

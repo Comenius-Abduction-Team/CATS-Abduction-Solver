@@ -75,8 +75,8 @@ public class RctTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label) {
-        return createNode(label, parent.depth + 1, (RctNode) parent);
+    public TreeNode createChildNode(TreeNode parent, Explanation path) {
+        return createNode(path, parent.depth + 1, (RctNode) parent);
     }
 
     private RctNode createNode(Explanation path, int depth, RctNode parent){

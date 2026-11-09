@@ -48,19 +48,19 @@ public class HstTreeBuilder implements ITreeBuilder {
     }
 
     @Override
-    public TreeNode createChildNode(TreeNode parent, Explanation label){
+    public TreeNode createChildNode(TreeNode parent, Explanation path){
 
-        return createNode(label, parent.depth + 1, nextChildIndex -1);
+        return createNode(path, parent.depth + 1, nextChildIndex -1);
 
     }
 
-    private HstNode createNode(Explanation label, Integer depth, int index){
+    private HstNode createNode(Explanation path, Integer depth, int index){
 
         HstNode node = new HstNode();
         node.index = index;
 
-        if (label != null) {
-            node.path = label.getAxioms();
+        if (path != null) {
+            node.path = path.getAxioms();
         }
         node.depth = depth;
 

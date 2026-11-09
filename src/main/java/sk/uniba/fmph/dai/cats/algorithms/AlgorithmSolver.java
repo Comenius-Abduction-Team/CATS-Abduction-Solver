@@ -1,7 +1,7 @@
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import sk.uniba.fmph.dai.cats.algorithms.hsdag.HsdagBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.hsdag.HsDagBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
@@ -137,7 +137,7 @@ public class AlgorithmSolver {
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
         else if (algorithm.isHsdag())
-            treeBuilder = new HsdagBuilder(this);
+            treeBuilder = new HsDagBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);
         else if (algorithm.isRootOnly())

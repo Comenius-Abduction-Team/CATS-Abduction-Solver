@@ -37,10 +37,10 @@ public interface ITreeBuilder {
      * Creates a new node as a child of the given parent node.
      *
      * @param parent the parent node
-     * @param label  label of the path from the tree's root to the created node
+     * @param path  label of the path from the tree's root to the created node
      * @return the new node
      */
-    TreeNode createChildNode(TreeNode parent, Explanation label);
+    TreeNode createChildNode(TreeNode parent, Explanation path);
 
     /**
      * Adds the given node to the tree. The node may already be a part of the tree in the topological sense
