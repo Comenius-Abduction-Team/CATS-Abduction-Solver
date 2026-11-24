@@ -37,6 +37,14 @@ public enum Algorithm {
 
     },
 
+    HST2 {
+        @Override
+        public boolean isHst2() {
+            return true;
+        }
+
+    },
+
     HSDAG{
         @Override
         public boolean isHsDag() {return true;}
@@ -78,6 +86,24 @@ public enum Algorithm {
         public boolean matchesName(String name) {
             return super.matchesName(name) || "HST-MXP".equals(name) || "HSTMXP".equals(name)
                     || "HST_X".equals(name) || "HST-X".equals(name) || "HSTX".equals(name);
+        }
+    },
+
+    HST2_MXP {
+        @Override
+        public boolean isHst2() {
+            return true;
+        }
+
+        @Override
+        public boolean usesMxp() {
+            return true;
+        }
+
+        @Override
+        public boolean matchesName(String name) {
+            return super.matchesName(name) || "HST2-MXP".equals(name) || "HST2MXP".equals(name)
+                    || "HST2_X".equals(name) || "HST2-X".equals(name) || "HST2X".equals(name);
         }
     },
 
@@ -123,6 +149,10 @@ public enum Algorithm {
         return false;
     }
     public boolean isHst(){
+        return false;
+    }
+
+    public boolean isHst2(){
         return false;
     }
 
