@@ -18,8 +18,11 @@ import sk.uniba.fmph.dai.cats.algorithms.AlgorithmSolverFactory;
 import sk.uniba.fmph.dai.cats.algorithms.Optimisation;
 import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.Explanation;
+import sk.uniba.fmph.dai.cats.events.DebugPrintEventSubscriber;
 import sk.uniba.fmph.dai.cats.events.EventPublisher;
 import sk.uniba.fmph.dai.cats.events.IEventSubscriber;
+import sk.uniba.fmph.dai.cats.events.JsonExportEventSubscriber;
+import sk.uniba.fmph.dai.cats.metrics.StatEventSubscriber;
 import sk.uniba.fmph.dai.cats.parser.ArgumentParser;
 import sk.uniba.fmph.dai.cats.metrics.MetricsThread;
 
@@ -246,6 +249,8 @@ public class CatsAbducer implements IThreadAbducer {
 
         solver = AlgorithmSolverFactory.createApiSolver(timer, algorithm, this);
 
+        generateSubscribers();
+
         if (subscribersToRegister == null)
             return;
 
@@ -254,6 +259,18 @@ public class CatsAbducer implements IThreadAbducer {
             subscriber.setSolver(solver);
         }
 
+    }
+
+    private void generateSubscribers(){
+        if (logging) {
+            registerSubscriber(new StatEventSubscriber(solver));
+        }
+        if (debug) {
+            registerSubscriber(new DebugPrintEventSubscriber(solver));
+        }
+        if (json) {
+            registerSubscriber(new JsonExportEventSubscriber(solver));
+        }
     }
 
     private void solve(){

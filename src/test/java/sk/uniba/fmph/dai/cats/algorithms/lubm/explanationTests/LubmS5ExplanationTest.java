@@ -11,7 +11,7 @@ import java.util.List;
 public class LubmS5ExplanationTest extends LubmExplanationTest {
 
     public LubmS5ExplanationTest() throws OWLOntologyCreationException, IOException {
-        super("LUBM checking computed explanations: group S5");
+        super("LUBM_S5");
     }
 
     @Override

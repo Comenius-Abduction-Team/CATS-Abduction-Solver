@@ -136,7 +136,7 @@ public class AlgorithmSolver {
         // TreeBuilder
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
-        else if (algorithm.isHsdag())
+        else if (algorithm.isHsDag())
             treeBuilder = new HsDagBuilder(this);
         else if (algorithm.isRcTree())
             treeBuilder = new RctTreeBuilder(this);
@@ -311,7 +311,7 @@ public class AlgorithmSolver {
 
             boolean canIterateNodeChildren = treeBuilder.startIteratingNodeChildren(node);
 
-            if (!canIterateNodeChildren || treeBuilder.noChildrenLeft()){
+            if (!canIterateNodeChildren){
                 EventPublisher.publishNodeEvent(this, EventType.CHILDLESS_NODE, node);
                 continue;
             }

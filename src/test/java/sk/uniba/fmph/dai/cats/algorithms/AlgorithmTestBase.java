@@ -38,9 +38,9 @@ public abstract class AlgorithmTestBase {
     /** Whether each test should print the explanations found into the console. */
     private final boolean PRINT_EXPLANATIONS = true;
     /** Whether the tests should create logs. */
-    private final boolean CREATE_LOGS = false;
+    protected final boolean CREATE_LOGS = false;
     /** Whether the tests should print the debugging prints. */
-    private final boolean DEBUG_PRINTING = false;
+    protected final boolean DEBUG_PRINTING = false;
 
 
     /** Path to the file containing the background knowledge ontology. */
@@ -113,10 +113,10 @@ public abstract class AlgorithmTestBase {
 
     /** Instantiates the abducer before each test case. */
     @BeforeEach
-    void setUp() {
-        Configuration.DEBUG_PRINT = DEBUG_PRINTING;
+    void setUp() {;
         abducer = new CatsAbducer(backgroundKnowledge,observation);
         abducer.setLogging(CREATE_LOGS);
+        abducer.setDebug(DEBUG_PRINTING);
     }
     @BeforeEach
     void init() throws OWLOntologyCreationException, IOException {
@@ -268,6 +268,7 @@ public abstract class AlgorithmTestBase {
         if (abducer.getOutputMessage() != null && !abducer.getOutputMessage().isEmpty()) {
             System.err.println(abducer.getOutputMessage());
         }
+        System.out.println(abducer.getFullLog());
     }
 
     // The following private methods are meant as shorthands to set the solver's configuration options

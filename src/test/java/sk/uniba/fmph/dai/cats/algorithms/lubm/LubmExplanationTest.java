@@ -27,16 +27,20 @@ public abstract class LubmExplanationTest extends LubmTestBase {
         Set<Optimisation> opt1 = new HashSet<>();
         Set<Optimisation> opt2 = new HashSet<>();
         Set<Optimisation> opt12 = new HashSet<>();
+        Set<Optimisation> opt17 = new HashSet<>();
 
         opt1.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
         opt2.add(Optimisation.SORT_MODEL);
         opt12.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
         opt12.add(Optimisation.SORT_MODEL);
+        opt17.add(Optimisation.MOVE_CONSISTENCY_CHECKS);
+        opt17.add(Optimisation.SORT_NODES_BY_MODEL_SIZE);
 
 //        optimizationCombinations.put("no-opt", new HashSet<>());
         optimizationCombinations.put("opt1", opt1);
 //        optimizationCombinations.put("opt2", opt2);
-        optimizationCombinations.put("opt12", opt12);
+//        optimizationCombinations.put("opt12", opt12);
+//        optimizationCombinations.put("opt17", opt17);
     }
 
     protected void executeTest(LubmInput input,
@@ -47,7 +51,8 @@ public abstract class LubmExplanationTest extends LubmTestBase {
             this.observation = parseAxiomsFromString(input.getObservation());
 
             this.abducer = new CatsAbducer(backgroundKnowledge, this.observation);
-            this.abducer.setLogging(false);
+            this.abducer.setLogging(CREATE_LOGS);
+            this.abducer.setDebug(DEBUG_PRINTING);
             this.abducer.setIgnoreDefaultOptimizations(
                     algorithmConfiguration.ignoreDefaultOptimisations
             );
@@ -63,8 +68,10 @@ public abstract class LubmExplanationTest extends LubmTestBase {
 
             this.abducer.setAlgorithm(algorithm);
 
+            Configuration.INPUT_FILE_NAME = input.getId();
+
             if (algorithmConfiguration.noNeg) {
-                Configuration.INPUT_FILE_NAME += "NoNeg";
+                Configuration.INPUT_FILE_NAME += "_NoNeg";
                 this.abducer.setExplanationConfigurator(noNeg);
             }
 
@@ -119,11 +126,6 @@ public abstract class LubmExplanationTest extends LubmTestBase {
         return algorithms.get(0);
     }
 
-
-    @TestFactory
-    public Collection<DynamicTest> multipleRandomAlgNoNeg() {
-        return generateDynamicTests(null);
-    }
 
 //    @TestFactory
 //    public Collection<DynamicTest> multipleMhsMxpNoNeg() {

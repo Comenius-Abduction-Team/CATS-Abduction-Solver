@@ -93,4 +93,6 @@ public interface ITreeBuilder {
      */
     default void resetLevel(){}
 
+    default void processExplanationEdge(boolean isExplanationEdge, TreeNode node) {}
+
 }

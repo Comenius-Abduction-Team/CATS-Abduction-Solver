@@ -28,7 +28,6 @@ public class FileManager {
     }
 
     public static final String LOG_FILE__POSTFIX = ".log";
-    private static String FILE_DIRECTORY = "";
 
     static void appendToFile(String fileName, String log) {
         if (!Configuration.LOGGING)
@@ -81,8 +80,6 @@ public class FileManager {
      * @param  createDirectory whether required directories should be created
      */
     static String createLogFileName(LogTypes type, String time, boolean createDirectory){
-        if (FILE_DIRECTORY.equals(""))
-            FILE_DIRECTORY = "logs" + File.separator + Configuration.ALGORITHM;
 
         String directoryPath = getDirectoryPath();
         File directory = new File(directoryPath);
@@ -105,10 +102,14 @@ public class FileManager {
             return getDefaultOutputPath();
         }
         else {
-            return FILE_DIRECTORY
+            return getFileDirectory()
                     .concat(File.separator)
                     .concat(Configuration.OUTPUT_PATH);
         }
+    }
+
+    private static String getFileDirectory() {
+        return "logs" + File.separator + Configuration.ALGORITHM;
     }
 
     private static void createFileIfNotExists(String fileName) {
@@ -136,7 +137,7 @@ public class FileManager {
             ontologyName = inputFileParts[0];
         }
 
-        directoryPath = FILE_DIRECTORY
+        directoryPath = getFileDirectory()
                 .concat(File.separator)
                 .concat(ontologyName)
                 .concat(File.separator)

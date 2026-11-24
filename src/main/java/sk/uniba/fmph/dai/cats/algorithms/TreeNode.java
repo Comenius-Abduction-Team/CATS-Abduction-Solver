@@ -26,6 +26,9 @@ public class TreeNode {
 
     @Override
     public String toString() {
+        if (model == null) {
+           return StringFactory.getRepresentation(new ArrayList<>());
+        }
         return StringFactory.getRepresentation(model.getNegatedData());
     }
 

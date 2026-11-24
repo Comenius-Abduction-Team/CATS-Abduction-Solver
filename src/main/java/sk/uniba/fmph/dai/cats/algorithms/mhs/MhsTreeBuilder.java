@@ -106,17 +106,19 @@ public class MhsTreeBuilder implements ITreeBuilder {
         return queue.poll();
     }
 
-
+    @Override
     public boolean startIteratingNodeChildren(TreeNode node){
         parentNode = node;
         iteratedChildren = new ArrayList<>(parentNode.model.getNegatedData());
-        return true;
+        return !iteratedChildren.isEmpty();
     }
 
+    @Override
     public boolean noChildrenLeft(){
         return iteratedChildren.isEmpty();
     }
 
+    @Override
     public OWLAxiom getNextChild(){
         OWLAxiom child = iteratedChildren.get(0);
         iteratedChildren.remove(0);

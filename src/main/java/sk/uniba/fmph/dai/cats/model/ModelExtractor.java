@@ -9,7 +9,12 @@ import sk.uniba.fmph.dai.cats.common.Configuration;
 import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.reasoner.AxiomManager;
 import sk.uniba.fmph.dai.cats.reasoner.Loader;
+import uk.ac.manchester.cs.jfact.JFactReasoner;
+import uk.ac.manchester.cs.jfact.kernel.DlCompletionTree;
+import uk.ac.manchester.cs.jfact.kernel.ReasoningKernel;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,14 +75,53 @@ public class ModelExtractor {
         Set<OWLClassExpression> notTypes = classSet2classExpSet(originalOntology.classesInSignature().collect(toSet()));
         notTypes.remove(dfactory.getOWLThing());
 
+        System.out.println("Individual: " + individual);
+        System.out.println("Entailed types: " +
+                loader.getReasoner()
+                        .getTypes(individual, false)
+                        .getFlattened());
+
         OWLObjectOneOf individualNominal = ontologyManager.getOWLDataFactory().getOWLObjectOneOf(individual);
 
         OWLKnowledgeExplorerReasoner.RootNode rootNode = loader.getReasoner().getRoot(individualNominal);
+
+        try {
+            JFactReasoner reasoner =
+                    (JFactReasoner) loader.getReasoner();
+
+            Field kernelField =
+                    JFactReasoner.class.getDeclaredField("kernel");
+
+            kernelField.setAccessible(true);
+
+            ReasoningKernel kernel =
+                    (ReasoningKernel) kernelField.get(reasoner);
+
+            DlCompletionTree node = rootNode.getNode();
+
+            List<ConceptExpression> rawTypes =
+                    kernel.getObjectLabel(node, false);
+
+            System.out.println("Raw types: " + rawTypes);
+
+            for (ConceptExpression type : rawTypes) {
+                System.out.println(
+                        type.getClass().getSimpleName() + ": " + type
+                );
+            }
+
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+
         Set<OWLClassExpression> foundTypes = loader.getReasoner().getObjectLabel(rootNode,false)
                 .entities()
                 .collect(toSet());
 
         notTypes.removeAll(foundTypes);
+
+
+        System.out.println("Found types: " + foundTypes);
 
         addAxiomsToModelsAccordingTypes(dfactory, model, foundTypes, notTypes, individual);
     }

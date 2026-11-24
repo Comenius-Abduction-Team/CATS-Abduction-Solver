@@ -11,7 +11,7 @@ import java.util.List;
 public class LubmS3ExplanationTest extends LubmExplanationTest {
 
     public LubmS3ExplanationTest() throws OWLOntologyCreationException, IOException {
-        super("LUBM checking computed explanations: group S3");
+        super("LUBM_S3");
     }
 
     @Override

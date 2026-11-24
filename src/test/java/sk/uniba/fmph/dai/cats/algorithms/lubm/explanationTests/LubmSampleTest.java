@@ -12,7 +12,7 @@ import java.util.List;
 public class LubmSampleTest extends LubmExplanationTest {
 
     public LubmSampleTest() throws OWLOntologyCreationException, IOException {
-        super("LUBM sample: checking computed explanations");
+        super("LUBM_sample");
     }
 
     @Override

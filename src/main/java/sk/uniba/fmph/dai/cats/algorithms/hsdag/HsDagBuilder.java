@@ -122,7 +122,7 @@ public class HsDagBuilder implements ITreeBuilder {
         pruneTree();
 
         iteratedChildren = new ArrayList<>(currentNode.model.getNegatedData());
-        return currentNode == root || currentNode.hasParent();
+        return (currentNode == root || currentNode.hasParent()) && !iteratedChildren.isEmpty();
     }
 
     public boolean noChildrenLeft(){

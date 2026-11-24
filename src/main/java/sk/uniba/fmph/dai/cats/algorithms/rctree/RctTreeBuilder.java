@@ -83,8 +83,9 @@ public class RctTreeBuilder implements ITreeBuilder {
 
         Model modelToReuse = solver.findAndGetModelToReuse();
 
-        if (modelToReuse == null)
+        if (modelToReuse == null) {
             return null;
+        }
 
         RctNode node = new RctNode(getAndIncreaseId());
         node.model = modelToReuse;

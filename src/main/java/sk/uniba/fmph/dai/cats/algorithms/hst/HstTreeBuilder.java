@@ -119,8 +119,9 @@ public class HstTreeBuilder implements ITreeBuilder {
     public boolean startIteratingNodeChildren(TreeNode node){
         parentNode = (HstNode) node;
 
-        if (globalMin > 0)
+        if (globalMin > 0) {
             indexAxiomsFromModel(parentNode, abducibles);
+        }
         solver.currentLevel.hstGlobalMin = globalMin;
 
         //Let min(v) be MIN + 1
@@ -156,7 +157,6 @@ public class HstTreeBuilder implements ITreeBuilder {
         }
     }
 
-    //int index = node.min; index < node.index; index++
     @Override
     public boolean noChildrenLeft(){
         return nextChildIndex == parentNode.index;

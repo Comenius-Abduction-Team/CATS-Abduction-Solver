@@ -39,7 +39,7 @@ public enum Algorithm {
 
     HSDAG{
         @Override
-        public boolean isHsdag() {return true;}
+        public boolean isHsDag() {return true;}
 
         @Override
         public boolean matchesName(String name) {
@@ -48,7 +48,7 @@ public enum Algorithm {
     },
     HSDAG_MXP{
         @Override
-        public boolean isHsdag() {return true;}
+        public boolean isHsDag() {return true;}
 
         @Override
         public boolean usesMxp() {
@@ -138,7 +138,7 @@ public enum Algorithm {
         return false;
     }
 
-    public boolean isHsdag(){ return false; }
+    public boolean isHsDag(){ return false; }
 
     /**
      * Decides which strings can be used as the value for the -alg input parameter to identify the given algorithm.
