@@ -113,7 +113,7 @@ public abstract class AlgorithmTestBase {
 
     /** Instantiates the abducer before each test case. */
     @BeforeEach
-    void setUp() {;
+    void setUp() {
         abducer = new CatsAbducer(backgroundKnowledge,observation);
         abducer.setLogging(CREATE_LOGS);
         abducer.setDebug(DEBUG_PRINTING);
