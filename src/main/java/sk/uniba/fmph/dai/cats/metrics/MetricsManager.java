@@ -98,6 +98,10 @@ public class MetricsManager {
         return memory;
     }
 
+    public void changeTimeout(){
+        metricsThread.setTimeInterval();
+    }
+
     private String formatSeconds(double seconds) {
         if (Double.isNaN(seconds)) {
             return "unsupported";

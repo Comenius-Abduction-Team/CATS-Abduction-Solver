@@ -19,6 +19,7 @@ public class ArgumentParser {
             throw new RuntimeException(message);
         }
         Configuration.INPUT_FILE_NAME = new File(args[0]).getName().split("\\.")[0];
+        Configuration.REASONER = ReasonerType.JFACT;
         ArrayList<String[]> lines = read_input_file(args[0]);
 
         boolean read_concepts = false;
@@ -89,15 +90,16 @@ public class ArgumentParser {
 
                     // Note: we work with only JFact reasoner for now
 
-//                case "-r:":
-//                    try {
-//                        Configuration.REASONER = ReasonerType.valueOf(next.toUpperCase());
-//                    }
-//                    catch (IllegalArgumentException e){
-//                        String message = "Reasoner type -r " + next + " is unknown, the only allowed reasoners are hermit|pellet|jfact");
-//                        throw new RuntimeException(message);
-//                    }
-//                    break;
+                case "-r:":
+                case "-r":
+                    try {
+                        Configuration.REASONER = ReasonerType.valueOf(next.toUpperCase());
+                    }
+                    catch (IllegalArgumentException e){
+                        String message = "Reasoner type -r " + next + " is unknown, the only allowed reasoners are pellet|jfact";
+                        throw new RuntimeException(message);
+                    }
+                    break;
 
                 case "-d:":
                 case "-d":
@@ -159,8 +161,8 @@ public class ArgumentParser {
                         System.err.println("Wrong 'looping allowed (-l)' value: " + next + ", allowed values are 'true' and 'false'");
                     }
                     break;
-                case "-r:":
-                case "-r":
+                case "-roles:":
+                case "-roles":
                     if (silentTrue || next.equals("true")) {
                         Configuration.ROLES_IN_EXPLANATIONS_ALLOWED = true;
                     } else if (!next.equals("false")) {

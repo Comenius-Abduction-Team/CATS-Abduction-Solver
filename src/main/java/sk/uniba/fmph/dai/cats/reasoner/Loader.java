@@ -11,8 +11,16 @@ import sk.uniba.fmph.dai.cats.data.InputAbducibles;
 import sk.uniba.fmph.dai.cats.data.Individuals;
 import sk.uniba.fmph.dai.cats.data.Observation;
 import sk.uniba.fmph.dai.cats.parser.PrefixesParser;
+import uk.ac.manchester.cs.factplusplus.owlapiv3.FaCTPlusPlusReasonerFactory;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,25 +104,21 @@ public abstract class Loader {
 
     
     public void changeReasoner(ReasonerType reasonerType) {
-        // Note: we only use JFact for now
 
-//        switch (reasonerType) {
-//            case PELLET:
-//                setOWLReasonerFactory(new OpenlletReasonerFactory());
-//                break;
-//
+        switch (reasonerType) {
+            case PELLET:
+                setOWLReasonerFactory(new OpenlletReasonerFactory());
+                break;
+
 //            case HERMIT:
 //                setOWLReasonerFactory(new ReasonerFactory());
 //                break;
-//
-//            case JFACT:
-//                setOWLReasonerFactory(new JFactFactory());
-//                break;
-//        }
 
-        setOWLReasonerFactory(new OpenlletReasonerFactory());
-        //new JFactFactory();
-        //new OpenlletReasonerFactory();
+            case JFACT:
+                setOWLReasonerFactory(new JFactFactory());
+                break;
+        }
+
         reasoner = (OWLKnowledgeExplorerReasoner) reasonerFactory.createReasoner(ontology);
     }
 

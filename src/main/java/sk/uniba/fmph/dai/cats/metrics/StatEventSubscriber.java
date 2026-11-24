@@ -6,6 +6,7 @@ import sk.uniba.fmph.dai.cats.events.*;
 public class StatEventSubscriber implements IEventSubscriber {
 
     private final AlgorithmSolver solver;
+    private int level = 0;
 
     public StatEventSubscriber(AlgorithmSolver solver) {
         this.solver = solver;
@@ -67,6 +68,10 @@ public class StatEventSubscriber implements IEventSubscriber {
                 break;
 
             case LEVEL_FINISHED:
+                level += 1;
+                if( level == 3) {
+                    solver.metrics.changeTimeout();
+                }
             case TREE_FINISHED:
                 solver.currentLevel.memory = solver.metrics.measureAverageMemory();
                 solver.currentLevel.finish = solver.metrics.getRunningTime();

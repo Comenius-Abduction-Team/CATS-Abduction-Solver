@@ -243,7 +243,7 @@ public class CatsAbducer implements IThreadAbducer {
 
     private void setupSolver() {
 
-        timer = new MetricsThread(10);
+        timer = new MetricsThread(2);
 
         setSolverConfiguration();
 

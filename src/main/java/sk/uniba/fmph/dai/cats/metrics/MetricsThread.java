@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MetricsThread extends Thread {
 
     private static final long BILLION = 1000000000;
-    private final long timeInterval;
+    private long timeInterval;
     private final long thisThreadId;
     private final ThreadMXBean threadBean;
     private final boolean cpuTimeSupported;
@@ -179,6 +179,10 @@ public class MetricsThread extends Thread {
 
     double getAverageMemory(){
         return memorySum / memoryCount;
+    }
+
+    void setTimeInterval(){
+        this.timeInterval = 10;
     }
 
     void clearMemoryRecords(){
