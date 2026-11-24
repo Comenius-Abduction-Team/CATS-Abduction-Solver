@@ -49,10 +49,10 @@ public class ClassicNodeProcessor implements INodeProcessor {
     }
 
     @Override
-    public int findExplanations(Explanation explanation, boolean extractModel) {
+    public boolean findExplanations(Explanation explanation, boolean extractModel) {
 
         if (consistencyChecker.checkOntologyConsistencyWithPath(extractModel, false))
-            return 0;
+            return false;
 
         EventPublisher.publishExplanationEvent(solver, EventType.EXPLANATION_EDGE, explanation);
 
@@ -60,21 +60,21 @@ public class ClassicNodeProcessor implements INodeProcessor {
 
             if (!ruleChecker.isConsistent(explanation)) {
                 EventPublisher.publishExplanationEvent(solver, EventType.INCONSISTENT_EXPLANATION, explanation);
-                return 1;
+                return true;
             }
             if (!ruleChecker.isRelevant(explanation)) {
                 EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
-                return 1;
+                return true;
             }
         }
 
         explanationManager.addPossibleExplanation(explanation);
-        return 1;
+        return true;
     }
 
     @Override
-    public boolean shouldCloseNode(int explanationsFound) {
-        return explanationsFound > 0;
+    public boolean shouldCloseNode(boolean explanationEdge) {
+        return explanationEdge;
     }
 
     @Override

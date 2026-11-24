@@ -22,9 +22,9 @@ public interface INodeProcessor {
      */
     boolean shouldPruneBranch(Explanation explanation);
 
-    int findExplanations(Explanation explanation, boolean extractModel);
+    boolean findExplanations(Explanation explanation, boolean extractModel);
 
-    boolean shouldCloseNode(int explanationsFound);
+    boolean shouldCloseNode(boolean explanationEdge);
 
     void postProcessExplanations();
 

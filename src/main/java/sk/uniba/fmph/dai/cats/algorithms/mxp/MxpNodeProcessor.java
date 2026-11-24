@@ -57,7 +57,7 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
     }
 
     @Override
-    public int findExplanations(Explanation explanation, boolean extractModel) {
+    public boolean findExplanations(Explanation explanation, boolean extractModel) {
 
         explanationLargerThanOne = false;
 
@@ -69,28 +69,26 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
                 if(Configuration.CONTINUOUS_HYBRID_RELEVANCE_CHECKS && !ruleChecker.isRelevant(explanation)){
                     EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
-                    return 0;
+                    return true;
                 }
 
                 addToExplanations(explanation);
                 StaticPrinter.debugPrint("[CLOSING] IS EXPLANATION!");
-                return 0; //explanation WAS found, but it was the path itself, i.e., no explanation larger than |path| can be found
+                return true; //explanation WAS found, but it was the path itself, i.e., no explanation larger than |path| can be found
             }
         }
 
         StaticPrinter.debugPrint("[MXP] Calling MXP");
-        return addExplanationsFoundByMxp(Configuration.ALWAYS_EXTRACT_MODELS_IN_MXP || extractModel);
-
+        addExplanationsFoundByMxp(Configuration.ALWAYS_EXTRACT_MODELS_IN_MXP || extractModel);
+        return false;
     }
 
     @Override
-    public boolean shouldCloseNode(int explanationsFound) {
-        if (explanationLargerThanOne)
-            return false;
-        return explanationsFound == 0;
+    public boolean shouldCloseNode(boolean explanationEdge) {
+        return !explanationLargerThanOne;
     }
 
-    private int addExplanationsFoundByMxp(boolean extractModel) {
+    private void addExplanationsFoundByMxp(boolean extractModel) {
 
         Collection<Explanation> newExplanations = findExplanationsWithMxp(extractModel);
         for (Explanation explanation : newExplanations){
@@ -121,7 +119,6 @@ public class MxpNodeProcessor extends QxpNodeProcessor implements INodeProcessor
 
         }
 
-        return newExplanations.size();
     }
 
     protected Collection<Explanation> findExplanationsWithMxp(boolean extractModel) {

@@ -101,12 +101,12 @@ public class QxpNodeProcessor  implements INodeProcessor {
     }
 
     @Override
-    public int findExplanations(Explanation explanation, boolean extractModel) {
-        return 0;
+    public boolean findExplanations(Explanation explanation, boolean extractModel) {
+        return false;
     }
 
     @Override
-    public boolean shouldCloseNode(int explanationsFound) {
+    public boolean shouldCloseNode(boolean explanationEdge) {
         return true;
     }
 

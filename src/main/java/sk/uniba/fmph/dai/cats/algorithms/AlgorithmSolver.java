@@ -3,6 +3,7 @@ package sk.uniba.fmph.dai.cats.algorithms;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import sk.uniba.fmph.dai.cats.algorithms.hsdag.HsDagBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.hst.HstTreeBuilder;
+import sk.uniba.fmph.dai.cats.algorithms.hst.hst2.Hst2TreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mhs.MhsTreeBuilder;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.MxpNodeProcessor;
 import sk.uniba.fmph.dai.cats.algorithms.mxp.QxpNodeProcessor;
@@ -136,6 +137,8 @@ public class AlgorithmSolver {
         // TreeBuilder
         if (algorithm.isHst())
             treeBuilder = new HstTreeBuilder(this);
+        else if (algorithm.isHst2())
+            treeBuilder = new Hst2TreeBuilder(this);
         else if (algorithm.isHsDag())
             treeBuilder = new HsDagBuilder(this);
         else if (algorithm.isRcTree())
@@ -360,10 +363,10 @@ public class AlgorithmSolver {
                         throw new TimeoutException();
                     }
 
-                    int explanationsFound = 0;
+                    boolean isExplanationEdge = false;
 
                     try {
-                        explanationsFound = nodeProcessor.findExplanations(
+                        isExplanationEdge = nodeProcessor.findExplanations(
                                 explanation, treeBuilder.shouldExtractModel()
                         );
                     } catch (EmptyModelException e) {
@@ -372,7 +375,9 @@ public class AlgorithmSolver {
                         return null;
                     }
 
-                    boolean shouldCloseNode = nodeProcessor.shouldCloseNode(explanationsFound);
+                    treeBuilder.processExplanationEdge(isExplanationEdge, node);
+
+                    boolean shouldCloseNode = nodeProcessor.shouldCloseNode(isExplanationEdge);
 
                     if (shouldCloseNode){
                         EventPublisher.publishNodeEvent(this, EventType.CLOSING_NODE, node);
