@@ -21,7 +21,7 @@ public class ExplanationLogger {
 
     final MetricsManager timer;
 
-    private String startTimeText, partialLog, levelLog;
+    private String startTimeText, partialLog, levelLog, memoryLog;
 
     public ExplanationLogger(AlgorithmSolver solver) {
         this.solver = solver;
@@ -40,6 +40,13 @@ public class ExplanationLogger {
         }
         log(LogTypes.TIMES, result);
     }
+
+//    void logMemories(String memory){
+//        if (!Configuration.LOGGING)
+//            return;
+//        StringBuilder result = new StringBuilder();
+//        log(LogTypes.MEMORY, memory);
+//    }
 
     void createFinalLogs(String finalLogContent, String levelLogContent){
         if (!Configuration.LOGGING)
@@ -68,6 +75,12 @@ public class ExplanationLogger {
         if (partialLog == null)
             partialLog = FileManager.createLogFileName(LogTypes.PARTIAL, getStartTime(), createDirectory);
         return partialLog;
+    }
+
+    private String getMemoryLogFileName(boolean createDirectory){
+        if (memoryLog == null)
+            memoryLog = FileManager.createLogFileName(LogTypes.MEMORY, getStartTime(), createDirectory);
+        return memoryLog;
     }
 
     private String getLevelLogFileName(boolean createDirectory){
@@ -101,6 +114,12 @@ public class ExplanationLogger {
             return;
         String content = buildLevelContent(level);
         log(getPartialLogFileName(true), content);
+    }
+
+    public void addRecordToMemoryLog(String memory) {
+        if (!Configuration.MEMORY_LOGGING)
+            return;
+        logMemory(getMemoryLogFileName(true), memory);
     }
 
     private String buildLevelContent(Level level){
@@ -142,6 +161,10 @@ public class ExplanationLogger {
      */
     private void log(String fileName, Object data){
         FileManager.appendToFile(fileName, data.toString());
+    }
+
+    private void logMemory(String fileName, String data){
+        FileManager.appendToFile(fileName, data);
     }
 
 }

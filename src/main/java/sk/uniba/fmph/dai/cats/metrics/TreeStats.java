@@ -93,6 +93,7 @@ public class TreeStats {
                 "filtered explanations",
                 "final explanations",
                 "average memory",
+                "memory peak",
                 "start time",
                 "finish time",
                 "duration",

@@ -27,6 +27,9 @@ public class Level {
     /**
      * Number of nodes that have been processed in this level.
      * **/
+
+    public double memoryPeak;
+
     public int processedNodes;
 
     /**
@@ -248,6 +251,7 @@ public class Level {
                 filteredExplanations,
                 finalExplanationsCount,
                 memory,
+                memoryPeak,
                 start,
                 finish,
                 finish-start,

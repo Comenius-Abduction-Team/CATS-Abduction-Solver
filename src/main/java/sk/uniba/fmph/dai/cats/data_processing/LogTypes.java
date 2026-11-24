@@ -6,5 +6,6 @@ enum LogTypes {
     LEVEL,
     PARTIAL,
     TIMES,
-    ERROR
+    ERROR,
+    MEMORY
 }

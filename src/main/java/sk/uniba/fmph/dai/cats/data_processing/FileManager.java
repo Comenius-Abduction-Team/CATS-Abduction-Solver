@@ -24,6 +24,7 @@ public class FileManager {
         map.put(LogTypes.PARTIAL, "partial-level");
         map.put(LogTypes.TIMES, "explanation-times");
         map.put(LogTypes.ERROR, "error");
+        map.put(LogTypes.MEMORY, "memory");
         LOG_PREFIXES = Collections.unmodifiableMap(map);
     }
 
