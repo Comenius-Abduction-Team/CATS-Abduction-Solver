@@ -124,6 +124,12 @@ public abstract class AlgorithmTestBase {
         setUpHelperObjects();
         setUpAbducibles();
     }
+    @BeforeEach
+    void init() throws OWLOntologyCreationException, IOException {
+        setUpInput();
+        setUpHelperObjects();
+        setUpAbducibles();
+    }
 
     /**
      * Parses ontology from an OWL file.

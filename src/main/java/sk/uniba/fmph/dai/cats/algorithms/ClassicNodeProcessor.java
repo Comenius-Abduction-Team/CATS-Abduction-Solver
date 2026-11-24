@@ -66,6 +66,10 @@ public class ClassicNodeProcessor implements INodeProcessor {
                 EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
                 return true;
             }
+            if (!ruleChecker.isRelevant(explanation)) {
+                EventPublisher.publishExplanationEvent(solver, EventType.IRELEVANT_EXPLANATION, explanation);
+                return 1;
+            }
         }
 
         explanationManager.addPossibleExplanation(explanation);

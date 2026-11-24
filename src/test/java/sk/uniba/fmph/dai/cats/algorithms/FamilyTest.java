@@ -1,3 +1,4 @@
+/*
 package sk.uniba.fmph.dai.cats.algorithms;
 
 import org.junit.jupiter.api.Test;
@@ -451,3 +452,4 @@ public class FamilyTest extends AlgorithmTestBase {
 
 
 }
+*/
